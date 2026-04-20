@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Color Manager</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #111;
+        color: #eee;
+      }
+      h2 {
+        margin-bottom: 10px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .card {
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        position: relative;
+      }
+      .del {
+        position: absolute;
+        top: 5px;
+        right: 8px;
+        cursor: pointer;
+      }
+      small {
+        display: block;
+        opacity: 0.7;
+        font-size: 12px;
+      }
+      .controls {
+        margin-bottom: 10px;
+      }
+      input {
+        padding: 6px;
+        margin-right: 5px;
+      }
+      button {
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🎨 Color Manager</h2>
+
+    <div class="controls">
+      <input id="bg" placeholder="#FFFFFF" />
+      <input id="color" placeholder="#000000" />
+      <input id="name" placeholder="name" />
+      <button id="add">추가</button>
+      <button id="reset">초기화</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <script>
+      const KEY = "color_items";
+
+      const DEFAULT = [
+        { bg: "#FAFAD2", color: "#663399", name: "레베카 퍼플" },
+        { bg: "#FFFFFF", color: "#000000", name: "화이트/블랙" },
+        { bg: "#000000", color: "#FFFFFF", name: "블랙/화이트" },
+        { bg: "#FF0000", color: "#FFFFFF", name: "레드" },
+        { bg: "#00FF00", color: "#000000", name: "라임" },
+        { bg: "#0000FF", color: "#FFFFFF", name: "블루" },
+        { bg: "#FFFF00", color: "#000000", name: "옐로우" },
+        { bg: "#FFA500", color: "#000000", name: "오렌지" },
+        { bg: "#800080", color: "#FFFFFF", name: "퍼플" },
+        { bg: "#FFC0CB", color: "#000000", name: "핑크" },
+        { bg: "#8B4513", color: "#FFFFFF", name: "브라운" },
+        { bg: "#708090", color: "#FFFFFF", name: "슬레이트그레이" },
+        { bg: "#F5F5F5", color: "#000000", name: "화이트스모크" },
+        { bg: "#D3D3D3", color: "#000000", name: "라이트그레이" },
+        { bg: "#696969", color: "#FFFFFF", name: "다크그레이" },
+        { bg: "#ADD8E6", color: "#000000", name: "라이트블루" },
+        { bg: "#008080", color: "#FFFFFF", name: "틸" },
+        { bg: "#40E0D0", color: "#000000", name: "터콰이즈" },
+        { bg: "#90EE90", color: "#000000", name: "라이트그린" },
+        { bg: "#006400", color: "#FFFFFF", name: "다크그린" },
+        { bg: "#FFD700", color: "#000000", name: "골드" },
+        { bg: "#B22222", color: "#FFFFFF", name: "파이어브릭" },
+        { bg: "#FF69B4", color: "#000000", name: "핫핑크" },
+        { bg: "#CD5C5C", color: "#FFFFFF", name: "인디언레드" },
+        { bg: "#4B0082", color: "#FFFFFF", name: "인디고" },
+        { bg: "#E6E6FA", color: "#000000", name: "라벤더" },
+        { bg: "#FFFACD", color: "#000000", name: "레몬쉬폰" },
+        { bg: "#F08080", color: "#000000", name: "라이트코랄" },
+        { bg: "#20B2AA", color: "#000000", name: "라이트시그린" },
+        { bg: "#87CEFA", color: "#000000", name: "라이트스카이블루" },
+        { bg: "#7B68EE", color: "#FFFFFF", name: "미디엄슬레이트블루" },
+        { bg: "#00FA9A", color: "#000000", name: "미디엄스프링그린" },
+        { bg: "#48D1CC", color: "#000000", name: "미디엄터콰이즈" },
+        { bg: "#C71585", color: "#FFFFFF", name: "미디엄바이올렛레드" },
+        { bg: "#191970", color: "#FFFFFF", name: "미드나잇블루" },
+        { bg: "#FFE4B5", color: "#000000", name: "모카신" },
+        { bg: "#FFDEAD", color: "#000000", name: "나바호화이트" },
+        { bg: "#000080", color: "#FFFFFF", name: "네이비" },
+        { bg: "#FDF5E6", color: "#000000", name: "올드레이스" },
+        { bg: "#6B8E23", color: "#FFFFFF", name: "올리브드랩" },
+        { bg: "#FF4500", color: "#FFFFFF", name: "오렌지레드" },
+        { bg: "#DA70D6", color: "#000000", name: "오키드" },
+        { bg: "#AFEEEE", color: "#000000", name: "페일터콰이즈" },
+        { bg: "#DB7093", color: "#000000", name: "페일바이올렛레드" },
+        { bg: "#FFEFD5", color: "#000000", name: "파파야휩" },
+        { bg: "#FFDAB9", color: "#000000", name: "피치퍼프" },
+        { bg: "#CD853F", color: "#FFFFFF", name: "페루" },
+        { bg: "#DDA0DD", color: "#000000", name: "플럼" },
+        { bg: "#B0E0E6", color: "#000000", name: "파우더블루" },
+        { bg: "#800000", color: "#FFFFFF", name: "마룬" },
+      ];
+
+      if (!localStorage.getItem(KEY)) {
+        localStorage.setItem(KEY, JSON.stringify(DEFAULT));
+      }
+
+      function getData() {
+        return JSON.parse(localStorage.getItem(KEY));
+      }
+
+      function setData(data) {
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+
+      function clear(el) {
+        while (el.firstChild) {
+          el.removeChild(el.firstChild);
+        }
+      }
+
+      function render() {
+        const grid = document.getElementById("grid");
+        clear(grid);
+
+        getData().forEach((c, i) => {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.style.background = c.bg;
+          div.style.color = c.color;
+
+          const text = `{background:${c.bg}; color:${c.color}} ${c.name}`;
+
+          const name = document.createElement("div");
+          name.textContent = c.name;
+
+          const code = document.createElement("small");
+          code.textContent = text;
+
+          const del = document.createElement("span");
+          del.textContent = "✕";
+          del.className = "del";
+
+          del.onclick = (e) => {
+            e.stopPropagation();
+            const data = getData();
+            data.splice(i, 1);
+            setData(data);
+            render();
+          };
+
+          div.onclick = () => {
+            navigator.clipboard.writeText(text);
+            code.textContent = "복사됨!";
+            setTimeout(() => (code.textContent = text), 500);
+          };
+
+          div.appendChild(del);
+          div.appendChild(name);
+          div.appendChild(code);
+          grid.appendChild(div);
+        });
+      }
+
+      document.getElementById("add").onclick = () => {
+        const bg = document.getElementById("bg").value;
+        const color = document.getElementById("color").value;
+        const name = document.getElementById("name").value;
+
+        const data = getData();
+        data.push({ bg, color, name });
+        setData(data);
+        render();
+      };
+
+      document.getElementById("reset").onclick = () => {
+        localStorage.setItem(KEY, JSON.stringify(DEFAULT));
+        render();
+      };
+
+      render();
+    </script>
+  </body>
+</html>
