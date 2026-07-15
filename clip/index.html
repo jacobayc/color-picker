@@ -1439,6 +1439,15 @@
                 const currentW = parseFloat(wrapper.style.width) || wrapper.offsetWidth;
                 const currentH = parseFloat(wrapper.style.height) || wrapper.offsetHeight;
                 
+                const defaultName = `clip-canvas-${type}-${Math.round(currentW)}x${Math.round(currentH)}`;
+                let filename = prompt('저장할 파일 이름을 입력하세요 (확장자 제외):', defaultName);
+                
+                if (filename === null) return; // Cancelled by user
+                filename = filename.trim();
+                if (filename === '') {
+                    filename = defaultName;
+                }
+                
                 const exportCanvas = document.createElement('canvas');
                 exportCanvas.width = currentW;
                 exportCanvas.height = currentH;
@@ -1469,7 +1478,7 @@
                 
                 const dataUrl = exportCanvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = `clip-canvas-${type}-${Math.round(currentW)}x${Math.round(currentH)}.png`;
+                link.download = `${filename}.png`;
                 link.href = dataUrl;
                 link.click();
                 showToast('파일로 다운로드되었습니다.');
