@@ -398,6 +398,11 @@
             z-index: 10;
         }
 
+        /* Override copy-btn right position for memo card which doesn't have download/edit buttons */
+        .image-wrapper.memo-card .copy-btn {
+            right: 18px;
+        }
+
         .image-wrapper.active .copy-btn {
             opacity: 1;
             transform: scale(1);
@@ -909,6 +914,40 @@
             });
             activeElements = [];
             updateAlignToolbarVisibility();
+            
+            // Push memo sticky notes to be always on top of image cards when deselected
+            pushMemosToTop();
+        }
+
+        function pushMemosToTop() {
+            const wrappers = Array.from(document.querySelectorAll('.image-wrapper'));
+            const images = wrappers.filter(el => !el.classList.contains('memo-card'));
+            const memos = wrappers.filter(el => el.classList.contains('memo-card'));
+            
+            if (images.length === 0 || memos.length === 0) return;
+            
+            let maxImageZ = 0;
+            images.forEach(img => {
+                const z = parseInt(img.style.zIndex) || 1;
+                if (z > maxImageZ) {
+                    maxImageZ = z;
+                }
+            });
+            
+            // Sort memos to preserve their relative stack order
+            memos.sort((a, b) => {
+                const zA = parseInt(a.style.zIndex) || 1;
+                const zB = parseInt(b.style.zIndex) || 1;
+                return zA - zB;
+            });
+            
+            // Elevate memo cards above the highest image card
+            memos.forEach((memo, idx) => {
+                memo.style.zIndex = maxImageZ + 1 + idx;
+            });
+            
+            maxZIndex = maxImageZ + 1 + memos.length;
+            saveToLocalStorage();
         }
 
         function updateAlignToolbarVisibility() {
@@ -1382,42 +1421,82 @@
                 wrapper.appendChild(img);
             }
 
-            // Size Badge
-            const sizeBadge = document.createElement('div');
-            sizeBadge.className = 'size-badge';
-            sizeBadge.textContent = `${Math.round(w)} × ${Math.round(h)}px`;
-            wrapper.appendChild(sizeBadge);
+            // Size Badge (Image only)
+            let sizeBadge = null;
+            if (type === 'image') {
+                sizeBadge = document.createElement('div');
+                sizeBadge.className = 'size-badge';
+                sizeBadge.textContent = `${Math.round(w)} × ${Math.round(h)}px`;
+                wrapper.appendChild(sizeBadge);
+            }
 
-            // Property Panel UI
-            const propPanel = document.createElement('div');
-            propPanel.className = 'property-panel';
-            propPanel.innerHTML = `
-                <div class="prop-group">
-                    <span class="prop-label">W</span>
-                    <input type="number" class="prop-input prop-w" value="${Math.round(w)}">
-                </div>
-                <button class="prop-lock-btn ${keepRatio ? 'active' : ''}" data-tooltip="비율 유지 토글">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="11" x="5" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </button>
-                <button class="prop-reset-btn" data-tooltip="원본 크기로 복원">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                </button>
-                <div class="prop-group">
-                    <span class="prop-label">H</span>
-                    <input type="number" class="prop-input prop-h" value="${Math.round(h)}">
-                </div>
-            `;
-            wrapper.appendChild(propPanel);
+            // Property Panel UI (Image only)
+            let propPanel = null;
+            if (type === 'image') {
+                propPanel = document.createElement('div');
+                propPanel.className = 'property-panel';
+                propPanel.innerHTML = `
+                    <div class="prop-group">
+                        <span class="prop-label">W</span>
+                        <input type="number" class="prop-input prop-w" value="${Math.round(w)}">
+                    </div>
+                    <button class="prop-lock-btn ${keepRatio ? 'active' : ''}" data-tooltip="비율 유지 토글">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="11" x="5" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </button>
+                    <button class="prop-reset-btn" data-tooltip="원본 크기로 복원">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                    <div class="prop-group">
+                        <span class="prop-label">H</span>
+                        <input type="number" class="prop-input prop-h" value="${Math.round(h)}">
+                    </div>
+                `;
+                wrapper.appendChild(propPanel);
 
-            // Edit Button
-            const editBtn = document.createElement('button');
-            editBtn.className = 'edit-btn';
-            editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-            editBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                wrapper.classList.toggle('show-properties');
-            });
-            wrapper.appendChild(editBtn);
+                // Edit Button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    wrapper.classList.toggle('show-properties');
+                });
+                wrapper.appendChild(editBtn);
+
+                // Download Button
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>';
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    const currentW = parseFloat(wrapper.style.width) || wrapper.offsetWidth;
+                    const currentH = parseFloat(wrapper.style.height) || wrapper.offsetHeight;
+                    
+                    const defaultName = `clip-canvas-image-${Math.round(currentW)}x${Math.round(currentH)}`;
+                    let filename = prompt('저장할 파일 이름을 입력하세요 (확장자 제외):', defaultName);
+                    
+                    if (filename === null) return;
+                    filename = filename.trim();
+                    if (filename === '') {
+                        filename = defaultName;
+                    }
+                    
+                    const exportCanvas = document.createElement('canvas');
+                    exportCanvas.width = currentW;
+                    exportCanvas.height = currentH;
+                    const ctx = exportCanvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, currentW, currentH);
+                    
+                    const dataUrl = exportCanvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `${filename}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                    showToast('이미지가 파일로 다운로드되었습니다.');
+                });
+                wrapper.appendChild(downloadBtn);
+            }
 
             // Copy Button
             const copyBtn = document.createElement('button');
@@ -1428,62 +1507,6 @@
                 copyImageToClipboard(wrapper);
             });
             wrapper.appendChild(copyBtn);
-
-            // Download Button
-            const downloadBtn = document.createElement('button');
-            downloadBtn.className = 'download-btn';
-            downloadBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>';
-            downloadBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                const currentW = parseFloat(wrapper.style.width) || wrapper.offsetWidth;
-                const currentH = parseFloat(wrapper.style.height) || wrapper.offsetHeight;
-                
-                const defaultName = `clip-canvas-${type}-${Math.round(currentW)}x${Math.round(currentH)}`;
-                let filename = prompt('저장할 파일 이름을 입력하세요 (확장자 제외):', defaultName);
-                
-                if (filename === null) return; // Cancelled by user
-                filename = filename.trim();
-                if (filename === '') {
-                    filename = defaultName;
-                }
-                
-                const exportCanvas = document.createElement('canvas');
-                exportCanvas.width = currentW;
-                exportCanvas.height = currentH;
-                const ctx = exportCanvas.getContext('2d');
-                
-                if (type === 'memo') {
-                    // Export styled memo
-                    const isDark = document.body.getAttribute('data-theme') === 'dark';
-                    ctx.fillStyle = isDark ? '#422006' : '#fef9c3';
-                    ctx.fillRect(0, 0, currentW, currentH);
-                    ctx.strokeStyle = isDark ? '#ca8a04' : '#fde047';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(0, 0, currentW, currentH);
-                    
-                    ctx.fillStyle = isDark ? '#fef08a' : '#1e293b';
-                    ctx.font = '500 13px sans-serif';
-                    ctx.textBaseline = 'top';
-                    
-                    const lines = textarea.value.split('\n');
-                    let yOffset = 10;
-                    lines.forEach(line => {
-                        ctx.fillText(line, 10, yOffset, currentW - 20);
-                        yOffset += 20;
-                    });
-                } else {
-                    ctx.drawImage(img, 0, 0, currentW, currentH);
-                }
-                
-                const dataUrl = exportCanvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `${filename}.png`;
-                link.href = dataUrl;
-                link.click();
-                showToast('파일로 다운로드되었습니다.');
-            });
-            wrapper.appendChild(downloadBtn);
 
             // Delete Button
             const deleteBtn = document.createElement('button');
@@ -1513,79 +1536,75 @@
                 setupResize(wrapper, handle);
             });
 
-            // Input handlers in property panel
-            const wInput = propPanel.querySelector('.prop-w');
-            const hInput = propPanel.querySelector('.prop-h');
-            const lockBtn = propPanel.querySelector('.prop-lock-btn');
-            const resetBtn = propPanel.querySelector('.prop-reset-btn');
+            // Input handlers in property panel (Image only)
+            if (type === 'image') {
+                const wInput = propPanel.querySelector('.prop-w');
+                const hInput = propPanel.querySelector('.prop-h');
+                const lockBtn = propPanel.querySelector('.prop-lock-btn');
+                const resetBtn = propPanel.querySelector('.prop-reset-btn');
 
-            lockBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isLocked = wrapper.dataset.keepRatio === 'true';
-                wrapper.dataset.keepRatio = isLocked ? 'false' : 'true';
-                lockBtn.classList.toggle('active', !isLocked);
-                saveToLocalStorage();
-            });
-
-            resetBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                let origW = 200;
-                let origH = 150;
-                
-                if (type === 'image') {
-                    origW = img.naturalWidth;
-                    origH = img.naturalHeight;
-                }
-                
-                if (origW && origH) {
-                    wrapper.style.width = `${origW}px`;
-                    wrapper.style.height = `${origH}px`;
-                    wInput.value = Math.round(origW);
-                    hInput.value = Math.round(origH);
-                    sizeBadge.textContent = `${Math.round(origW)} × ${Math.round(origH)}px`;
-                    
-                    const newRatio = origW / origH;
-                    wrapper.dataset.aspectRatio = newRatio;
-                    
+                lockBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isLocked = wrapper.dataset.keepRatio === 'true';
+                    wrapper.dataset.keepRatio = isLocked ? 'false' : 'true';
+                    lockBtn.classList.toggle('active', !isLocked);
                     saveToLocalStorage();
-                    showToast('요소가 원본 크기로 복원되었습니다.');
-                } else {
-                    showToast('원본 데이터를 읽지 못했습니다.');
-                }
-            });
+                });
 
-            wInput.addEventListener('input', (e) => {
-                let val = parseFloat(e.target.value) || 0;
-                val = Math.max(10, val);
-                wrapper.style.width = `${val}px`;
-                if (wrapper.dataset.keepRatio === 'true') {
-                    const linkedH = val / aspectRatio;
-                    wrapper.style.height = `${linkedH}px`;
-                    hInput.value = Math.round(linkedH);
-                }
-                const curW = parseFloat(wrapper.style.width);
-                const curH = parseFloat(wrapper.style.height);
-                sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
-                saveToLocalStorage();
-            });
+                resetBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const origW = img.naturalWidth;
+                    const origH = img.naturalHeight;
+                    
+                    if (origW && origH) {
+                        wrapper.style.width = `${origW}px`;
+                        wrapper.style.height = `${origH}px`;
+                        wInput.value = Math.round(origW);
+                        hInput.value = Math.round(origH);
+                        sizeBadge.textContent = `${Math.round(origW)} × ${Math.round(origH)}px`;
+                        
+                        const newRatio = origW / origH;
+                        wrapper.dataset.aspectRatio = newRatio;
+                        
+                        saveToLocalStorage();
+                        showToast('이미지가 원본 크기로 복원되었습니다.');
+                    } else {
+                        showToast('원본 이미지 정보를 읽지 못했습니다.');
+                    }
+                });
 
-            hInput.addEventListener('input', (e) => {
-                let val = parseFloat(e.target.value) || 0;
-                val = Math.max(10, val);
-                wrapper.style.height = `${val}px`;
-                if (wrapper.dataset.keepRatio === 'true') {
-                    const linkedW = val * aspectRatio;
-                    wrapper.style.width = `${linkedW}px`;
-                    wInput.value = Math.round(linkedW);
-                }
-                const curW = parseFloat(wrapper.style.width);
-                const curH = parseFloat(wrapper.style.height);
-                sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
-                saveToLocalStorage();
-            });
+                wInput.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value) || 0;
+                    val = Math.max(10, val);
+                    wrapper.style.width = `${val}px`;
+                    if (wrapper.dataset.keepRatio === 'true') {
+                        const linkedH = val / aspectRatio;
+                        wrapper.style.height = `${linkedH}px`;
+                        hInput.value = Math.round(linkedH);
+                    }
+                    const curW = parseFloat(wrapper.style.width);
+                    const curH = parseFloat(wrapper.style.height);
+                    sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
+                    saveToLocalStorage();
+                });
 
-            // Prevent text select drag inside input fields
-            propPanel.addEventListener('mousedown', (e) => e.stopPropagation());
+                hInput.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value) || 0;
+                    val = Math.max(10, val);
+                    wrapper.style.height = `${val}px`;
+                    if (wrapper.dataset.keepRatio === 'true') {
+                        const linkedW = val * aspectRatio;
+                        wrapper.style.width = `${linkedW}px`;
+                        wInput.value = Math.round(linkedW);
+                    }
+                    const curW = parseFloat(wrapper.style.width);
+                    const curH = parseFloat(wrapper.style.height);
+                    sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
+                    saveToLocalStorage();
+                });
+
+                propPanel.addEventListener('mousedown', (e) => e.stopPropagation());
+            }
 
             // Setup Drag & Drop
             setupDrag(wrapper);
