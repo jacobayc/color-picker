@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Clipboard Canvas</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --grid-color: rgba(0, 0, 0, 0.08);
+            --text-primary: #1a1a1a;
+            --text-secondary: #71717a;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --border-color: #e4e4e7;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --active-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+            --btn-bg: rgba(255, 255, 255, 0.8);
+            --btn-hover: #ffffff;
+            --icon-color: #4b5563;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #09090b;
+            --grid-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border-color: #27272a;
+            --card-bg: rgba(24, 24, 27, 0.85);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --active-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+            --btn-bg: rgba(39, 39, 42, 0.8);
+            --btn-hover: #27272a;
+            --icon-color: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Dedicated Grid Layer */
+        #grid-background {
+            position: absolute;
+            top: -5000px;
+            left: -5000px;
+            width: 10000px;
+            height: 10000px;
+            background-image: radial-gradient(var(--grid-color) 2px, transparent 2px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        /* Infinity Board Container */
+        #board {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        /* Grid Toggle transition */
+        .no-grid #grid-background {
+            opacity: 0;
+        }
+
+        /* Glassmorphic Header & Toolbar */
+        header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 12px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 12px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .logo-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: -0.02em;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--icon-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tool-btn:hover {
+            background: var(--btn-hover);
+            transform: translateY(-2px);
+            color: var(--text-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .tool-btn:active {
+            transform: translateY(0);
+        }
+
+        .tool-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.15s ease;
+            z-index: 10001;
+        }
+
+        .tool-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        .empty-state h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 320px;
+            line-height: 1.5;
+        }
+
+        .keyboard-shortcut {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .key-badge {
+            background: var(--text-primary);
+            color: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+        }
+
+        /* Canvas Wrapper & Sticky Elements */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        /* Image Wrapper Element */
+        .image-wrapper {
+            position: absolute;
+            min-width: 60px;
+            min-height: 60px;
+            background: transparent;
+            border: 2px solid transparent;
+            cursor: move;
+            border-radius: 8px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: var(--card-shadow);
+            animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, width, height, left, top;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            border-radius: 6px;
+            pointer-events: none;
+            display: block;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Selected State */
+        .image-wrapper.active {
+            border-color: var(--accent-color);
+            box-shadow: var(--active-shadow);
+            z-index: 9999 !important; /* Ensure it is on top when selected */
+        }
+
+        /* Close Button */
+        .image-wrapper .delete-btn {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .delete-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        /* Download Button */
+        .image-wrapper .download-btn {
+            position: absolute;
+            top: -12px;
+            right: 78px;
+            background: #10b981;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .download-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .download-btn:hover {
+            background: #059669;
+            transform: scale(1.1);
+        }
+
+        /* Copy Button */
+        .image-wrapper .copy-btn {
+            position: absolute;
+            top: -12px;
+            right: 48px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .copy-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .copy-btn:hover {
+            background: #7c3aed;
+            transform: scale(1.1);
+        }
+
+        /* Edit Button */
+        .image-wrapper .edit-btn {
+            position: absolute;
+            top: -12px;
+            right: 18px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .edit-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .edit-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .image-wrapper.show-properties .edit-btn {
+            background: #10b981;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Glassmorphic Property Panel */
+        .property-panel {
+            position: absolute;
+            bottom: -52px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 10px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--card-shadow);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 999;
+        }
+
+        /* Only show when active and edit mode toggled */
+        .image-wrapper.active.show-properties .property-panel {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .prop-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .prop-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .prop-input {
+            width: 55px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 11px;
+            font-family: monospace;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        [data-theme="dark"] .prop-input {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .prop-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .prop-input::-webkit-outer-spin-button,
+        .prop-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .prop-lock-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .prop-lock-btn.active {
+            color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .prop-lock-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        [data-theme="dark"] .prop-lock-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .prop-reset-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .prop-reset-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+        [data-theme="dark"] .prop-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Resize Handles */
+        .resize-handle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 5;
+        }
+
+        .image-wrapper.active .resize-handle {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .resize-handle:hover {
+            transform: scale(1.3);
+            background: var(--accent-color);
+        }
+
+        /* Handle Positions & Cursors */
+        .resize-handle.tl { top: -4px; left: -4px; cursor: nwse-resize; }
+        .resize-handle.tr { top: -4px; right: -4px; cursor: nesw-resize; }
+        .resize-handle.bl { bottom: -4px; left: -4px; cursor: nesw-resize; }
+        .resize-handle.br { bottom: -4px; right: -4px; cursor: nwse-resize; }
+        
+        .resize-handle.t { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+        .resize-handle.b { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+        .resize-handle.l { left: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+        .resize-handle.r { right: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+
+        .resize-handle.t:hover, .resize-handle.b:hover { transform: translateX(-50%) scale(1.3); }
+        .resize-handle.l:hover, .resize-handle.r:hover { transform: translateY(-50%) scale(1.3); }
+
+        /* Custom alert notification */
+        .toast {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Sticky Note Card */
+        .image-wrapper.memo-card {
+            background: #fef9c3;
+            border: 1.5px solid #fde047;
+            padding: 0;
+            overflow: visible;
+        }
+        
+        [data-theme="dark"] .image-wrapper.memo-card {
+            background: #422006;
+            border: 1.5px solid #ca8a04;
+        }
+
+        .memo-textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            resize: none;
+            font-size: 13px;
+            font-family: inherit;
+            color: #1e293b;
+            padding: 10px;
+            font-weight: 500;
+            outline: none;
+            line-height: 1.5;
+            border-radius: 6px;
+        }
+
+        [data-theme="dark"] .memo-textarea {
+            color: #fef08a;
+        }
+
+        /* Alignment Toolbar */
+        .align-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 12px;
+            border-right: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- Header / Controls -->
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">C</div>
+            <div class="logo-title">ClipCanvas</div>
+        </div>
+        
+        <!-- Alignment Toolbar (Hidden by default, shown when 2+ items selected) -->
+        <div class="align-toolbar" id="align-toolbar" style="display: none;">
+            <button class="tool-btn align-btn" data-align="left" data-tooltip="왼쪽 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="21" y2="3"/><rect width="12" height="6" x="4" y="5" rx="1.5"/><rect width="16" height="6" x="4" y="13" rx="1.5"/></svg>
+            </button>
+            <button class="tool-btn align-btn" data-align="h-center" data-tooltip="가로 중앙 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="22" y2="2"/><rect width="14" height="6" x="5" y="5" rx="1"/><rect width="10" height="6" x="7" y="13" rx="1"/></svg>
+            </button>
+            <button class="tool-btn align-btn" data-align="right" data-tooltip="오른쪽 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="20" x2="20" y1="21" y2="3"/><rect width="12" height="6" x="8" y="5" rx="1.5"/><rect width="16" height="6" x="4" y="13" rx="1.5"/></svg>
+            </button>
+            <span class="toolbar-separator"></span>
+            <button class="tool-btn align-btn" data-align="top" data-tooltip="상단 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="4" y2="4"/><rect width="6" height="12" x="5" y="4" rx="1.5"/><rect width="6" height="16" x="13" y="4" rx="1.5"/></svg>
+            </button>
+            <button class="tool-btn align-btn" data-align="v-center" data-tooltip="세로 중앙 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><rect width="6" height="14" x="5" y="5" rx="1"/><rect width="6" height="10" x="13" y="7" rx="1"/></svg>
+            </button>
+            <button class="tool-btn align-btn" data-align="bottom" data-tooltip="하단 정렬">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="20" y2="20"/><rect width="6" height="12" x="5" y="8" rx="1.5"/><rect width="6" height="16" x="13" y="4" rx="1.5"/></svg>
+            </button>
+        </div>
+        <span class="toolbar-separator" id="align-separator" style="display: none;"></span>
+
+        <div class="toolbar">
+            <button class="tool-btn" id="theme-toggle" data-tooltip="테마 전환 (다크/라이트)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <button class="tool-btn" id="grid-toggle" data-tooltip="그리드 토글">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+            </button>
+            <button class="tool-btn" id="clear-all" data-tooltip="모두 지우기">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Empty State Guide -->
+    <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </div>
+        <h2>클립보드 이미지 보드</h2>
+        <p>복사한 이미지(스크린샷 등)가 있다면 화면을 선택한 뒤 붙여넣어 보세요.</p>
+        <div class="keyboard-shortcut">
+            <span class="key-badge">Ctrl</span> + <span class="key-badge">V</span>
+        </div>
+    </div>
+
+    <!-- Canvas (Viewport) -->
+    <div id="canvas-container">
+        <!-- Infinity Zoom/Pan Board -->
+        <div id="board">
+            <!-- Grid Background Layer inside board -->
+            <div id="grid-background"></div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span id="toast-message">이미지가 추가되었습니다.</span>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        const canvas = document.getElementById('canvas-container');
+        const board = document.getElementById('board');
+        const emptyState = document.getElementById('empty-state');
+        const themeToggle = document.getElementById('theme-toggle');
+        const gridToggle = document.getElementById('grid-toggle');
+        const clearAllBtn = document.getElementById('clear-all');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Infinity Canvas States
+        let zoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isSpacePressed = false;
+        let isPanning = false;
+        let startPanX = 0;
+        let startPanY = 0;
+
+        let maxZIndex = 1;
+
+        // Toast Helper
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Check if board is empty (excluding grid background)
+        function checkEmptyState() {
+            const imageCount = board.querySelectorAll('.image-wrapper').length;
+            if (imageCount === 0) {
+                emptyState.style.opacity = '1';
+                emptyState.style.pointerEvents = 'none';
+            } else {
+                emptyState.style.opacity = '0';
+                emptyState.style.pointerEvents = 'none';
+            }
+        }
+
+        // Update Transform
+        function updateBoardTransform() {
+            board.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoom})`;
+        }
+
+        // Save Board View State
+        function saveBoardState() {
+            localStorage.setItem('clip_canvas_board_state', JSON.stringify({ zoom, panX, panY }));
+        }
+
+        // Load Board View State
+        function loadBoardState() {
+            const stateData = localStorage.getItem('clip_canvas_board_state');
+            if (stateData) {
+                try {
+                    const state = JSON.parse(stateData);
+                    zoom = state.zoom || 1;
+                    panX = state.panX || 0;
+                    panY = state.panY || 0;
+                    updateBoardTransform();
+                } catch (e) {
+                    console.error('보드 상태 복원 실패:', e);
+                }
+            }
+        }
+
+        // LocalStorage Save Images
+        function saveToLocalStorage() {
+            try {
+                const items = [];
+                board.querySelectorAll('.image-wrapper').forEach(el => {
+                    items.push({
+                        id: el.dataset.id,
+                        src: el.querySelector('img').src,
+                        left: parseFloat(el.style.left) || 0,
+                        top: parseFloat(el.style.top) || 0,
+                        width: parseFloat(el.style.width) || 0,
+                        height: parseFloat(el.style.height) || 0,
+                        zIndex: parseInt(el.style.zIndex) || 1,
+                        keepRatio: el.dataset.keepRatio === 'true'
+                    });
+                });
+                localStorage.setItem('clip_canvas_images', JSON.stringify(items));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    showToast('로컬 용량 부족! 고용량 이미지를 지워주세요.');
+                } else {
+                    console.error(e);
+                }
+            }
+        }
+
+        // LocalStorage Load Images & Memos
+        function loadFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem('clip_canvas_cards');
+                if (!stored) return;
+                
+                const cardsData = JSON.parse(stored);
+                if (!Array.isArray(cardsData)) return;
+
+                cardsData.forEach(data => {
+                    createCard({
+                        type: data.type || 'image',
+                        src: data.src || '',
+                        text: data.text || '',
+                        x: data.left,
+                        y: data.top,
+                        w: data.width,
+                        h: data.height,
+                        id: data.id,
+                        zIndex: data.zIndex,
+                        keepRatio: data.keepRatio,
+                        shouldSave: false
+                    });
+                });
+            } catch (err) {
+                console.error('로컬스토리지 로딩 실패:', err);
+            }
+            checkEmptyState();
+        }
+
+        // Selection Managers
+        function selectElement(el, isShift = false) {
+            if (!isShift) {
+                deselectAll();
+                activeElements = [el];
+                el.classList.add('active');
+            } else {
+                const idx = activeElements.indexOf(el);
+                if (idx > -1) {
+                    activeElements.splice(idx, 1);
+                    el.classList.remove('active');
+                    el.classList.remove('show-properties');
+                } else {
+                    activeElements.push(el);
+                    el.classList.add('active');
+                }
+            }
+            
+            // Raise z-index for all selected items
+            activeElements.forEach(item => {
+                maxZIndex += 1;
+                item.style.zIndex = maxZIndex;
+            });
+
+            updateAlignToolbarVisibility();
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.image-wrapper').forEach(el => {
+                el.classList.remove('active');
+                el.classList.remove('show-properties');
+            });
+            activeElements = [];
+            updateAlignToolbarVisibility();
+        }
+
+        function updateAlignToolbarVisibility() {
+            const toolbar = document.getElementById('align-toolbar');
+            const separator = document.getElementById('align-separator');
+            if (activeElements.length >= 2) {
+                toolbar.style.display = 'flex';
+                separator.style.display = 'block';
+            } else {
+                toolbar.style.display = 'none';
+                separator.style.display = 'none';
+            }
+        }
+
+        // Alignment Function
+        function alignSelected(direction) {
+            if (activeElements.length < 2) return;
+
+            const coords = activeElements.map(el => {
+                const left = parseFloat(el.style.left) || 0;
+                const top = parseFloat(el.style.top) || 0;
+                const w = parseFloat(el.style.width) || el.offsetWidth;
+                const h = parseFloat(el.style.height) || el.offsetHeight;
+                return { el, left, top, w, h, right: left + w, bottom: top + h };
+            });
+
+            const lefts = coords.map(c => c.left);
+            const tops = coords.map(c => c.top);
+            const rights = coords.map(c => c.right);
+            const bottoms = coords.map(c => c.bottom);
+
+            const minLeft = Math.min(...lefts);
+            const maxRight = Math.max(...rights);
+            const minTop = Math.min(...tops);
+            const maxBottom = Math.max(...bottoms);
+
+            const boxCenterX = minLeft + (maxRight - minLeft) / 2;
+            const boxCenterY = minTop + (maxBottom - minTop) / 2;
+
+            coords.forEach(c => {
+                if (direction === 'left') {
+                    c.el.style.left = `${minLeft}px`;
+                } else if (direction === 'right') {
+                    c.el.style.left = `${maxRight - c.w}px`;
+                } else if (direction === 'h-center') {
+                    c.el.style.left = `${boxCenterX - c.w / 2}px`;
+                } else if (direction === 'top') {
+                    c.el.style.top = `${minTop}px`;
+                } else if (direction === 'bottom') {
+                    c.el.style.top = `${maxBottom - c.h}px`;
+                } else if (direction === 'v-center') {
+                    c.el.style.top = `${boxCenterY - c.h / 2}px`;
+                }
+            });
+
+            saveToLocalStorage();
+            showToast('정렬이 완료되었습니다.');
+        }
+
+        // Bind align buttons
+        document.querySelectorAll('.align-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alignSelected(btn.dataset.align);
+            });
+        });
+
+        // Copy Image Helper (Canvas export supporting images and styled memos)
+        function copyImageToClipboard(wrapper) {
+            if (!wrapper) return;
+            
+            const isMemo = wrapper.classList.contains('memo-card');
+            const currentW = parseFloat(wrapper.style.width) || wrapper.offsetWidth;
+            const currentH = parseFloat(wrapper.style.height) || wrapper.offsetHeight;
+            
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = currentW;
+            exportCanvas.height = currentH;
+            const ctx = exportCanvas.getContext('2d');
+            
+            if (isMemo) {
+                // Render memo card background and text to canvas
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                ctx.fillStyle = isDark ? '#422006' : '#fef9c3';
+                ctx.fillRect(0, 0, currentW, currentH);
+                
+                ctx.strokeStyle = isDark ? '#ca8a04' : '#fde047';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(0, 0, currentW, currentH);
+                
+                ctx.fillStyle = isDark ? '#fef08a' : '#1e293b';
+                ctx.font = '500 13px sans-serif';
+                ctx.textBaseline = 'top';
+                
+                const text = wrapper.querySelector('.memo-textarea').value;
+                const lines = text.split('\n');
+                let yOffset = 10;
+                lines.forEach(line => {
+                    ctx.fillText(line, 10, yOffset, currentW - 20);
+                    yOffset += 20;
+                });
+
+                exportCanvas.toBlob((blob) => {
+                    if (blob) {
+                        try {
+                            const data = [new ClipboardItem({ [blob.type]: blob })];
+                            navigator.clipboard.write(data).then(() => {
+                                showToast('메모가 이미지 크기로 복사되었습니다.');
+                            }).catch(err => {
+                                console.error(err);
+                                showToast('클립보드 권한이 필요합니다.');
+                            });
+                        } catch (err) {
+                            showToast('복사를 지원하지 않는 브라우저입니다.');
+                        }
+                    }
+                }, 'image/png');
+            } else {
+                // Render image
+                const img = wrapper.querySelector('img');
+                ctx.drawImage(img, 0, 0, currentW, currentH);
+                exportCanvas.toBlob((blob) => {
+                    if (blob) {
+                        try {
+                            const data = [new ClipboardItem({ [blob.type]: blob })];
+                            navigator.clipboard.write(data).then(() => {
+                                showToast(`이미지가 ${Math.round(currentW)} × ${Math.round(currentH)}px 크기로 복사되었습니다.`);
+                            }).catch(err => {
+                                console.error('클립보드 복사 실패:', err);
+                                showToast('클립보드 쓰기 권한이 차단되었습니다.');
+                            });
+                        } catch (err) {
+                            showToast('복사를 지원하지 않는 브라우저입니다.');
+                        }
+                    }
+                }, 'image/png');
+            }
+        }
+
+        // Keyboard Shortcuts & Navigation
+        window.addEventListener('keydown', (e) => {
+            // Space panning
+            if (e.code === 'Space') {
+                isSpacePressed = true;
+                if (!isPanning) {
+                    document.body.style.cursor = 'grab';
+                }
+                if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                }
+            }
+
+            // Skip shortcuts when editing values inside input fields
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            if (activeElements.length > 0) {
+                // Delete active elements
+                if (e.code === 'Delete' || e.code === 'Backspace') {
+                    e.preventDefault();
+                    activeElements.forEach(el => el.remove());
+                    deselectAll();
+                    checkEmptyState();
+                    saveToLocalStorage();
+                    showToast('요소가 삭제되었습니다.');
+                }
+
+                // Keyboard Nudge (Arrow Keys)
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+                    e.preventDefault();
+                    const step = e.shiftKey ? 10 : 1;
+                    activeElements.forEach(el => {
+                        const curLeft = parseFloat(el.style.left) || 0;
+                        const curTop = parseFloat(el.style.top) || 0;
+
+                        if (e.code === 'ArrowLeft') el.style.left = `${curLeft - step}px`;
+                        if (e.code === 'ArrowRight') el.style.left = `${curLeft + step}px`;
+                        if (e.code === 'ArrowUp') el.style.top = `${curTop - step}px`;
+                        if (e.code === 'ArrowDown') el.style.top = `${curTop + step}px`;
+                    });
+                    saveToLocalStorage();
+                }
+
+                // Keyboard Copy (Ctrl + C) - copies only when 1 element is selected
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+                    if (activeElements.length === 1) {
+                        e.preventDefault();
+                        copyImageToClipboard(activeElements[0]);
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                isSpacePressed = false;
+                if (!isPanning) {
+                    document.body.style.cursor = 'default';
+                }
+            }
+        });
+
+        // Double Click empty area to spawn a Sticky Note
+        canvas.addEventListener('dblclick', (e) => {
+            if (e.target === canvas || e.target === board) {
+                const viewportX = e.clientX;
+                const viewportY = e.clientY;
+                
+                const x = (viewportX - panX) / zoom - 100;
+                const y = (viewportY - panY) / zoom - 75;
+                
+                createCard({
+                    type: 'memo',
+                    text: '',
+                    x: x,
+                    y: y,
+                    w: 200,
+                    h: 150,
+                    keepRatio: false
+                });
+            }
+        });
+
+        // Pan Event binding
+        canvas.addEventListener('mousedown', (e) => {
+            if (isSpacePressed) {
+                isPanning = true;
+                document.body.style.cursor = 'grabbing';
+                startPanX = e.clientX - panX;
+                startPanY = e.clientY - panY;
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                panX = e.clientX - startPanX;
+                panY = e.clientY - startPanY;
+                updateBoardTransform();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                document.body.style.cursor = isSpacePressed ? 'grab' : 'default';
+                saveBoardState();
+            }
+        });
+
+        // Zoom Event (Mouse pointer center)
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const zoomIntensity = 0.08;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const boardMouseX = (mouseX - panX) / zoom;
+            const boardMouseY = (mouseY - panY) / zoom;
+
+            let nextZoom;
+            if (e.deltaY < 0) {
+                nextZoom = zoom * (1 + zoomIntensity);
+            } else {
+                nextZoom = zoom / (1 + zoomIntensity);
+            }
+
+            nextZoom = Math.min(Math.max(0.15, nextZoom), 6.0);
+
+            panX = mouseX - boardMouseX * nextZoom;
+            panY = mouseY - boardMouseY * nextZoom;
+            zoom = nextZoom;
+
+            updateBoardTransform();
+            saveBoardState();
+        }, { passive: false });
+
+        // Save layout state to LocalStorage
+        function saveToLocalStorage() {
+            const cardsData = [];
+            document.querySelectorAll('.image-wrapper').forEach(wrapper => {
+                const isMemo = wrapper.classList.contains('memo-card');
+                const data = {
+                    type: isMemo ? 'memo' : 'image',
+                    id: wrapper.dataset.id,
+                    left: parseFloat(wrapper.style.left) || 0,
+                    top: parseFloat(wrapper.style.top) || 0,
+                    width: parseFloat(wrapper.style.width) || wrapper.offsetWidth,
+                    height: parseFloat(wrapper.style.height) || wrapper.offsetHeight,
+                    zIndex: parseInt(wrapper.style.zIndex) || 1,
+                    keepRatio: wrapper.dataset.keepRatio === 'true'
+                };
+
+                if (isMemo) {
+                    data.text = wrapper.querySelector('.memo-textarea').value;
+                } else {
+                    data.src = wrapper.querySelector('img').src;
+                }
+
+                cardsData.push(data);
+            });
+
+            localStorage.setItem('clip_canvas_cards', JSON.stringify(cardsData));
+        }
+
+        // Restore layout state from LocalStorage
+        function loadFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem('clip_canvas_cards');
+                if (!stored) return;
+                
+                const cardsData = JSON.parse(stored);
+                if (!Array.isArray(cardsData)) return;
+
+                cardsData.forEach(data => {
+                    createCard({
+                        type: data.type || 'image',
+                        src: data.src || '',
+                        text: data.text || '',
+                        x: data.left,
+                        y: data.top,
+                        w: data.width,
+                        h: data.height,
+                        id: data.id,
+                        zIndex: data.zIndex,
+                        keepRatio: data.keepRatio,
+                        shouldSave: false
+                    });
+                });
+            } catch (err) {
+                console.error('로컬스토리지 로딩 실패:', err);
+            }
+            checkEmptyState();
+        }
+
+        // Image Compression Helper (Canvas based, JPEG 75% quality, max 1280px)
+        function compressImage(base64Src, callback) {
+            const img = new Image();
+            img.src = base64Src;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                const maxDim = 1280;
+                let w = img.width;
+                let h = img.height;
+                
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) {
+                        h = (maxDim / w) * h;
+                        w = maxDim;
+                    } else {
+                        w = (maxDim / h) * w;
+                        h = maxDim;
+                    }
+                }
+                
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                callback(compressedDataUrl, img.width, img.height);
+            };
+        }
+
+        // Paste Event Listener
+        document.addEventListener('paste', function (e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file' && items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64Url = event.target.result;
+                        
+                        compressImage(base64Url, function(compressedUrl, origW, origH) {
+                            const maxInitSize = 400;
+                            let w = origW;
+                            let h = origH;
+                            
+                            if (w > maxInitSize || h > maxInitSize) {
+                                if (w > h) {
+                                    h = (maxInitSize / w) * h;
+                                    w = maxInitSize;
+                                } else {
+                                    w = (maxInitSize / h) * w;
+                                    h = maxInitSize;
+                                }
+                            }
+
+                            const viewportCenterX = window.innerWidth / 2;
+                            const viewportCenterY = window.innerHeight / 2;
+                            const randomOffset = Math.random() * 40 - 20;
+
+                            const x = (viewportCenterX - panX) / zoom - w / 2 + randomOffset;
+                            const y = (viewportCenterY - panY) / zoom - h / 2 + randomOffset;
+                            
+                            createCard({
+                                type: 'image',
+                                src: compressedUrl,
+                                x: x,
+                                y: y,
+                                w: w,
+                                h: h,
+                                keepRatio: true,
+                                shouldSave: true
+                            });
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        });
+
+        // Unified Card Creator (Unified Image and Memo 스티커)
+        function createCard(config) {
+            const {
+                type = 'image',
+                src = '',
+                text = '',
+                x = 0,
+                y = 0,
+                w = 200,
+                h = 150,
+                id = null,
+                zIndex = null,
+                keepRatio = false,
+                shouldSave = true
+            } = config;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `image-wrapper ${type === 'memo' ? 'memo-card' : ''}`;
+            wrapper.style.left = `${x}px`;
+            wrapper.style.top = `${y}px`;
+            wrapper.style.width = `${w}px`;
+            wrapper.style.height = `${h}px`;
+            
+            const cardId = id || `card_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            wrapper.dataset.id = cardId;
+            wrapper.dataset.keepRatio = keepRatio ? 'true' : 'false';
+            
+            const itemZIndex = zIndex || (++maxZIndex);
+            wrapper.style.zIndex = itemZIndex;
+            if (itemZIndex > maxZIndex) {
+                maxZIndex = itemZIndex;
+            }
+            
+            const aspectRatio = w / h;
+            wrapper.dataset.aspectRatio = aspectRatio;
+
+            let img = null;
+            let textarea = null;
+
+            if (type === 'memo') {
+                textarea = document.createElement('textarea');
+                textarea.className = 'memo-textarea';
+                textarea.placeholder = '메모를 입력하세요...';
+                textarea.value = text;
+                textarea.addEventListener('input', () => {
+                    saveToLocalStorage();
+                });
+                wrapper.appendChild(textarea);
+            } else {
+                img = document.createElement('img');
+                img.src = src;
+                wrapper.appendChild(img);
+            }
+
+            // Size Badge
+            const sizeBadge = document.createElement('div');
+            sizeBadge.className = 'size-badge';
+            sizeBadge.textContent = `${Math.round(w)} × ${Math.round(h)}px`;
+            wrapper.appendChild(sizeBadge);
+
+            // Property Panel UI
+            const propPanel = document.createElement('div');
+            propPanel.className = 'property-panel';
+            propPanel.innerHTML = `
+                <div class="prop-group">
+                    <span class="prop-label">W</span>
+                    <input type="number" class="prop-input prop-w" value="${Math.round(w)}">
+                </div>
+                <button class="prop-lock-btn ${keepRatio ? 'active' : ''}" data-tooltip="비율 유지 토글">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="11" x="5" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </button>
+                <button class="prop-reset-btn" data-tooltip="원본 크기로 복원">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </button>
+                <div class="prop-group">
+                    <span class="prop-label">H</span>
+                    <input type="number" class="prop-input prop-h" value="${Math.round(h)}">
+                </div>
+            `;
+            wrapper.appendChild(propPanel);
+
+            // Edit Button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-btn';
+            editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wrapper.classList.toggle('show-properties');
+            });
+            wrapper.appendChild(editBtn);
+
+            // Copy Button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyImageToClipboard(wrapper);
+            });
+            wrapper.appendChild(copyBtn);
+
+            // Download Button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>';
+            downloadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const currentW = parseFloat(wrapper.style.width) || wrapper.offsetWidth;
+                const currentH = parseFloat(wrapper.style.height) || wrapper.offsetHeight;
+                
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = currentW;
+                exportCanvas.height = currentH;
+                const ctx = exportCanvas.getContext('2d');
+                
+                if (type === 'memo') {
+                    // Export styled memo
+                    const isDark = document.body.getAttribute('data-theme') === 'dark';
+                    ctx.fillStyle = isDark ? '#422006' : '#fef9c3';
+                    ctx.fillRect(0, 0, currentW, currentH);
+                    ctx.strokeStyle = isDark ? '#ca8a04' : '#fde047';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(0, 0, currentW, currentH);
+                    
+                    ctx.fillStyle = isDark ? '#fef08a' : '#1e293b';
+                    ctx.font = '500 13px sans-serif';
+                    ctx.textBaseline = 'top';
+                    
+                    const lines = textarea.value.split('\n');
+                    let yOffset = 10;
+                    lines.forEach(line => {
+                        ctx.fillText(line, 10, yOffset, currentW - 20);
+                        yOffset += 20;
+                    });
+                } else {
+                    ctx.drawImage(img, 0, 0, currentW, currentH);
+                }
+                
+                const dataUrl = exportCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `clip-canvas-${type}-${Math.round(currentW)}x${Math.round(currentH)}.png`;
+                link.href = dataUrl;
+                link.click();
+                showToast('파일로 다운로드되었습니다.');
+            });
+            wrapper.appendChild(downloadBtn);
+
+            // Delete Button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wrapper.remove();
+                
+                const idx = activeElements.indexOf(wrapper);
+                if (idx > -1) activeElements.splice(idx, 1);
+                updateAlignToolbarVisibility();
+                
+                checkEmptyState();
+                saveToLocalStorage();
+                showToast('요소가 삭제되었습니다.');
+            });
+            wrapper.appendChild(deleteBtn);
+
+            // Resize Handles
+            const handles = ['tl', 'tr', 'bl', 'br', 't', 'b', 'l', 'r'];
+            handles.forEach(type => {
+                const handle = document.createElement('div');
+                handle.className = `resize-handle ${type}`;
+                handle.dataset.handleType = type;
+                wrapper.appendChild(handle);
+                setupResize(wrapper, handle);
+            });
+
+            // Input handlers in property panel
+            const wInput = propPanel.querySelector('.prop-w');
+            const hInput = propPanel.querySelector('.prop-h');
+            const lockBtn = propPanel.querySelector('.prop-lock-btn');
+            const resetBtn = propPanel.querySelector('.prop-reset-btn');
+
+            lockBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isLocked = wrapper.dataset.keepRatio === 'true';
+                wrapper.dataset.keepRatio = isLocked ? 'false' : 'true';
+                lockBtn.classList.toggle('active', !isLocked);
+                saveToLocalStorage();
+            });
+
+            resetBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let origW = 200;
+                let origH = 150;
+                
+                if (type === 'image') {
+                    origW = img.naturalWidth;
+                    origH = img.naturalHeight;
+                }
+                
+                if (origW && origH) {
+                    wrapper.style.width = `${origW}px`;
+                    wrapper.style.height = `${origH}px`;
+                    wInput.value = Math.round(origW);
+                    hInput.value = Math.round(origH);
+                    sizeBadge.textContent = `${Math.round(origW)} × ${Math.round(origH)}px`;
+                    
+                    const newRatio = origW / origH;
+                    wrapper.dataset.aspectRatio = newRatio;
+                    
+                    saveToLocalStorage();
+                    showToast('요소가 원본 크기로 복원되었습니다.');
+                } else {
+                    showToast('원본 데이터를 읽지 못했습니다.');
+                }
+            });
+
+            wInput.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value) || 0;
+                val = Math.max(10, val);
+                wrapper.style.width = `${val}px`;
+                if (wrapper.dataset.keepRatio === 'true') {
+                    const linkedH = val / aspectRatio;
+                    wrapper.style.height = `${linkedH}px`;
+                    hInput.value = Math.round(linkedH);
+                }
+                const curW = parseFloat(wrapper.style.width);
+                const curH = parseFloat(wrapper.style.height);
+                sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
+                saveToLocalStorage();
+            });
+
+            hInput.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value) || 0;
+                val = Math.max(10, val);
+                wrapper.style.height = `${val}px`;
+                if (wrapper.dataset.keepRatio === 'true') {
+                    const linkedW = val * aspectRatio;
+                    wrapper.style.width = `${linkedW}px`;
+                    wInput.value = Math.round(linkedW);
+                }
+                const curW = parseFloat(wrapper.style.width);
+                const curH = parseFloat(wrapper.style.height);
+                sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
+                saveToLocalStorage();
+            });
+
+            // Prevent text select drag inside input fields
+            propPanel.addEventListener('mousedown', (e) => e.stopPropagation());
+
+            // Setup Drag & Drop
+            setupDrag(wrapper);
+
+            // Click to select
+            wrapper.addEventListener('mousedown', (e) => {
+                if (isSpacePressed) return; // Allow board panning if space is held
+                e.stopPropagation();
+                selectElement(wrapper, e.shiftKey);
+            });
+
+            board.appendChild(wrapper);
+            selectElement(wrapper);
+            checkEmptyState();
+            
+            if (shouldSave) {
+                saveToLocalStorage();
+                showToast(`${type === 'memo' ? '메모' : '이미지'}가 추가되었습니다.`);
+            }
+        }
+
+        // Drag Handler (Vanilla JS)
+        function setupDrag(element) {
+            let startX, startY, initialX, initialY;
+            let isDragging = false;
+
+            element.addEventListener('mousedown', (e) => {
+                if (isSpacePressed) return;
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || e.target.classList.contains('memo-textarea')) return;
+                
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = parseFloat(element.style.left) || 0;
+                initialY = parseFloat(element.style.top) || 0;
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const dx = (e.clientX - startX) / zoom;
+                const dy = (e.clientY - startY) / zoom;
+                
+                element.style.left = `${initialX + dx}px`;
+                element.style.top = `${initialY + dy}px`;
+            }
+
+            function onMouseUp() {
+                if (isDragging) {
+                    isDragging = false;
+                    saveToLocalStorage();
+                }
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        }
+
+        // Resize Handler (Vanilla JS)
+        function setupResize(element, handle) {
+            const type = handle.dataset.handleType;
+            const sizeBadge = element.querySelector('.size-badge');
+            const wInput = element.querySelector('.prop-w');
+            const hInput = element.querySelector('.prop-h');
+            
+            let startX, startY, initialW, initialH, initialX, initialY;
+            let isResizing = false;
+
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                isResizing = true;
+                element.classList.add('resizing');
+                startX = e.clientX;
+                startY = e.clientY;
+                initialW = element.offsetWidth;
+                initialH = element.offsetHeight;
+                initialX = parseFloat(element.style.left) || 0;
+                initialY = parseFloat(element.style.top) || 0;
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+
+            function onMouseMove(e) {
+                if (!isResizing) return;
+
+                const dx = (e.clientX - startX) / zoom;
+                const dy = (e.clientY - startY) / zoom;
+                const ratio = parseFloat(element.dataset.aspectRatio);
+                const keepRatio = element.dataset.keepRatio === 'true';
+
+                let nextW = initialW;
+                let nextH = initialH;
+                let nextX = initialX;
+                let nextY = initialY;
+
+                switch (type) {
+                    case 'r':
+                        nextW = Math.max(30, initialW + dx);
+                        nextH = keepRatio ? nextW / ratio : initialH;
+                        break;
+                    case 'l':
+                        nextW = Math.max(30, initialW - dx);
+                        nextX = initialX + (initialW - nextW);
+                        nextH = keepRatio ? nextW / ratio : initialH;
+                        break;
+                    case 'b':
+                        nextH = Math.max(30, initialH + dy);
+                        nextW = keepRatio ? nextH * ratio : initialW;
+                        break;
+                    case 't':
+                        nextH = Math.max(30, initialH - dy);
+                        nextY = initialY + (initialH - nextH);
+                        nextW = keepRatio ? nextH * ratio : initialW;
+                        break;
+                    case 'br':
+                        nextW = Math.max(30, initialW + dx);
+                        nextH = keepRatio ? nextW / ratio : Math.max(30, initialH + dy);
+                        break;
+                    case 'bl':
+                        nextW = Math.max(30, initialW - dx);
+                        nextX = initialX + (initialW - nextW);
+                        nextH = keepRatio ? nextW / ratio : Math.max(30, initialH + dy);
+                        break;
+                    case 'tr':
+                        nextW = Math.max(30, initialW + dx);
+                        nextH = keepRatio ? nextW / ratio : Math.max(30, initialH - dy);
+                        nextY = initialY + (initialH - nextH);
+                        break;
+                    case 'tl':
+                        nextW = Math.max(30, initialW - dx);
+                        nextX = initialX + (initialW - nextW);
+                        nextH = keepRatio ? nextW / ratio : Math.max(30, initialH - dy);
+                        nextY = initialY + (initialH - nextH);
+                        break;
+                }
+
+                element.style.width = `${nextW}px`;
+                element.style.height = `${nextH}px`;
+                element.style.left = `${nextX}px`;
+                element.style.top = `${nextY}px`;
+
+                if (sizeBadge) {
+                    sizeBadge.textContent = `${Math.round(nextW)} × ${Math.round(nextH)}px`;
+                }
+
+                if (wInput) wInput.value = Math.round(nextW);
+                if (hInput) hInput.value = Math.round(nextH);
+            }
+
+            // End Resize
+            function onMouseUp() {
+                if (isResizing) {
+                    isResizing = false;
+                    element.classList.remove('resizing');
+                    saveToLocalStorage();
+                }
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        }
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            
+            if (newTheme === 'dark') {
+                themeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+            } else {
+                themeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+            }
+            showToast(`${newTheme === 'dark' ? '다크' : '라이트'} 모드로 전환되었습니다.`);
+        });
+
+        // Grid Toggle
+        gridToggle.addEventListener('click', () => {
+            document.body.classList.toggle('no-grid');
+            const isNoGrid = document.body.classList.contains('no-grid');
+            showToast(isNoGrid ? '그리드가 비활성화되었습니다.' : '그리드가 활성화되었습니다.');
+        });
+
+        // Clear All
+        clearAllBtn.addEventListener('click', () => {
+            const cardCount = board.querySelectorAll('.image-wrapper').length;
+            if (cardCount === 0) return;
+            if (confirm('캔버스의 모든 요소를 삭제하시겠습니까?')) {
+                board.querySelectorAll('.image-wrapper').forEach(el => el.remove());
+                localStorage.removeItem('clip_canvas_cards');
+                deselectAll();
+                checkEmptyState();
+                showToast('캔버스가 초기화되었습니다.');
+            }
+        });
+
+        // Deselect when clicking canvas background
+        document.body.addEventListener('mousedown', (e) => {
+            if (e.target === canvas || e.target === board || e.target === document.body) {
+                deselectAll();
+            }
+        });
+
+        // Initialize and Load states
+        window.addEventListener('DOMContentLoaded', () => {
+            loadBoardState();
+            loadFromLocalStorage();
+        });
+    </script>
+</body>
+</html>
