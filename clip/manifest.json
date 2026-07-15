@@ -1,0 +1,18 @@
+{
+  "name": "EL Clipboard Canvas",
+  "short_name": "EL Clip",
+  "description": "클립보드 이미지를 복사하여 자유롭게 배치하고 가공하는 무한 캔버스 디자인 도구",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#8b5cf6",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
