@@ -1010,6 +1010,9 @@
         <span class="toolbar-separator" id="align-separator" style="display: none;"></span>
 
         <div class="toolbar">
+            <button class="tool-btn" id="pwa-install-btn" style="display: none;" data-tooltip="앱으로 설치 / 홈 화면에 추가">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            </button>
             <button class="tool-btn" id="paste-btn" data-tooltip="클립보드 이미지 붙여넣기">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
             </button>
@@ -2986,7 +2989,34 @@
             loadBoardState();
             loadFromLocalStorage();
 
-            // Register PWA Service Worker
+            // Register PWA Service Worker & Install Prompt
+            let deferredPrompt = null;
+            const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (pwaInstallBtn) {
+                    pwaInstallBtn.style.display = 'flex';
+                }
+            });
+
+            if (pwaInstallBtn) {
+                pwaInstallBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            showToast('앱이 성공적으로 설치되었습니다!');
+                        }
+                        deferredPrompt = null;
+                        pwaInstallBtn.style.display = 'none';
+                    } else {
+                        showToast('iOS Safari는 [공유] → [홈 화면에 추가]를 눌러주세요.');
+                    }
+                });
+            }
+
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('PWA Service Worker registered:', reg.scope))
