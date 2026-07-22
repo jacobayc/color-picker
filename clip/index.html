@@ -387,7 +387,126 @@
             background: #059669;
             transform: scale(1.1);
         }
+        /* Opacity Controller */
+        .image-wrapper .opacity-container {
+            position: absolute;
+            top: -12px;
+            right: 48px; /* Left of copy-btn (48px) if image card, or right: 48px for memo card */
+            z-index: 11;
+        }
 
+        /* Shift opacity btn position specifically for memo card which has no edit/download buttons */
+        .image-wrapper.memo-card .opacity-container {
+            right: 48px;
+        }
+
+        .image-wrapper.memo-card .copy-btn {
+            right: 18px;
+        }
+
+        .image-wrapper .opacity-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+        }
+
+        .image-wrapper.active .opacity-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .opacity-btn:hover {
+            background: #d97706;
+            transform: scale(1.1);
+        }
+
+        .opacity-slider-pop {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--card-shadow);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            min-width: 140px;
+            z-index: 100;
+        }
+
+        .opacity-container:hover .opacity-slider-pop,
+        .opacity-container:focus-within .opacity-slider-pop {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .opacity-slider-input {
+            width: 80px;
+            height: 4px;
+            accent-color: #f59e0b;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .opacity-val {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-primary);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* Unmerge Button */
+        .image-wrapper .unmerge-btn {
+            position: absolute;
+            top: -12px;
+            right: 108px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .unmerge-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-wrapper .unmerge-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
         /* Copy Button */
         .image-wrapper .copy-btn {
             position: absolute;
@@ -523,6 +642,28 @@
         .prop-input:focus {
             outline: none;
             border-color: var(--accent-color);
+        }
+
+        .prop-apply-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .prop-apply-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .image-wrapper.touch-ready {
+            box-shadow: 0 0 0 3px #10b981, var(--active-shadow) !important;
+            transform: scale(1.02);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .prop-input::-webkit-outer-spin-button,
@@ -662,7 +803,6 @@
             height: 100%;
             border: none;
             background: transparent;
-            resize: none;
             font-size: 13px;
             font-family: inherit;
             color: #1e293b;
@@ -671,10 +811,67 @@
             outline: none;
             line-height: 1.5;
             border-radius: 6px;
+            overflow-y: auto;
+            word-break: break-all;
+            
+            /* Hide scrollbar */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        .memo-textarea::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .memo-textarea:empty::before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            font-weight: 400;
         }
 
         [data-theme="dark"] .memo-textarea {
             color: #fef08a;
+        }
+
+        /* Scroll more indicator */
+        .memo-card .scroll-indicator {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            background: #8b5cf6;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 5;
+            animation: bounceIndicator 1.5s infinite;
+        }
+
+        @keyframes bounceIndicator {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(3px); }
+        }
+
+        .memo-card.active.has-more-content .scroll-indicator {
+            opacity: 1;
+        }
+
+        /* Real-time Intersection Guide overlay */
+        .intersection-guide {
+            position: absolute;
+            border: 2px dashed #a855f7;
+            background: rgba(168, 85, 247, 0.09);
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 100002;
+            transition: opacity 0.1s ease;
         }
 
         /* Alignment Toolbar */
@@ -686,15 +883,96 @@
             border-right: 1px solid var(--border-color);
             transition: all 0.2s ease;
         }
-        .toolbar-separator {
-            width: 1px;
-            height: 20px;
-            background: var(--border-color);
-            margin: 0 4px;
+        
+        .merge-btn:hover {
+            background: #8b5cf6 !important;
+            color: white !important;
+            border-color: #8b5cf6 !important;
+        }
+        
+        /* Size Badge Style */
+        .image-wrapper .size-badge {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+
+        .image-wrapper.active .size-badge {
+            opacity: 1;
+        }
+        /* Floating Text Format Toolbar */
+        .text-format-toolbar {
+            position: absolute;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 8px;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--card-shadow);
+            z-index: 100005;
+            pointer-events: auto;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .text-format-toolbar .prop-input {
+            width: 50px;
+            height: 24px;
+            font-size: 11px;
+        }
+        .text-format-toolbar .tool-btn {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        [data-theme="dark"] .text-format-toolbar .tool-btn {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .text-format-toolbar .tool-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
         }
     </style>
-</head>
 <body data-theme="light">
+    <script>
+        // Apply theme before DOM paints to prevent flash
+        const savedTheme = localStorage.getItem('clip_canvas_theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <!-- Floating Text Formatting Toolbar -->
+    <div id="text-format-toolbar" class="text-format-toolbar" style="display: none;">
+        <input type="number" id="text-format-size" class="prop-input" value="13" placeholder="px" title="글꼴 크기 (px)">
+        <span class="toolbar-separator"></span>
+        <button id="text-format-bold" class="tool-btn" title="볼드체 토글">B</button>
+    </div>
 
     <!-- Header / Controls -->
     <header>
@@ -724,10 +1002,17 @@
             <button class="tool-btn align-btn" data-align="bottom" data-tooltip="하단 정렬">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="20" y2="20"/><rect width="6" height="12" x="5" y="8" rx="1.5"/><rect width="6" height="16" x="13" y="4" rx="1.5"/></svg>
             </button>
+            <span class="toolbar-separator"></span>
+            <button class="tool-btn merge-btn" id="merge-btn" data-tooltip="선택 요소 병합하기">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+            </button>
         </div>
         <span class="toolbar-separator" id="align-separator" style="display: none;"></span>
 
         <div class="toolbar">
+            <button class="tool-btn" id="paste-btn" data-tooltip="클립보드 이미지 붙여넣기">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            </button>
             <button class="tool-btn" id="theme-toggle" data-tooltip="테마 전환 (다크/라이트)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
             </button>
@@ -746,9 +1031,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </div>
         <h2>클립보드 이미지 보드</h2>
-        <p>복사한 이미지(스크린샷 등)가 있다면 화면을 선택한 뒤 붙여넣어 보세요.</p>
+        <p>복사한 이미지가 있다면 붙여넣기 버튼이나 단축키를 눌러보세요.</p>
         <div class="keyboard-shortcut">
-            <span class="key-badge">Ctrl</span> + <span class="key-badge">V</span>
+            <span class="key-badge">Ctrl + V</span> 또는 상단 <span class="key-badge">📋 붙여넣기</span>
         </div>
     </div>
 
@@ -788,6 +1073,7 @@
         let startPanY = 0;
 
         let maxZIndex = 1;
+        let undoStack = [];
 
         // Toast Helper
         function showToast(message) {
@@ -796,6 +1082,38 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 2500);
+        }
+
+        function pushUndoState() {
+            const stored = localStorage.getItem('clip_canvas_cards');
+            if (undoStack.length > 0 && undoStack[undoStack.length - 1] === stored) {
+                return;
+            }
+            undoStack.push(stored);
+            if (undoStack.length > 30) {
+                undoStack.shift();
+            }
+        }
+
+        function triggerUndo() {
+            if (undoStack.length === 0) {
+                showToast('되돌릴 작업 내역이 없습니다.');
+                return;
+            }
+            const previousState = undoStack.pop();
+            
+            // Clear current cards DOM
+            document.querySelectorAll('.image-wrapper').forEach(el => el.remove());
+            activeElements = [];
+            
+            if (previousState) {
+                localStorage.setItem('clip_canvas_cards', previousState);
+            } else {
+                localStorage.removeItem('clip_canvas_cards');
+            }
+            
+            loadFromLocalStorage();
+            showToast('이전 작업 상태로 되돌렸습니다. (Undo)');
         }
 
         // Check if board is empty (excluding grid background)
@@ -883,6 +1201,7 @@
                         id: data.id,
                         zIndex: data.zIndex,
                         keepRatio: data.keepRatio,
+                        opacity: data.opacity !== undefined ? data.opacity : 100,
                         shouldSave: false
                     });
                 });
@@ -910,13 +1229,22 @@
                 }
             }
             
-            // Raise z-index for all selected items
-            activeElements.forEach(item => {
+            // Raise z-index for all selected items (always place memo cards above image cards)
+            const sortedActive = [...activeElements].sort((a, b) => {
+                const aIsMemo = a.classList.contains('memo-card');
+                const bIsMemo = b.classList.contains('memo-card');
+                if (aIsMemo && !bIsMemo) return 1;
+                if (!aIsMemo && bIsMemo) return -1;
+                return 0;
+            });
+
+            sortedActive.forEach(item => {
                 maxZIndex += 1;
                 item.style.zIndex = maxZIndex;
             });
 
             updateAlignToolbarVisibility();
+            updateIntersectionGuides();
         }
 
         function deselectAll() {
@@ -926,6 +1254,7 @@
             });
             activeElements = [];
             updateAlignToolbarVisibility();
+            updateIntersectionGuides();
             
             // Push memo sticky notes to be always on top of image cards when deselected
             pushMemosToTop();
@@ -962,6 +1291,270 @@
             saveToLocalStorage();
         }
 
+        function checkScrollIndicator(textarea) {
+            if (!textarea) return;
+            const wrapper = textarea.closest('.memo-card');
+            if (!wrapper) return;
+            
+            // Apply a 8px margin buffer to offset padding rendering differences across browsers
+            const hasMore = textarea.scrollHeight > textarea.clientHeight + 8;
+            const isAtBottom = textarea.scrollTop + textarea.clientHeight >= textarea.scrollHeight - 10;
+            
+            if (hasMore && !isAtBottom) {
+                wrapper.classList.add('has-more-content');
+            } else {
+                wrapper.classList.remove('has-more-content');
+            }
+        }
+
+        function updateCardOpacity(wrapper, opacityPercent) {
+            if (!wrapper) return;
+            const alpha = opacityPercent / 100;
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            
+            if (wrapper.classList.contains('memo-card')) {
+                const bgColor = isDark ? `rgba(66, 32, 6, ${alpha})` : `rgba(254, 249, 195, ${alpha})`;
+                wrapper.style.backgroundColor = bgColor;
+                
+                const borderAlpha = Math.min(1, alpha + 0.2);
+                const borderColor = isDark ? `rgba(202, 138, 4, ${borderAlpha})` : `rgba(253, 224, 71, ${borderAlpha})`;
+                wrapper.style.borderColor = borderColor;
+            }
+            wrapper.dataset.opacity = opacityPercent;
+        }
+
+        // Merge selected elements (images and memos) into one single image card
+        function mergeSelectedElements() {
+            if (activeElements.length < 2) return;
+            pushUndoState();
+
+            let minX = Infinity, minY = Infinity;
+            let maxX = -Infinity, maxY = -Infinity;
+
+            activeElements.forEach(el => {
+                const left = parseFloat(el.style.left) || 0;
+                const top = parseFloat(el.style.top) || 0;
+                const width = el.offsetWidth;
+                const height = el.offsetHeight;
+
+                if (left < minX) minX = left;
+                if (top < minY) minY = top;
+                if (left + width > maxX) maxX = left + width;
+                if (top + height > maxY) maxY = top + height;
+            });
+
+            const totalW = maxX - minX;
+            const totalH = maxY - minY;
+
+            if (totalW <= 0 || totalH <= 0) return;
+
+            // Sort elements by z-index to draw bottom layers first
+            const sortedElements = [...activeElements].sort((a, b) => {
+                const zA = parseInt(a.style.zIndex) || 0;
+                const zB = parseInt(b.style.zIndex) || 0;
+                return zA - zB;
+            });
+
+            const canvasEl = document.createElement('canvas');
+            canvasEl.width = totalW;
+            canvasEl.height = totalH;
+            const ctx = canvasEl.getContext('2d');
+
+            const sourcesData = [];
+            const imageElements = sortedElements.filter(el => !el.classList.contains('memo-card'));
+
+            function proceedDrawing() {
+                // Draw everything in order onto the canvas
+                sortedElements.forEach(el => {
+                    const rx = (parseFloat(el.style.left) || 0) - minX;
+                    const ry = (parseFloat(el.style.top) || 0) - minY;
+                    const rw = el.offsetWidth;
+                    const rh = el.offsetHeight;
+
+                    if (!el.classList.contains('memo-card')) {
+                        const imgEl = el.querySelector('img');
+                        if (imgEl) {
+                            ctx.drawImage(imgEl, rx, ry, rw, rh);
+                            sourcesData.push({
+                                type: 'image',
+                                src: imgEl.src,
+                                left: parseFloat(el.style.left) || 0,
+                                top: parseFloat(el.style.top) || 0,
+                                width: rw,
+                                height: rh,
+                                zIndex: parseInt(el.style.zIndex) || 1,
+                                keepRatio: el.dataset.keepRatio === 'true'
+                            });
+                        }
+                    } else {
+                        const memoTextarea = el.querySelector('.memo-textarea');
+                        if (memoTextarea) {
+                            const opacity = el.dataset.opacity !== undefined ? parseInt(el.dataset.opacity) : 100;
+                            const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+                            ctx.save();
+                            // Clip rounded border
+                            const radius = 8;
+                            ctx.beginPath();
+                            ctx.moveTo(rx + radius, ry);
+                            ctx.lineTo(rx + rw - radius, ry);
+                            ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + radius);
+                            ctx.lineTo(rx + rw, ry + rh - radius);
+                            ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - radius, ry + rh);
+                            ctx.lineTo(rx + radius, ry + rh);
+                            ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - radius);
+                            ctx.lineTo(rx, ry + radius);
+                            ctx.quadraticCurveTo(rx, ry, rx + radius, ry);
+                            ctx.closePath();
+
+                            // Fill background
+                            const alpha = opacity / 100;
+                            ctx.fillStyle = isDark ? `rgba(66, 32, 6, ${alpha})` : `rgba(254, 249, 195, ${alpha})`;
+                            ctx.fill();
+
+                            // Stroke border
+                            const borderAlpha = Math.min(1, alpha + 0.2);
+                            ctx.strokeStyle = isDark ? `rgba(202, 138, 4, ${borderAlpha})` : `rgba(253, 224, 71, ${borderAlpha})`;
+                            ctx.lineWidth = 1.5;
+                            ctx.stroke();
+
+                            ctx.clip();
+
+                            // Render text content with multiple fallbacks for robustness
+                            const rawText = memoTextarea.innerText || memoTextarea.textContent || "";
+                            ctx.fillStyle = isDark ? '#fef08a' : '#1e293b';
+                            ctx.font = '500 13px sans-serif';
+                            ctx.textBaseline = 'top';
+
+                            const padding = 10;
+                            const contentX = rx + padding;
+                            let contentY = ry + padding;
+                            const maxTextW = rw - (padding * 2);
+
+                            const lines = rawText.split('\n');
+                            lines.forEach(line => {
+                                let currentLine = '';
+                                for (let char of line) {
+                                    const testLine = currentLine + char;
+                                    const metrics = ctx.measureText(testLine);
+                                    if (metrics.width > maxTextW) {
+                                        ctx.fillText(currentLine, contentX, contentY);
+                                        contentY += 18; // Line height
+                                        currentLine = char;
+                                    } else {
+                                        currentLine = testLine;
+                                    }
+                                }
+                                if (currentLine) {
+                                    ctx.fillText(currentLine, contentX, contentY);
+                                    contentY += 18;
+                                }
+                            });
+
+                            ctx.restore();
+
+                            sourcesData.push({
+                                type: 'memo',
+                                text: memoTextarea.innerHTML,
+                                left: parseFloat(el.style.left) || 0,
+                                top: parseFloat(el.style.top) || 0,
+                                width: rw,
+                                height: rh,
+                                zIndex: parseInt(el.style.zIndex) || 1,
+                                opacity: opacity,
+                                keepRatio: el.dataset.keepRatio === 'true'
+                            });
+                        }
+                    }
+                });
+
+                const base64Img = canvasEl.toDataURL('image/png');
+                
+                // Spawn composite image card
+                createCard({
+                    type: 'image',
+                    src: base64Img,
+                    x: minX,
+                    y: minY,
+                    w: totalW,
+                    h: totalH,
+                    keepRatio: false,
+                    mergedSources: sourcesData,
+                    shouldSave: true
+                });
+
+                // Clear original items
+                sortedElements.forEach(el => el.remove());
+                deselectAll();
+                saveToLocalStorage();
+                showToast('선택한 카드들이 단일 이미지로 병합되었습니다.');
+            }
+
+            // Sync loading process with Promise.all to completely avoid race conditions
+            const imagePromises = imageElements.map(el => {
+                return new Promise((resolve) => {
+                    const imgEl = el.querySelector('img');
+                    if (!imgEl) {
+                        resolve();
+                        return;
+                    }
+                    if (imgEl.complete && imgEl.naturalWidth > 0) {
+                        resolve();
+                    } else {
+                        imgEl.onload = () => resolve();
+                        imgEl.onerror = () => resolve();
+                    }
+                });
+            });
+
+            Promise.all(imagePromises).then(() => {
+                proceedDrawing();
+            });
+        }
+
+        // Unmerge / Split composite image card back to original cards
+        function unmergeCard(compositeCard) {
+            pushUndoState();
+            const storedSources = compositeCard.dataset.mergedSources;
+            if (!storedSources) return;
+
+            try {
+                const sources = JSON.parse(storedSources);
+                if (Array.isArray(sources)) {
+                    sources.forEach(srcData => {
+                        createCard({
+                            type: srcData.type,
+                            src: srcData.src || '',
+                            text: srcData.text || '',
+                            x: srcData.left,
+                            y: srcData.top,
+                            w: srcData.width,
+                            h: srcData.height,
+                            zIndex: srcData.zIndex,
+                            keepRatio: srcData.keepRatio,
+                            opacity: srcData.opacity !== undefined ? srcData.opacity : 100,
+                            shouldSave: false
+                        });
+                    });
+                }
+
+                compositeCard.remove();
+                deselectAll();
+                saveToLocalStorage();
+                showToast('병합이 해제되어 개별 카드로 복구되었습니다.');
+            } catch (err) {
+                console.error('병합 해제 실패:', err);
+                showToast('병합 해제 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Bind Merge Button Event
+        document.getElementById('merge-btn').addEventListener('click', () => {
+            if (activeElements.length >= 2) {
+                mergeSelectedElements();
+            }
+        });
+
         function updateAlignToolbarVisibility() {
             const toolbar = document.getElementById('align-toolbar');
             const separator = document.getElementById('align-separator');
@@ -971,6 +1564,51 @@
             } else {
                 toolbar.style.display = 'none';
                 separator.style.display = 'none';
+            }
+        }
+
+        function updateIntersectionGuides() {
+            document.querySelectorAll('.intersection-guide').forEach(el => el.remove());
+
+            if (activeElements.length < 2) return;
+
+            for (let i = 0; i < activeElements.length; i++) {
+                for (let j = i + 1; j < activeElements.length; j++) {
+                    const elA = activeElements[i];
+                    const elB = activeElements[j];
+
+                    const rA = {
+                        left: parseFloat(elA.style.left) || 0,
+                        top: parseFloat(elA.style.top) || 0,
+                        width: elA.offsetWidth,
+                        height: elA.offsetHeight
+                    };
+                    const rB = {
+                        left: parseFloat(elB.style.left) || 0,
+                        top: parseFloat(elB.style.top) || 0,
+                        width: elB.offsetWidth,
+                        height: elB.offsetHeight
+                    };
+
+                    const xLeft = Math.max(rA.left, rB.left);
+                    const yTop = Math.max(rA.top, rB.top);
+                    const xRight = Math.min(rA.left + rA.width, rB.left + rB.width);
+                    const yBottom = Math.min(rA.top + rA.height, rB.top + rB.height);
+
+                    if (xLeft < xRight && yTop < yBottom) {
+                        const overlapW = xRight - xLeft;
+                        const overlapH = yBottom - yTop;
+
+                        const guide = document.createElement('div');
+                        guide.className = 'intersection-guide';
+                        guide.style.left = `${xLeft}px`;
+                        guide.style.top = `${yTop}px`;
+                        guide.style.width = `${overlapW}px`;
+                        guide.style.height = `${overlapH}px`;
+
+                        board.appendChild(guide);
+                    }
+                }
             }
         }
 
@@ -1100,19 +1738,34 @@
 
         // Keyboard Shortcuts & Navigation
         window.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            const isEditing = active && (
+                active.tagName === 'INPUT' || 
+                active.tagName === 'TEXTAREA' || 
+                active.isContentEditable || 
+                active.closest('[contenteditable="true"]')
+            );
+
             // Space panning
             if (e.code === 'Space') {
                 isSpacePressed = true;
                 if (!isPanning) {
                     document.body.style.cursor = 'grab';
                 }
-                if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if (!isEditing) {
                     e.preventDefault();
                 }
             }
 
+            // Ctrl + Z Undo Shortcut
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                triggerUndo();
+                return;
+            }
+
             // Skip shortcuts when editing values inside input fields
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+            if (isEditing) {
                 return;
             }
 
@@ -1120,6 +1773,7 @@
                 // Delete active elements
                 if (e.code === 'Delete' || e.code === 'Backspace') {
                     e.preventDefault();
+                    pushUndoState();
                     activeElements.forEach(el => el.remove());
                     deselectAll();
                     checkEmptyState();
@@ -1183,7 +1837,11 @@
             }
         });
 
-        // Pan Event binding
+        // Touch & Pan Event binding for Mobile / Touch Devices
+        let touchStartDist = 0;
+        let touchStartZoom = 1;
+        let isTouchPanning = false;
+
         canvas.addEventListener('mousedown', (e) => {
             if (isSpacePressed) {
                 isPanning = true;
@@ -1207,6 +1865,78 @@
                 isPanning = false;
                 document.body.style.cursor = isSpacePressed ? 'grab' : 'default';
                 saveBoardState();
+            }
+        });
+
+        // Touch event handlers for 1-finger / 2-finger canvas interaction
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.image-wrapper') || e.target.closest('.toolbar') || e.target.closest('.align-toolbar') || e.target.closest('#text-format-toolbar')) {
+                return;
+            }
+
+            if (e.touches.length === 1) {
+                isTouchPanning = true;
+                startPanX = e.touches[0].clientX - panX;
+                startPanY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isTouchPanning = true;
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                touchStartDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                touchStartZoom = zoom;
+
+                const midX = (touch1.clientX + touch2.clientX) / 2;
+                const midY = (touch1.clientY + touch2.clientY) / 2;
+                startPanX = midX - panX;
+                startPanY = midY - panY;
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isTouchPanning) return;
+
+            if (e.target.closest('.image-wrapper') && !e.target.closest('.image-wrapper').classList.contains('touch-active')) {
+                return;
+            }
+
+            if (e.touches.length === 1 && isTouchPanning) {
+                panX = e.touches[0].clientX - startPanX;
+                panY = e.touches[0].clientY - startPanY;
+                updateBoardTransform();
+                e.preventDefault();
+            } else if (e.touches.length === 2 && isTouchPanning) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                
+                if (touchStartDist > 0) {
+                    const factor = currentDist / touchStartDist;
+                    let nextZoom = Math.min(Math.max(0.15, touchStartZoom * factor), 6.0);
+                    
+                    const midX = (touch1.clientX + touch2.clientX) / 2;
+                    const midY = (touch1.clientY + touch2.clientY) / 2;
+                    
+                    const boardMidX = (midX - panX) / zoom;
+                    const boardMidY = (midY - panY) / zoom;
+
+                    zoom = nextZoom;
+                    panX = midX - boardMidX * zoom;
+                    panY = midY - boardMidY * zoom;
+
+                    updateBoardTransform();
+                }
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) {
+                isTouchPanning = false;
+                touchStartDist = 0;
+                saveBoardState();
+            } else if (e.touches.length === 1) {
+                startPanX = e.touches[0].clientX - panX;
+                startPanY = e.touches[0].clientY - panY;
             }
         });
 
@@ -1255,9 +1985,13 @@
                 };
 
                 if (isMemo) {
-                    data.text = wrapper.querySelector('.memo-textarea').value;
+                    data.text = wrapper.querySelector('.memo-textarea').innerHTML;
+                    data.opacity = wrapper.dataset.opacity !== undefined ? parseInt(wrapper.dataset.opacity) : 100;
                 } else {
                     data.src = wrapper.querySelector('img').src;
+                    if (wrapper.dataset.mergedSources) {
+                        data.mergedSources = JSON.parse(wrapper.dataset.mergedSources);
+                    }
                 }
 
                 cardsData.push(data);
@@ -1287,6 +2021,7 @@
                         id: data.id,
                         zIndex: data.zIndex,
                         keepRatio: data.keepRatio,
+                        mergedSources: data.mergedSources || null,
                         shouldSave: false
                     });
                 });
@@ -1327,57 +2062,94 @@
             };
         }
 
-        // Paste Event Listener
+        // Helper to process and place image blob on canvas
+        function processImageBlob(blob) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64Url = event.target.result;
+                compressImage(base64Url, function(compressedUrl, origW, origH) {
+                    const maxInitSize = 400;
+                    let w = origW;
+                    let h = origH;
+                    
+                    if (w > maxInitSize || h > maxInitSize) {
+                        if (w > h) {
+                            h = (maxInitSize / w) * h;
+                            w = maxInitSize;
+                        } else {
+                            w = (maxInitSize / h) * w;
+                            h = maxInitSize;
+                        }
+                    }
+
+                    const viewportCenterX = window.innerWidth / 2;
+                    const viewportCenterY = window.innerHeight / 2;
+                    const randomOffset = Math.random() * 40 - 20;
+
+                    const x = (viewportCenterX - panX) / zoom - w / 2 + randomOffset;
+                    const y = (viewportCenterY - panY) / zoom - h / 2 + randomOffset;
+                    
+                    createCard({
+                        type: 'image',
+                        src: compressedUrl,
+                        x: x,
+                        y: y,
+                        w: w,
+                        h: h,
+                        keepRatio: true,
+                        shouldSave: true
+                    });
+                });
+            };
+            reader.readAsDataURL(blob);
+        }
+
+        // Paste Event Listener (Standard Desktop Ctrl+V)
         document.addEventListener('paste', function (e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            
             for (let i = 0; i < items.length; i++) {
                 if (items[i].kind === 'file' && items[i].type.indexOf('image') !== -1) {
                     const blob = items[i].getAsFile();
-                    
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const base64Url = event.target.result;
-                        
-                        compressImage(base64Url, function(compressedUrl, origW, origH) {
-                            const maxInitSize = 400;
-                            let w = origW;
-                            let h = origH;
-                            
-                            if (w > maxInitSize || h > maxInitSize) {
-                                if (w > h) {
-                                    h = (maxInitSize / w) * h;
-                                    w = maxInitSize;
-                                } else {
-                                    w = (maxInitSize / h) * w;
-                                    h = maxInitSize;
-                                }
-                            }
-
-                            const viewportCenterX = window.innerWidth / 2;
-                            const viewportCenterY = window.innerHeight / 2;
-                            const randomOffset = Math.random() * 40 - 20;
-
-                            const x = (viewportCenterX - panX) / zoom - w / 2 + randomOffset;
-                            const y = (viewportCenterY - panY) / zoom - h / 2 + randomOffset;
-                            
-                            createCard({
-                                type: 'image',
-                                src: compressedUrl,
-                                x: x,
-                                y: y,
-                                w: w,
-                                h: h,
-                                keepRatio: true,
-                                shouldSave: true
-                            });
-                        });
-                    };
-                    reader.readAsDataURL(blob);
+                    processImageBlob(blob);
                     break;
                 }
             }
         });
+
+        // Mobile / Button Async Clipboard Reader Helper
+        async function pasteFromAsyncClipboard() {
+            if (navigator.clipboard && navigator.clipboard.read) {
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    let imageFound = false;
+                    for (const item of clipboardItems) {
+                        const imageType = item.types.find(t => t.startsWith('image/'));
+                        if (imageType) {
+                            const blob = await item.getType(imageType);
+                            processImageBlob(blob);
+                            imageFound = true;
+                            break;
+                        }
+                    }
+                    if (!imageFound) {
+                        showToast('클립보드에 복사된 이미지가 없습니다.');
+                    }
+                } catch (err) {
+                    console.warn('Async clipboard read failed, fallbacking:', err);
+                    showToast('클립보드 권한 승인이 필요하거나 복사된 이미지가 없습니다.');
+                }
+            } else {
+                showToast('이 브라우저는 클립보드 직접 읽기를 지원하지 않습니다. Ctrl+V를 사용해주세요.');
+            }
+        }
+
+        // Bind Paste Button Click Event
+        const pasteBtn = document.getElementById('paste-btn');
+        if (pasteBtn) {
+            pasteBtn.addEventListener('click', () => {
+                pasteFromAsyncClipboard();
+            });
+        }
 
         // Unified Card Creator (Unified Image and Memo 스티커)
         function createCard(config) {
@@ -1392,8 +2164,12 @@
                 id = null,
                 zIndex = null,
                 keepRatio = false,
+                opacity = 100,
+                mergedSources = null,
                 shouldSave = true
             } = config;
+
+            if (shouldSave) pushUndoState();
 
             const wrapper = document.createElement('div');
             wrapper.className = `image-wrapper ${type === 'memo' ? 'memo-card' : ''}`;
@@ -1419,18 +2195,108 @@
             let textarea = null;
 
             if (type === 'memo') {
-                textarea = document.createElement('textarea');
+                textarea = document.createElement('div');
                 textarea.className = 'memo-textarea';
-                textarea.placeholder = '메모를 입력하세요...';
-                textarea.value = text;
-                textarea.addEventListener('input', () => {
+                textarea.contentEditable = 'false';
+                textarea.setAttribute('data-placeholder', '메모를 입력하세요...');
+                textarea.innerHTML = text;
+                
+                // Scroll Indicator Badge
+                const scrollIndicator = document.createElement('div');
+                scrollIndicator.className = 'scroll-indicator';
+                scrollIndicator.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+                wrapper.appendChild(scrollIndicator);
+
+                // Double click to enter edit mode
+                textarea.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    textarea.contentEditable = 'true';
+                    textarea.focus();
+                });
+
+                // Blur to exit edit mode
+                textarea.addEventListener('blur', () => {
+                    textarea.contentEditable = 'false';
                     saveToLocalStorage();
                 });
+
+                textarea.addEventListener('input', () => {
+                    saveToLocalStorage();
+                    checkScrollIndicator(textarea);
+                });
+
+                textarea.addEventListener('scroll', () => {
+                    checkScrollIndicator(textarea);
+                });
+
+                // Focus formatting size input on drag complete
+                textarea.addEventListener('mouseup', () => {
+                    setTimeout(() => {
+                        const selection = window.getSelection();
+                        if (!selection.isCollapsed && selection.rangeCount > 0 && textarea.contentEditable === 'true') {
+                            const sizeInput = document.getElementById('text-format-size');
+                            if (sizeInput) {
+                                sizeInput.focus();
+                                sizeInput.select();
+                            }
+                        }
+                    }, 80);
+                });
+
+                setTimeout(() => {
+                    checkScrollIndicator(textarea);
+                }, 100);
+
+                // Opacity Slider (Memo only)
+                const cardOpacity = opacity !== undefined ? opacity : 100;
+                updateCardOpacity(wrapper, cardOpacity);
+                
+                const opacityContainer = document.createElement('div');
+                opacityContainer.className = 'opacity-container';
+                opacityContainer.innerHTML = `
+                    <button class="opacity-btn" title="배경 투명도 조절">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20Z"/></svg>
+                    </button>
+                    <div class="opacity-slider-pop">
+                        <input type="range" min="0" max="100" class="opacity-slider-input" value="${cardOpacity}">
+                        <span class="opacity-val">${cardOpacity}%</span>
+                    </div>
+                `;
+                
+                const sliderInput = opacityContainer.querySelector('.opacity-slider-input');
+                const valDisplay = opacityContainer.querySelector('.opacity-val');
+                
+                opacityContainer.addEventListener('mousedown', (e) => e.stopPropagation());
+                
+                sliderInput.addEventListener('input', (e) => {
+                    const val = parseInt(e.target.value);
+                    valDisplay.textContent = `${val}%`;
+                    updateCardOpacity(wrapper, val);
+                    saveToLocalStorage();
+                });
+                
+                wrapper.appendChild(opacityContainer);
                 wrapper.appendChild(textarea);
             } else {
                 img = document.createElement('img');
                 img.src = src;
                 wrapper.appendChild(img);
+
+                if (mergedSources) {
+                    wrapper.dataset.mergedSources = typeof mergedSources === 'string' ? mergedSources : JSON.stringify(mergedSources);
+                    
+                    const unmergeBtn = document.createElement('button');
+                    unmergeBtn.className = 'unmerge-btn';
+                    unmergeBtn.title = '병합 해제 (개별 카드로 분리)';
+                    unmergeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9.8" y1="8.2" x2="21" y2="12.4"/><line x1="9.8" y1="15.8" x2="21" y2="11.6"/></svg>';
+                    
+                    unmergeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+                    unmergeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        unmergeCard(wrapper);
+                    });
+                    wrapper.appendChild(unmergeBtn);
+                }
             }
 
             // Size Badge (Image only)
@@ -1443,7 +2309,6 @@
             }
 
             // Property Panel UI (Image only)
-            let propPanel = null;
             if (type === 'image') {
                 propPanel = document.createElement('div');
                 propPanel.className = 'property-panel';
@@ -1462,6 +2327,7 @@
                         <span class="prop-label">H</span>
                         <input type="number" class="prop-input prop-h" value="${Math.round(h)}">
                     </div>
+                    <button class="prop-apply-btn" title="사이즈 반영">확인</button>
                 `;
                 wrapper.appendChild(propPanel);
 
@@ -1526,6 +2392,7 @@
             deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                pushUndoState();
                 wrapper.remove();
                 
                 const idx = activeElements.indexOf(wrapper);
@@ -1554,6 +2421,7 @@
                 const hInput = propPanel.querySelector('.prop-h');
                 const lockBtn = propPanel.querySelector('.prop-lock-btn');
                 const resetBtn = propPanel.querySelector('.prop-reset-btn');
+                const applyBtn = propPanel.querySelector('.prop-apply-btn');
 
                 lockBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1585,37 +2453,43 @@
                     }
                 });
 
-                wInput.addEventListener('input', (e) => {
-                    let val = parseFloat(e.target.value) || 0;
-                    val = Math.max(10, val);
-                    wrapper.style.width = `${val}px`;
+                function applySizeFromInputs() {
+                    let newW = parseFloat(wInput.value) || 0;
+                    let newH = parseFloat(hInput.value) || 0;
+                    newW = Math.max(10, newW);
+                    newH = Math.max(10, newH);
+
+                    wrapper.style.width = `${newW}px`;
+                    wrapper.style.height = `${newH}px`;
+
+                    wInput.value = Math.round(newW);
+                    hInput.value = Math.round(newH);
+                    sizeBadge.textContent = `${Math.round(newW)} × ${Math.round(newH)}px`;
+
                     if (wrapper.dataset.keepRatio === 'true') {
-                        const linkedH = val / aspectRatio;
-                        wrapper.style.height = `${linkedH}px`;
-                        hInput.value = Math.round(linkedH);
+                        wrapper.dataset.aspectRatio = newW / newH;
                     }
-                    const curW = parseFloat(wrapper.style.width);
-                    const curH = parseFloat(wrapper.style.height);
-                    sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
+
                     saveToLocalStorage();
+                    showToast('사이즈가 반영되었습니다.');
+                }
+
+                applyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applySizeFromInputs();
                 });
 
-                hInput.addEventListener('input', (e) => {
-                    let val = parseFloat(e.target.value) || 0;
-                    val = Math.max(10, val);
-                    wrapper.style.height = `${val}px`;
-                    if (wrapper.dataset.keepRatio === 'true') {
-                        const linkedW = val * aspectRatio;
-                        wrapper.style.width = `${linkedW}px`;
-                        wInput.value = Math.round(linkedW);
-                    }
-                    const curW = parseFloat(wrapper.style.width);
-                    const curH = parseFloat(wrapper.style.height);
-                    sizeBadge.textContent = `${Math.round(curW)} × ${Math.round(curH)}px`;
-                    saveToLocalStorage();
+                [wInput, hInput].forEach(input => {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            applySizeFromInputs();
+                        }
+                    });
                 });
 
                 propPanel.addEventListener('mousedown', (e) => e.stopPropagation());
+                propPanel.addEventListener('touchstart', (e) => e.stopPropagation());
             }
 
             // Setup Drag & Drop
@@ -1638,14 +2512,18 @@
             }
         }
 
-        // Drag Handler (Vanilla JS)
+        // Drag Handler (Vanilla JS with Mobile Long-Press Support)
         function setupDrag(element) {
             let startX, startY, initialX, initialY;
             let isDragging = false;
+            let touchTimer = null;
+            let isTouchActive = false;
 
             element.addEventListener('mousedown', (e) => {
                 if (isSpacePressed) return;
-                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || e.target.classList.contains('memo-textarea')) return;
+                
+                const isEditingMemo = e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true';
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || isEditingMemo) return;
                 
                 isDragging = true;
                 startX = e.clientX;
@@ -1664,16 +2542,87 @@
                 
                 element.style.left = `${initialX + dx}px`;
                 element.style.top = `${initialY + dy}px`;
+                updateIntersectionGuides();
             }
 
             function onMouseUp() {
                 if (isDragging) {
+                    pushUndoState();
                     isDragging = false;
                     saveToLocalStorage();
                 }
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             }
+
+            // Mobile Touch Long-Press Drag Logic
+            element.addEventListener('touchstart', (e) => {
+                const isEditingMemo = e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true';
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || isEditingMemo) return;
+
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    initialX = parseFloat(element.style.left) || 0;
+                    initialY = parseFloat(element.style.top) || 0;
+
+                    // Provide visual ready cue on long press
+                    element.classList.add('touch-ready');
+
+                    touchTimer = setTimeout(() => {
+                        isTouchActive = true;
+                        isDragging = true;
+                        element.classList.remove('touch-ready');
+                        element.classList.add('touch-active');
+                        selectElement(element);
+                        showToast('이동 모드가 활성화되었습니다.');
+                    }, 400); // 400ms long-press
+                }
+            }, { passive: true });
+
+            element.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 1) {
+                    clearTimeout(touchTimer);
+                    element.classList.remove('touch-ready');
+                    return;
+                }
+
+                const touch = e.touches[0];
+                const moveDist = Math.hypot(touch.clientX - startX, touch.clientY - startY);
+
+                // If user moves before long-press activates, cancel long press so canvas can pan naturally
+                if (!isTouchActive && moveDist > 8) {
+                    clearTimeout(touchTimer);
+                    element.classList.remove('touch-ready');
+                    return;
+                }
+
+                if (isTouchActive && isDragging) {
+                    e.preventDefault(); // Prevent page/canvas scroll while dragging element
+                    const dx = (touch.clientX - startX) / zoom;
+                    const dy = (touch.clientY - startY) / zoom;
+
+                    element.style.left = `${initialX + dx}px`;
+                    element.style.top = `${initialY + dy}px`;
+                    updateIntersectionGuides();
+                }
+            }, { passive: false });
+
+            const cancelTouchDrag = () => {
+                clearTimeout(touchTimer);
+                element.classList.remove('touch-ready');
+                if (isTouchActive) {
+                    isTouchActive = false;
+                    isDragging = false;
+                    element.classList.remove('touch-active');
+                    pushUndoState();
+                    saveToLocalStorage();
+                }
+            };
+
+            element.addEventListener('touchend', cancelTouchDrag);
+            element.addEventListener('touchcancel', cancelTouchDrag);
         }
 
         // Resize Handler (Vanilla JS)
@@ -1702,6 +2651,39 @@
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
             });
+
+            handle.addEventListener('touchstart', (e) => {
+                if (e.touches.length !== 1) return;
+                e.stopPropagation();
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                isResizing = true;
+                element.classList.add('resizing');
+                startX = touch.clientX;
+                startY = touch.clientY;
+                initialW = element.offsetWidth;
+                initialH = element.offsetHeight;
+                initialX = parseFloat(element.style.left) || 0;
+                initialY = parseFloat(element.style.top) || 0;
+
+                const onTouchMove = (evt) => {
+                    if (!isResizing || evt.touches.length !== 1) return;
+                    evt.preventDefault();
+                    onMouseMove(evt.touches[0]);
+                };
+
+                const onTouchEnd = () => {
+                    onMouseUp();
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                    document.removeEventListener('touchcancel', onTouchEnd);
+                };
+
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+                document.addEventListener('touchcancel', onTouchEnd);
+            }, { passive: false });
 
             function onMouseMove(e) {
                 if (!isResizing) return;
@@ -1768,11 +2750,18 @@
 
                 if (wInput) wInput.value = Math.round(nextW);
                 if (hInput) hInput.value = Math.round(nextH);
+
+                const memoText = element.querySelector('.memo-textarea');
+                if (memoText) {
+                    checkScrollIndicator(memoText);
+                }
+                updateIntersectionGuides();
             }
 
             // End Resize
             function onMouseUp() {
                 if (isResizing) {
+                    pushUndoState();
                     isResizing = false;
                     element.classList.remove('resizing');
                     saveToLocalStorage();
@@ -1787,14 +2776,26 @@
             const currentTheme = document.body.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('clip_canvas_theme', newTheme);
             
-            if (newTheme === 'dark') {
+            updateThemeIcon(newTheme);
+            
+            // Re-render all memo card backgrounds to blend with the new theme colors
+            document.querySelectorAll('.image-wrapper.memo-card').forEach(card => {
+                const op = card.dataset.opacity !== undefined ? parseInt(card.dataset.opacity) : 100;
+                updateCardOpacity(card, op);
+            });
+
+            showToast(`${newTheme === 'dark' ? '다크' : '라이트'} 모드로 전환되었습니다.`);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
                 themeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
             } else {
                 themeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
             }
-            showToast(`${newTheme === 'dark' ? '다크' : '라이트'} 모드로 전환되었습니다.`);
-        });
+        }
 
         // Grid Toggle
         gridToggle.addEventListener('click', () => {
@@ -1823,8 +2824,165 @@
             }
         });
 
+        // Floating Text Format Toolbar Logic
+        const textFormatToolbar = document.getElementById('text-format-toolbar');
+        const textFormatSize = document.getElementById('text-format-size');
+        const textFormatBold = document.getElementById('text-format-bold');
+        let savedRange = null;
+        let isFormatting = false;
+
+        document.addEventListener('selectionchange', () => {
+            // Guard: Do not hide or reset if currently modifying format or focused inside input
+            if (isFormatting || (document.activeElement && document.activeElement.closest('#text-format-toolbar'))) {
+                return;
+            }
+
+            const selection = window.getSelection();
+            if (selection.isCollapsed || selection.rangeCount === 0) {
+                textFormatToolbar.style.display = 'none';
+                savedRange = null;
+                return;
+            }
+
+            const range = selection.getRangeAt(0);
+            let container = range.commonAncestorContainer;
+            if (container.nodeType === Node.TEXT_NODE) {
+                container = container.parentNode;
+            }
+
+            const memoTextarea = container.closest('.memo-textarea');
+            if (memoTextarea) {
+                savedRange = range.cloneRange(); // Backup the active text range
+                
+                const rect = range.getBoundingClientRect();
+                textFormatToolbar.style.display = 'flex';
+                
+                const toolbarW = textFormatToolbar.offsetWidth || 120;
+                const toolbarH = textFormatToolbar.offsetHeight || 34;
+                
+                let targetLeft = rect.left + window.scrollX + (rect.width / 2) - (toolbarW / 2);
+                let targetTop = rect.top + window.scrollY - toolbarH - 10;
+                
+                // Fallback position if selection bounding box is collapsed to 0
+                if (rect.width === 0 || rect.height === 0) {
+                    const memoRect = memoTextarea.getBoundingClientRect();
+                    targetLeft = memoRect.left + window.scrollX + (memoRect.width / 2) - (toolbarW / 2);
+                    targetTop = memoRect.top + window.scrollY - toolbarH - 10;
+                }
+                
+                textFormatToolbar.style.left = `${targetLeft}px`;
+                textFormatToolbar.style.top = `${targetTop}px`;
+                
+                // Track font size of selection node if present
+                let currentSize = '13';
+                let checkEl = container;
+                while (checkEl && checkEl !== memoTextarea) {
+                    if (checkEl.style && checkEl.style.fontSize) {
+                        currentSize = checkEl.style.fontSize.replace('px', '');
+                        break;
+                    }
+                    checkEl = checkEl.parentNode;
+                }
+                textFormatSize.value = currentSize;
+            } else {
+                textFormatToolbar.style.display = 'none';
+                savedRange = null;
+            }
+        });
+
+        // Apply style to selection helper with savedRange restoration and focus memory
+        function applyStyleToSelection(styleName, styleValue) {
+            isFormatting = true; // Lock selection change actions
+            const activeInput = document.activeElement;
+            
+            const selection = window.getSelection();
+            const range = savedRange ? savedRange.cloneRange() : (selection.rangeCount > 0 ? selection.getRangeAt(0) : null);
+            if (!range) {
+                isFormatting = false;
+                return;
+            }
+
+            // Restore selection to perform style replacement safely
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            const span = document.createElement('span');
+            span.style[styleName] = styleValue;
+
+            try {
+                const fragment = range.extractContents();
+                span.appendChild(fragment);
+                range.insertNode(span);
+                
+                // Keep the newly styled node selected and update backup
+                const newRange = document.createRange();
+                newRange.selectNodeContents(span);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+                savedRange = newRange.cloneRange();
+            } catch (err) {
+                console.error('서식 적용 오류:', err);
+            }
+
+            // Restore focus back to the input element asynchronously and place cursor at the end
+            if (activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName === 'TEXTAREA')) {
+                setTimeout(() => {
+                    activeInput.focus();
+                    const temp = activeInput.value;
+                    activeInput.value = '';
+                    activeInput.value = temp;
+                }, 10);
+            }
+            saveToLocalStorage();
+        }
+
+        // Keep isFormatting active during focus & modification, with 150ms buffer on blur
+        textFormatSize.addEventListener('focus', () => { 
+            isFormatting = true; 
+        });
+        textFormatSize.addEventListener('blur', () => { 
+            setTimeout(() => {
+                if (document.activeElement !== textFormatSize && !document.activeElement.closest('#text-format-toolbar')) {
+                    isFormatting = false;
+                }
+            }, 150);
+        });
+
+        // Bold button trigger
+        textFormatBold.addEventListener('mousedown', (e) => {
+            e.preventDefault(); 
+            if (savedRange) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedRange);
+            }
+            document.execCommand('bold', false, null);
+            
+            // Re-capture updated selection range
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                savedRange = selection.getRangeAt(0).cloneRange();
+            }
+            saveToLocalStorage();
+        });
+
+        // Size input trigger
+        textFormatSize.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (val && val > 0) {
+                applyStyleToSelection('fontSize', `${val}px`);
+            }
+        });
+
+        // Keep toolbar open
+        textFormatToolbar.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+        });
+
         // Initialize and Load states
         window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('clip_canvas_theme') || 'light';
+            updateThemeIcon(savedTheme);
             loadBoardState();
             loadFromLocalStorage();
 
