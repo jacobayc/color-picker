@@ -1,4 +1,4 @@
-const CACHE_NAME = 'el-clip-canvas-cache-v1';
+const CACHE_NAME = 'el-clip-canvas-cache-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -30,22 +30,23 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch Event - Cache First, Fallback to Network
+// Fetch Event - Network First, Fallback to Cache (Ensures deployment updates are immediately visible)
 self.addEventListener('fetch', (e) => {
-  // Only handle GET requests for caching
   if (e.request.method !== 'GET') return;
 
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(e.request).then((networkResponse) => {
-        // Cache new dynamically requested assets if needed
+    fetch(e.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseClone);
+          });
+        }
         return networkResponse;
-      }).catch(() => {
-        // Fallback or offline page
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(e.request);
+      })
   );
 });
