@@ -704,11 +704,18 @@
             border: 1.5px solid #fde047;
             padding: 0;
             overflow: visible;
+            cursor: move;
         }
         
         [data-theme="dark"] .image-wrapper.memo-card {
             background: #422006;
             border: 1.5px solid #ca8a04;
+        }
+
+        .image-wrapper.memo-card.editing {
+            cursor: default;
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
         }
 
         .memo-textarea {
@@ -726,10 +733,16 @@
             border-radius: 6px;
             overflow-y: auto;
             word-break: break-all;
+            user-select: none;
+            cursor: inherit;
             
             /* Hide scrollbar */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none;  /* IE and Edge */
+        }
+        .memo-textarea.is-editing {
+            user-select: text;
+            cursor: text;
         }
         .memo-textarea::-webkit-scrollbar {
             display: none; /* Chrome, Safari, Opera */
@@ -833,25 +846,26 @@
             box-shadow: 0 0 10px rgba(14, 165, 233, 0.6);
             transform: translateX(-50%) scale(1.08);
         }
-        /* Floating Text Format Toolbar (Dynamic Responsive clamp()) */
+        /* Docked / Floating Text Format Toolbar (Dynamic Responsive clamp()) */
         .text-format-toolbar {
             position: absolute;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border-radius: clamp(6px, 1.5vw, 10px);
-            padding: clamp(3px, 0.8vw, 6px) clamp(6px, 1.5vw, 12px);
+            padding: clamp(3px, 0.8vw, 6px) clamp(6px, 1.2vw, 10px);
             display: flex;
             align-items: center;
             gap: clamp(4px, 1vw, 8px);
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
             z-index: 100005;
             pointer-events: auto;
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
         }
         .text-format-toolbar .prop-input {
-            width: clamp(44px, 7vw, 60px);
+            width: clamp(40px, 6vw, 54px);
             height: clamp(22px, 3.5vw, 28px);
             font-size: clamp(10px, 1.3vw, 13px);
             padding: 2px 4px;
@@ -860,8 +874,8 @@
             width: clamp(22px, 3.5vw, 28px);
             height: clamp(22px, 3.5vw, 28px);
             padding: 0;
-            font-size: clamp(11px, 1.4vw, 14px);
-            font-weight: 800;
+            font-size: clamp(11px, 1.4vw, 13px);
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -875,18 +889,63 @@
         .text-format-toolbar .tool-btn:hover {
             background: rgba(0, 0, 0, 0.1);
         }
+        .text-format-toolbar .font-preset-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .text-format-toolbar .font-preset-btn {
+            padding: 0 6px;
+            height: clamp(22px, 3.5vw, 28px);
+            font-size: clamp(10px, 1.2vw, 12px);
+            font-weight: 600;
+            border-radius: clamp(3px, 0.8vw, 6px);
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .text-format-toolbar .font-preset-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--accent-color);
+        }
+        .text-format-toolbar .color-palette {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .text-format-toolbar .color-swatch {
+            width: clamp(14px, 2.2vw, 18px);
+            height: clamp(14px, 2.2vw, 18px);
+            border-radius: 50%;
+            border: 1.5px solid rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            padding: 0;
+            outline: none;
+        }
+        .text-format-toolbar .color-swatch:hover {
+            transform: scale(1.25);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        }
         .text-format-toolbar .color-picker-wrapper {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: clamp(22px, 3.5vw, 28px);
-            height: clamp(22px, 3.5vw, 28px);
-            border-radius: clamp(3px, 0.8vw, 6px);
-            border: 1px solid var(--border-color);
+            width: clamp(20px, 3vw, 24px);
+            height: clamp(20px, 3vw, 24px);
+            border-radius: 50%;
+            border: 1px dashed var(--border-color);
             cursor: pointer;
             overflow: hidden;
             background: rgba(0, 0, 0, 0.05);
+            transition: all 0.15s ease;
+        }
+        .text-format-toolbar .color-picker-wrapper:hover {
+            border-style: solid;
+            border-color: var(--accent-color);
         }
         .text-format-toolbar .color-picker-preview {
             width: 100%;
@@ -894,8 +953,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(10px, 1.3vw, 13px);
-            font-weight: 700;
+            font-size: clamp(9px, 1.2vw, 11px);
+            font-weight: 800;
             color: #1e293b;
             pointer-events: none;
         }
@@ -911,10 +970,12 @@
             padding: 0;
         }
         [data-theme="dark"] .text-format-toolbar .tool-btn,
+        [data-theme="dark"] .text-format-toolbar .font-preset-btn,
         [data-theme="dark"] .text-format-toolbar .color-picker-wrapper {
             background: rgba(255, 255, 255, 0.05);
         }
-        [data-theme="dark"] .text-format-toolbar .tool-btn:hover {
+        [data-theme="dark"] .text-format-toolbar .tool-btn:hover,
+        [data-theme="dark"] .text-format-toolbar .font-preset-btn:hover {
             background: rgba(255, 255, 255, 0.1);
         }
         /* Floating Minimap Radar & Navigation Controls */
@@ -1027,14 +1088,31 @@
         document.body.setAttribute('data-theme', savedTheme);
     </script>
 
-    <!-- Floating Text Formatting Toolbar -->
+    <!-- Docked / Floating Text Formatting Toolbar -->
     <div id="text-format-toolbar" class="text-format-toolbar" style="display: none;">
+        <button id="text-format-decrease" class="tool-btn" title="글꼴 작게 (A-)">A-</button>
         <input type="number" id="text-format-size" class="prop-input" value="13" placeholder="px" title="글꼴 크기 (px)">
+        <button id="text-format-increase" class="tool-btn" title="글꼴 크게 (A+)">A+</button>
+        <div class="font-preset-group">
+            <button class="font-preset-btn" data-size="12" title="작게 (12px)">12</button>
+            <button class="font-preset-btn" data-size="16" title="보통 (16px)">16</button>
+            <button class="font-preset-btn" data-size="24" title="크게 (24px)">24</button>
+            <button class="font-preset-btn" data-size="32" title="제목 (32px)">32</button>
+        </div>
         <span class="toolbar-separator"></span>
         <button id="text-format-bold" class="tool-btn" title="볼드체 토글">B</button>
         <span class="toolbar-separator"></span>
-        <div class="color-picker-wrapper" title="텍스트 색상 변경">
-            <div id="text-format-color-preview" class="color-picker-preview" style="color: #1e293b;">A</div>
+        <div class="color-palette">
+            <button class="color-swatch" data-color="#1e293b" style="background: #1e293b;" title="기본 다크"></button>
+            <button class="color-swatch" data-color="#64748b" style="background: #64748b;" title="슬레이트 그레이"></button>
+            <button class="color-swatch" data-color="#ef4444" style="background: #ef4444;" title="레드"></button>
+            <button class="color-swatch" data-color="#3b82f6" style="background: #3b82f6;" title="블루"></button>
+            <button class="color-swatch" data-color="#10b981" style="background: #10b981;" title="그린"></button>
+            <button class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;" title="오렌지"></button>
+            <button class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6;" title="퍼플"></button>
+        </div>
+        <div class="color-picker-wrapper" title="사용자 정의 색상 선택">
+            <div id="text-format-color-preview" class="color-picker-preview" style="color: #1e293b;">🎨</div>
             <input type="color" id="text-format-color" class="color-picker-input" value="#1e293b">
         </div>
     </div>
@@ -1735,6 +1813,16 @@
                 el.classList.remove('active');
                 el.classList.remove('show-properties');
             });
+            document.querySelectorAll('.image-wrapper.memo-card.editing').forEach(el => {
+                el.classList.remove('editing');
+            });
+            document.querySelectorAll('.memo-textarea.is-editing').forEach(area => {
+                area.classList.remove('is-editing');
+                area.contentEditable = 'false';
+            });
+            if (typeof textFormatToolbar !== 'undefined' && textFormatToolbar) {
+                textFormatToolbar.style.display = 'none';
+            }
             activeElements = [];
             updateAlignToolbarVisibility();
             updateIntersectionGuides();
@@ -2308,7 +2396,7 @@
                 const x = (viewportX - panX) / zoom - 100;
                 const y = (viewportY - panY) / zoom - 75;
                 
-                createCard({
+                const card = createCard({
                     type: 'memo',
                     text: '',
                     x: x,
@@ -2317,6 +2405,15 @@
                     h: 150,
                     keepRatio: false
                 });
+
+                if (card) {
+                    const area = card.querySelector('.memo-textarea');
+                    if (area) {
+                        setTimeout(() => {
+                            area.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+                        }, 50);
+                    }
+                }
             }
         });
 
@@ -2602,40 +2699,79 @@
                 scrollIndicator.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
                 wrapper.appendChild(scrollIndicator);
 
-                // Double click to enter edit mode
+                // Double click to enter edit mode & select all text
                 textarea.addEventListener('dblclick', (e) => {
                     e.stopPropagation();
-                    textarea.contentEditable = 'true';
-                    textarea.focus();
+                    enterMemoEditMode(wrapper, textarea, true);
                 });
+
+                // Enter edit mode function
+                function enterMemoEditMode(cardWrapper, area, selectAll = false) {
+                    cardWrapper.classList.add('editing');
+                    area.classList.add('is-editing');
+                    area.contentEditable = 'true';
+                    area.focus();
+
+                    if (selectAll) {
+                        const sel = window.getSelection();
+                        const r = document.createRange();
+                        r.selectNodeContents(area);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        savedRange = r.cloneRange();
+                    }
+                    positionTextFormatToolbar();
+                }
 
                 // Blur to exit edit mode
                 textarea.addEventListener('blur', () => {
-                    textarea.contentEditable = 'false';
+                    setTimeout(() => {
+                        // Check if focus moved to format toolbar
+                        if (document.activeElement && document.activeElement.closest('#text-format-toolbar')) {
+                            return;
+                        }
+                        exitMemoEditMode(wrapper, textarea);
+                    }, 120);
+                });
+
+                function exitMemoEditMode(cardWrapper, area) {
+                    cardWrapper.classList.remove('editing');
+                    area.classList.remove('is-editing');
+                    area.contentEditable = 'false';
                     saveToLocalStorage();
+                    if (!document.querySelector('.memo-textarea.is-editing')) {
+                        textFormatToolbar.style.display = 'none';
+                        savedRange = null;
+                    }
+                }
+
+                // Keyboard handling while editing (Escape to finish editing)
+                textarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        exitMemoEditMode(wrapper, textarea);
+                        textarea.blur();
+                    }
                 });
 
                 textarea.addEventListener('input', () => {
                     saveToLocalStorage();
                     checkScrollIndicator(textarea);
+                    positionTextFormatToolbar();
                 });
 
                 textarea.addEventListener('scroll', () => {
                     checkScrollIndicator(textarea);
                 });
 
-                // Focus formatting size input on drag complete
                 textarea.addEventListener('mouseup', () => {
-                    setTimeout(() => {
-                        const selection = window.getSelection();
-                        if (!selection.isCollapsed && selection.rangeCount > 0 && textarea.contentEditable === 'true') {
-                            const sizeInput = document.getElementById('text-format-size');
-                            if (sizeInput) {
-                                sizeInput.focus();
-                                sizeInput.select();
-                            }
+                    if (textarea.contentEditable === 'true') {
+                        const sel = window.getSelection();
+                        if (sel.rangeCount > 0) {
+                            savedRange = sel.getRangeAt(0).cloneRange();
                         }
-                    }, 80);
+                        positionTextFormatToolbar();
+                    }
                 });
 
                 setTimeout(() => {
@@ -2947,6 +3083,8 @@
                 saveToLocalStorage();
                 showToast(`${type === 'memo' ? '메모' : '이미지'}가 추가되었습니다.`);
             }
+
+            return wrapper;
         }
 
         // Drag Handler (Vanilla JS with Mobile Long-Press Support)
@@ -2959,7 +3097,9 @@
             element.addEventListener('mousedown', (e) => {
                 if (isSpacePressed) return;
                 
-                const isEditingMemo = e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true';
+                const isEditingMemo = element.classList.contains('editing') || 
+                                     (e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true') ||
+                                     e.target.closest('.memo-textarea.is-editing');
                 if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || isEditingMemo) return;
                 
                 isDragging = true;
@@ -3301,9 +3441,11 @@
             }
         });
 
-        // Floating Text Format Toolbar Logic
+        // Floating / Docked Text Format Toolbar Logic
         const textFormatToolbar = document.getElementById('text-format-toolbar');
         const textFormatSize = document.getElementById('text-format-size');
+        const textFormatDecrease = document.getElementById('text-format-decrease');
+        const textFormatIncrease = document.getElementById('text-format-increase');
         const textFormatBold = document.getElementById('text-format-bold');
         const textFormatColor = document.getElementById('text-format-color');
         const textFormatColorPreview = document.getElementById('text-format-color-preview');
@@ -3319,16 +3461,72 @@
             return '#' + ((1 << 24) + (parseInt(match[0]) << 16) + (parseInt(match[1]) << 8) + parseInt(match[2])).toString(16).slice(1);
         }
 
+        // Position toolbar docked above the currently editing or selected memo card
+        function positionTextFormatToolbar() {
+            const activeEditingArea = document.querySelector('.memo-textarea.is-editing');
+            if (!activeEditingArea) return;
+
+            const card = activeEditingArea.closest('.memo-card');
+            if (!card) return;
+
+            const cardRect = card.getBoundingClientRect();
+            textFormatToolbar.style.display = 'flex';
+
+            const toolbarW = textFormatToolbar.offsetWidth || 340;
+            const toolbarH = textFormatToolbar.offsetHeight || 38;
+
+            let targetLeft = cardRect.left + window.scrollX + (cardRect.width / 2) - (toolbarW / 2);
+            let targetTop = cardRect.top + window.scrollY - toolbarH - 12;
+
+            // Prevent toolbar from rendering above screen top
+            if (targetTop < window.scrollY + 10) {
+                targetTop = cardRect.bottom + window.scrollY + 12; // dock below if no top space
+            }
+            if (targetLeft < window.scrollX + 10) {
+                targetLeft = window.scrollX + 10;
+            }
+
+            textFormatToolbar.style.left = `${targetLeft}px`;
+            textFormatToolbar.style.top = `${targetTop}px`;
+
+            // Detect current size and color
+            let currentSize = '13';
+            let currentColor = '#1e293b';
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                let container = range.commonAncestorContainer;
+                if (container.nodeType === Node.TEXT_NODE) container = container.parentNode;
+                let checkEl = container;
+                while (checkEl && checkEl !== activeEditingArea) {
+                    if (checkEl.style) {
+                        if (checkEl.style.fontSize && currentSize === '13') {
+                            currentSize = checkEl.style.fontSize.replace('px', '');
+                        }
+                        if (checkEl.style.color && currentColor === '#1e293b') {
+                            currentColor = rgbToHex(checkEl.style.color);
+                        }
+                    }
+                    checkEl = checkEl.parentNode;
+                }
+            }
+            if (textFormatSize) textFormatSize.value = currentSize;
+            if (textFormatColor) textFormatColor.value = currentColor;
+            if (textFormatColorPreview) textFormatColorPreview.style.color = currentColor;
+        }
+
         document.addEventListener('selectionchange', () => {
-            // Guard: Do not hide or reset if currently modifying format or focused inside input
             if (isFormatting || (document.activeElement && document.activeElement.closest('#text-format-toolbar'))) {
                 return;
             }
 
             const selection = window.getSelection();
             if (selection.isCollapsed || selection.rangeCount === 0) {
-                textFormatToolbar.style.display = 'none';
-                savedRange = null;
+                const isStillEditing = document.querySelector('.memo-textarea.is-editing');
+                if (!isStillEditing) {
+                    textFormatToolbar.style.display = 'none';
+                    savedRange = null;
+                }
                 return;
             }
 
@@ -3340,68 +3538,34 @@
 
             const memoTextarea = container.closest('.memo-textarea');
             if (memoTextarea) {
-                savedRange = range.cloneRange(); // Backup the active text range
-                
-                const rect = range.getBoundingClientRect();
-                textFormatToolbar.style.display = 'flex';
-                
-                const toolbarW = textFormatToolbar.offsetWidth || 150;
-                const toolbarH = textFormatToolbar.offsetHeight || 34;
-                
-                let targetLeft = rect.left + window.scrollX + (rect.width / 2) - (toolbarW / 2);
-                let targetTop = rect.top + window.scrollY - toolbarH - 10;
-                
-                // Fallback position if selection bounding box is collapsed to 0
-                if (rect.width === 0 || rect.height === 0) {
-                    const memoRect = memoTextarea.getBoundingClientRect();
-                    targetLeft = memoRect.left + window.scrollX + (memoRect.width / 2) - (toolbarW / 2);
-                    targetTop = memoRect.top + window.scrollY - toolbarH - 10;
-                }
-                
-                textFormatToolbar.style.left = `${targetLeft}px`;
-                textFormatToolbar.style.top = `${targetTop}px`;
-                
-                // Track font size & color of selection node if present
-                let currentSize = '13';
-                let currentColor = '#1e293b';
-                let checkEl = container;
-                while (checkEl && checkEl !== memoTextarea) {
-                    if (checkEl.style) {
-                        if (checkEl.style.fontSize && currentSize === '13') {
-                            currentSize = checkEl.style.fontSize.replace('px', '');
-                        }
-                        if (checkEl.style.color && currentColor === '#1e293b') {
-                            currentColor = rgbToHex(checkEl.style.color);
-                        }
-                    }
-                    checkEl = checkEl.parentNode;
-                }
-                textFormatSize.value = currentSize;
-                if (textFormatColor) {
-                    textFormatColor.value = currentColor;
-                }
-                if (textFormatColorPreview) {
-                    textFormatColorPreview.style.color = currentColor;
-                }
-            } else {
-                textFormatToolbar.style.display = 'none';
-                savedRange = null;
+                savedRange = range.cloneRange();
+                positionTextFormatToolbar();
             }
         });
 
         // Apply style to selection helper with savedRange restoration and focus memory
         function applyStyleToSelection(styleName, styleValue) {
-            isFormatting = true; // Lock selection change actions
+            isFormatting = true;
             const activeInput = document.activeElement;
             
             const selection = window.getSelection();
-            const range = savedRange ? savedRange.cloneRange() : (selection.rangeCount > 0 ? selection.getRangeAt(0) : null);
+            let range = savedRange ? savedRange.cloneRange() : (selection.rangeCount > 0 ? selection.getRangeAt(0) : null);
+            
+            const activeEditingArea = document.querySelector('.memo-textarea.is-editing');
+            // If no range is selected but editing area is active, select whole contents
+            if ((!range || range.collapsed) && activeEditingArea) {
+                const r = document.createRange();
+                r.selectNodeContents(activeEditingArea);
+                selection.removeAllRanges();
+                selection.addRange(r);
+                range = r.cloneRange();
+            }
+
             if (!range) {
                 isFormatting = false;
                 return;
             }
 
-            // Restore selection to perform style replacement safely
             selection.removeAllRanges();
             selection.addRange(range);
 
@@ -3413,7 +3577,6 @@
                 span.appendChild(fragment);
                 range.insertNode(span);
                 
-                // Keep the newly styled node selected and update backup
                 const newRange = document.createRange();
                 newRange.selectNodeContents(span);
                 selection.removeAllRanges();
@@ -3423,7 +3586,6 @@
                 console.error('서식 적용 오류:', err);
             }
 
-            // Restore focus back to the input element asynchronously and place cursor at the end
             if (activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName === 'TEXTAREA')) {
                 setTimeout(() => {
                     activeInput.focus();
@@ -3433,20 +3595,78 @@
                 }, 10);
             }
             saveToLocalStorage();
+            positionTextFormatToolbar();
+            setTimeout(() => {
+                isFormatting = false;
+            }, 80);
         }
 
         // Keep isFormatting active during focus & modification, with 150ms buffer on blur
-        textFormatSize.addEventListener('focus', () => { 
-            isFormatting = true; 
-        });
-        textFormatSize.addEventListener('blur', () => { 
-            setTimeout(() => {
-                if (document.activeElement !== textFormatSize && !document.activeElement.closest('#text-format-toolbar')) {
-                    isFormatting = false;
+        if (textFormatSize) {
+            textFormatSize.addEventListener('focus', () => { 
+                isFormatting = true; 
+            });
+            textFormatSize.addEventListener('blur', () => { 
+                setTimeout(() => {
+                    if (document.activeElement !== textFormatSize && !document.activeElement.closest('#text-format-toolbar')) {
+                        isFormatting = false;
+                    }
+                }, 150);
+            });
+            textFormatSize.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                if (val && val > 0) {
+                    applyStyleToSelection('fontSize', `${val}px`);
                 }
-            }, 150);
+            });
+        }
+
+        // Font size decrease (A-) & increase (A+)
+        if (textFormatDecrease) {
+            textFormatDecrease.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                let cur = parseInt(textFormatSize.value) || 13;
+                cur = Math.max(9, cur - 2);
+                textFormatSize.value = cur;
+                applyStyleToSelection('fontSize', `${cur}px`);
+            });
+        }
+        if (textFormatIncrease) {
+            textFormatIncrease.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                let cur = parseInt(textFormatSize.value) || 13;
+                cur = Math.min(72, cur + 2);
+                textFormatSize.value = cur;
+                applyStyleToSelection('fontSize', `${cur}px`);
+            });
+        }
+
+        // Font size preset buttons (12, 16, 24, 32)
+        document.querySelectorAll('.font-preset-btn').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const size = btn.dataset.size;
+                if (size) {
+                    textFormatSize.value = size;
+                    applyStyleToSelection('fontSize', `${size}px`);
+                }
+            });
         });
 
+        // Quick Color Swatches Palette
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const col = swatch.dataset.color;
+                if (col) {
+                    if (textFormatColor) textFormatColor.value = col;
+                    if (textFormatColorPreview) textFormatColorPreview.style.color = col;
+                    applyStyleToSelection('color', col);
+                }
+            });
+        });
+
+        // Custom Color Picker
         if (textFormatColor) {
             textFormatColor.addEventListener('focus', () => {
                 isFormatting = true;
@@ -3471,30 +3691,24 @@
         }
 
         // Bold button trigger
-        textFormatBold.addEventListener('mousedown', (e) => {
-            e.preventDefault(); 
-            if (savedRange) {
+        if (textFormatBold) {
+            textFormatBold.addEventListener('mousedown', (e) => {
+                e.preventDefault(); 
+                if (savedRange) {
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(savedRange);
+                }
+                document.execCommand('bold', false, null);
+                
                 const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedRange);
-            }
-            document.execCommand('bold', false, null);
-            
-            // Re-capture updated selection range
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                savedRange = selection.getRangeAt(0).cloneRange();
-            }
-            saveToLocalStorage();
-        });
-
-        // Size input trigger
-        textFormatSize.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            if (val && val > 0) {
-                applyStyleToSelection('fontSize', `${val}px`);
-            }
-        });
+                if (selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                }
+                saveToLocalStorage();
+                positionTextFormatToolbar();
+            });
+        }
 
         // Keep toolbar open
         textFormatToolbar.addEventListener('mousedown', (e) => {
