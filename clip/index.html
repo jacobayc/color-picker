@@ -833,45 +833,89 @@
             box-shadow: 0 0 10px rgba(14, 165, 233, 0.6);
             transform: translateX(-50%) scale(1.08);
         }
-        /* Floating Text Format Toolbar */
+        /* Floating Text Format Toolbar (Dynamic Responsive clamp()) */
         .text-format-toolbar {
             position: absolute;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-radius: 8px;
-            padding: 4px 8px;
+            border-radius: clamp(6px, 1.5vw, 10px);
+            padding: clamp(3px, 0.8vw, 6px) clamp(6px, 1.5vw, 12px);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: clamp(4px, 1vw, 8px);
             box-shadow: var(--card-shadow);
             z-index: 100005;
             pointer-events: auto;
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
         .text-format-toolbar .prop-input {
-            width: 50px;
-            height: 24px;
-            font-size: 11px;
+            width: clamp(44px, 7vw, 60px);
+            height: clamp(22px, 3.5vw, 28px);
+            font-size: clamp(10px, 1.3vw, 13px);
+            padding: 2px 4px;
         }
         .text-format-toolbar .tool-btn {
-            width: 24px;
-            height: 24px;
+            width: clamp(22px, 3.5vw, 28px);
+            height: clamp(22px, 3.5vw, 28px);
             padding: 0;
-            font-size: 12px;
+            font-size: clamp(11px, 1.4vw, 14px);
             font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            border-radius: clamp(3px, 0.8vw, 6px);
             background: rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             cursor: pointer;
+            transition: all 0.15s ease;
         }
-        [data-theme="dark"] .text-format-toolbar .tool-btn {
+        .text-format-toolbar .tool-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .text-format-toolbar .color-picker-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(22px, 3.5vw, 28px);
+            height: clamp(22px, 3.5vw, 28px);
+            border-radius: clamp(3px, 0.8vw, 6px);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .text-format-toolbar .color-picker-preview {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(10px, 1.3vw, 13px);
+            font-weight: 700;
+            color: #1e293b;
+            pointer-events: none;
+        }
+        .text-format-toolbar .color-picker-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+        [data-theme="dark"] .text-format-toolbar .tool-btn,
+        [data-theme="dark"] .text-format-toolbar .color-picker-wrapper {
             background: rgba(255, 255, 255, 0.05);
+        }
+        [data-theme="dark"] .text-format-toolbar .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         /* Floating Minimap Radar & Navigation Controls */
         .minimap-panel {
@@ -988,6 +1032,11 @@
         <input type="number" id="text-format-size" class="prop-input" value="13" placeholder="px" title="글꼴 크기 (px)">
         <span class="toolbar-separator"></span>
         <button id="text-format-bold" class="tool-btn" title="볼드체 토글">B</button>
+        <span class="toolbar-separator"></span>
+        <div class="color-picker-wrapper" title="텍스트 색상 변경">
+            <div id="text-format-color-preview" class="color-picker-preview" style="color: #1e293b;">A</div>
+            <input type="color" id="text-format-color" class="color-picker-input" value="#1e293b">
+        </div>
     </div>
 
     <!-- Header / Controls -->
@@ -3256,8 +3305,19 @@
         const textFormatToolbar = document.getElementById('text-format-toolbar');
         const textFormatSize = document.getElementById('text-format-size');
         const textFormatBold = document.getElementById('text-format-bold');
+        const textFormatColor = document.getElementById('text-format-color');
+        const textFormatColorPreview = document.getElementById('text-format-color-preview');
         let savedRange = null;
         let isFormatting = false;
+
+        // RGB to Hex helper
+        function rgbToHex(rgbStr) {
+            if (!rgbStr) return '#1e293b';
+            if (rgbStr.startsWith('#')) return rgbStr;
+            const match = rgbStr.match(/\d+/g);
+            if (!match || match.length < 3) return '#1e293b';
+            return '#' + ((1 << 24) + (parseInt(match[0]) << 16) + (parseInt(match[1]) << 8) + parseInt(match[2])).toString(16).slice(1);
+        }
 
         document.addEventListener('selectionchange', () => {
             // Guard: Do not hide or reset if currently modifying format or focused inside input
@@ -3285,7 +3345,7 @@
                 const rect = range.getBoundingClientRect();
                 textFormatToolbar.style.display = 'flex';
                 
-                const toolbarW = textFormatToolbar.offsetWidth || 120;
+                const toolbarW = textFormatToolbar.offsetWidth || 150;
                 const toolbarH = textFormatToolbar.offsetHeight || 34;
                 
                 let targetLeft = rect.left + window.scrollX + (rect.width / 2) - (toolbarW / 2);
@@ -3301,17 +3361,28 @@
                 textFormatToolbar.style.left = `${targetLeft}px`;
                 textFormatToolbar.style.top = `${targetTop}px`;
                 
-                // Track font size of selection node if present
+                // Track font size & color of selection node if present
                 let currentSize = '13';
+                let currentColor = '#1e293b';
                 let checkEl = container;
                 while (checkEl && checkEl !== memoTextarea) {
-                    if (checkEl.style && checkEl.style.fontSize) {
-                        currentSize = checkEl.style.fontSize.replace('px', '');
-                        break;
+                    if (checkEl.style) {
+                        if (checkEl.style.fontSize && currentSize === '13') {
+                            currentSize = checkEl.style.fontSize.replace('px', '');
+                        }
+                        if (checkEl.style.color && currentColor === '#1e293b') {
+                            currentColor = rgbToHex(checkEl.style.color);
+                        }
                     }
                     checkEl = checkEl.parentNode;
                 }
                 textFormatSize.value = currentSize;
+                if (textFormatColor) {
+                    textFormatColor.value = currentColor;
+                }
+                if (textFormatColorPreview) {
+                    textFormatColorPreview.style.color = currentColor;
+                }
             } else {
                 textFormatToolbar.style.display = 'none';
                 savedRange = null;
@@ -3375,6 +3446,29 @@
                 }
             }, 150);
         });
+
+        if (textFormatColor) {
+            textFormatColor.addEventListener('focus', () => {
+                isFormatting = true;
+            });
+            textFormatColor.addEventListener('input', (e) => {
+                const newColor = e.target.value;
+                if (textFormatColorPreview) {
+                    textFormatColorPreview.style.color = newColor;
+                }
+                applyStyleToSelection('color', newColor);
+            });
+            textFormatColor.addEventListener('change', (e) => {
+                const newColor = e.target.value;
+                if (textFormatColorPreview) {
+                    textFormatColorPreview.style.color = newColor;
+                }
+                applyStyleToSelection('color', newColor);
+                setTimeout(() => {
+                    isFormatting = false;
+                }, 100);
+            });
+        }
 
         // Bold button trigger
         textFormatBold.addEventListener('mousedown', (e) => {
