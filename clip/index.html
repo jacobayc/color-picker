@@ -1080,6 +1080,69 @@
             pointer-events: none;
             opacity: 0.7;
         }
+
+        /* Mobile & Touch Responsive Styles */
+        #canvas-container {
+            touch-action: none;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                top: 10px;
+                padding: 6px 12px;
+                gap: 8px;
+                max-width: 95vw;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            header::-webkit-scrollbar {
+                display: none;
+            }
+            .logo-section {
+                padding-right: 6px;
+                gap: 6px;
+            }
+            .logo-title {
+                display: none; /* Hide logo title on small screens */
+            }
+            .tool-btn {
+                width: 32px;
+                height: 32px;
+                flex-shrink: 0;
+            }
+            .align-toolbar {
+                padding: 2px 4px;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+            .minimap-panel {
+                bottom: 16px;
+                right: 14px;
+                gap: 6px;
+            }
+            .minimap-box {
+                width: 130px;
+                height: 90px;
+            }
+            .text-format-toolbar {
+                position: fixed;
+                bottom: 16px;
+                top: auto !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: 92vw;
+                max-width: 480px;
+                overflow-x: auto;
+                scrollbar-width: none;
+                justify-content: flex-start;
+                padding: 8px 12px;
+                border-radius: 14px;
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+            }
+            .text-format-toolbar::-webkit-scrollbar {
+                display: none;
+            }
+        }
     </style>
 <body data-theme="light">
     <script>
@@ -2417,11 +2480,6 @@
             }
         });
 
-        // Touch & Pan Event binding for Mobile / Touch Devices
-        let touchStartDist = 0;
-        let touchStartZoom = 1;
-        let isTouchPanning = false;
-
         canvas.addEventListener('mousedown', (e) => {
             if (isSpacePressed) {
                 isPanning = true;
@@ -2448,17 +2506,15 @@
             }
         });
 
+        // Touch & Pan Event binding for Mobile / Touch Devices
+        let touchStartDist = 0;
+        let touchStartZoom = 1;
+        let isTouchPanning = false;
+
         // Touch event handlers for 1-finger / 2-finger canvas interaction
         canvas.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.image-wrapper') || e.target.closest('.toolbar') || e.target.closest('.align-toolbar') || e.target.closest('#text-format-toolbar')) {
-                return;
-            }
-
-            if (e.touches.length === 1) {
-                isTouchPanning = true;
-                startPanX = e.touches[0].clientX - panX;
-                startPanY = e.touches[0].clientY - panY;
-            } else if (e.touches.length === 2) {
+            // If 2 touches, ALWAYS allow canvas pinch/pan regardless of where touched (even over cards)
+            if (e.touches.length === 2) {
                 isTouchPanning = true;
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
@@ -2469,15 +2525,24 @@
                 const midY = (touch1.clientY + touch2.clientY) / 2;
                 startPanX = midX - panX;
                 startPanY = midY - panY;
+                e.preventDefault();
+                return;
+            }
+
+            // 1 finger touch: pan only when touching empty canvas area
+            if (e.target.closest('.image-wrapper') || e.target.closest('.toolbar') || e.target.closest('.align-toolbar') || e.target.closest('#text-format-toolbar') || e.target.closest('.minimap-panel')) {
+                return;
+            }
+
+            if (e.touches.length === 1) {
+                isTouchPanning = true;
+                startPanX = e.touches[0].clientX - panX;
+                startPanY = e.touches[0].clientY - panY;
             }
         }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
             if (!isTouchPanning) return;
-
-            if (e.target.closest('.image-wrapper') && !e.target.closest('.image-wrapper').classList.contains('touch-active')) {
-                return;
-            }
 
             if (e.touches.length === 1 && isTouchPanning) {
                 panX = e.touches[0].clientX - startPanX;
@@ -3132,9 +3197,17 @@
                 document.removeEventListener('mouseup', onMouseUp);
             }
 
-            // Mobile Touch Long-Press Drag Logic
+            // Mobile Touch Drag Logic (Immediate response for selected, 2-finger gesture passthrough)
             element.addEventListener('touchstart', (e) => {
-                const isEditingMemo = e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true';
+                if (e.touches.length > 1) {
+                    isTouchActive = false;
+                    isDragging = false;
+                    return; // 2 fingers: let canvas handle pinch zoom
+                }
+
+                const isEditingMemo = element.classList.contains('editing') ||
+                                     (e.target.classList.contains('memo-textarea') && e.target.contentEditable === 'true') ||
+                                     e.target.closest('.memo-textarea.is-editing');
                 if (e.target.classList.contains('resize-handle') || e.target.classList.contains('delete-btn') || e.target.closest('.property-panel') || isEditingMemo) return;
 
                 if (e.touches.length === 1) {
@@ -3144,55 +3217,36 @@
                     initialX = parseFloat(element.style.left) || 0;
                     initialY = parseFloat(element.style.top) || 0;
 
-                    // Provide visual ready cue on long press
-                    element.classList.add('touch-ready');
-
-                    touchTimer = setTimeout(() => {
-                        isTouchActive = true;
-                        isDragging = true;
-                        element.classList.remove('touch-ready');
-                        element.classList.add('touch-active');
-                        selectElement(element);
-                        showToast('이동 모드가 활성화되었습니다.');
-                    }, 400); // 400ms long-press
+                    // Select card immediately on touch
+                    selectElement(element);
+                    isTouchActive = true;
+                    isDragging = true;
                 }
             }, { passive: true });
 
             element.addEventListener('touchmove', (e) => {
                 if (e.touches.length > 1) {
-                    clearTimeout(touchTimer);
-                    element.classList.remove('touch-ready');
-                    return;
-                }
-
-                const touch = e.touches[0];
-                const moveDist = Math.hypot(touch.clientX - startX, touch.clientY - startY);
-
-                // If user moves before long-press activates, cancel long press so canvas can pan naturally
-                if (!isTouchActive && moveDist > 8) {
-                    clearTimeout(touchTimer);
-                    element.classList.remove('touch-ready');
+                    isTouchActive = false;
+                    isDragging = false;
                     return;
                 }
 
                 if (isTouchActive && isDragging) {
-                    e.preventDefault(); // Prevent page/canvas scroll while dragging element
+                    const touch = e.touches[0];
                     const dx = (touch.clientX - startX) / zoom;
                     const dy = (touch.clientY - startY) / zoom;
 
                     element.style.left = `${initialX + dx}px`;
                     element.style.top = `${initialY + dy}px`;
                     updateIntersectionGuides();
+                    if (e.cancelable) e.preventDefault(); // Lock canvas panning while moving card
                 }
             }, { passive: false });
 
             const cancelTouchDrag = () => {
-                clearTimeout(touchTimer);
-                element.classList.remove('touch-ready');
                 if (isTouchActive) {
                     isTouchActive = false;
                     isDragging = false;
-                    element.classList.remove('touch-active');
                     pushUndoState();
                     saveToLocalStorage();
                 }
