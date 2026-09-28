@@ -380,6 +380,16 @@
             transform: scale(1.1);
         }
 
+        /* Optimal 1:1 Size Button */
+        .image-wrapper .optimal-btn {
+            background: #0ea5e9;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+        }
+        .image-wrapper .optimal-btn:hover {
+            background: #0284c7;
+            transform: scale(1.1);
+        }
+
         /* Edit Button */
         .image-wrapper .edit-btn {
             background: #3b82f6;
@@ -810,12 +820,18 @@
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease, background 0.15s ease, transform 0.15s ease;
             z-index: 10;
         }
 
         .image-wrapper.active .size-badge {
             opacity: 1;
+        }
+
+        .image-wrapper .size-badge.snapped {
+            background: #0284c7;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.6);
+            transform: translateX(-50%) scale(1.08);
         }
         /* Floating Text Format Toolbar */
         .text-format-toolbar {
@@ -2668,6 +2684,37 @@
                 `;
                 wrapper.appendChild(propPanel);
 
+                // Optimal 1:1 Size Button
+                const optimalBtn = document.createElement('button');
+                optimalBtn.className = 'action-btn optimal-btn';
+                optimalBtn.title = '최적 해상도(1:1 원본 크기)로 맞춤';
+                optimalBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><circle cx="12" cy="12" r="2"/></svg>';
+                optimalBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const origW = img.naturalWidth;
+                    const origH = img.naturalHeight;
+                    if (origW && origH) {
+                        pushUndoState();
+                        wrapper.style.width = `${origW}px`;
+                        wrapper.style.height = `${origH}px`;
+                        const wInput = propPanel.querySelector('.prop-w');
+                        const hInput = propPanel.querySelector('.prop-h');
+                        if (wInput) wInput.value = Math.round(origW);
+                        if (hInput) hInput.value = Math.round(origH);
+                        if (sizeBadge) {
+                            sizeBadge.textContent = `${Math.round(origW)} × ${Math.round(origH)}px (100% 최적)`;
+                            sizeBadge.classList.add('snapped');
+                            setTimeout(() => sizeBadge.classList.remove('snapped'), 1200);
+                        }
+                        wrapper.dataset.aspectRatio = origW / origH;
+                        saveToLocalStorage();
+                        showToast(`최적 해상도(${Math.round(origW)}×${Math.round(origH)}px 100%)로 복원되었습니다.`);
+                    } else {
+                        showToast('원본 이미지 정보를 읽지 못했습니다.');
+                    }
+                });
+                actionBar.appendChild(optimalBtn);
+
                 // Edit Button
                 const editBtn = document.createElement('button');
                 editBtn.className = 'action-btn edit-btn';
@@ -3080,13 +3127,51 @@
                         break;
                 }
 
+                // Smart Snap to Optimal (100% Natural Resolution) for Images
+                let isSnapped = false;
+                const imgEl = element.querySelector('img');
+                if (imgEl && imgEl.naturalWidth && imgEl.naturalHeight) {
+                    const origW = imgEl.naturalWidth;
+                    const origH = imgEl.naturalHeight;
+                    const snapThreshold = 12 / zoom; // Snap within 12 screen pixels
+
+                    // Check if close to original 100% size
+                    if (Math.abs(nextW - origW) < snapThreshold) {
+                        const diffW = origW - nextW;
+                        nextW = origW;
+                        if (keepRatio) {
+                            nextH = origH;
+                        }
+                        if (type.includes('l')) {
+                            nextX -= diffW;
+                        }
+                        isSnapped = true;
+                    } else if (Math.abs(nextH - origH) < snapThreshold) {
+                        const diffH = origH - nextH;
+                        nextH = origH;
+                        if (keepRatio) {
+                            nextW = origW;
+                        }
+                        if (type.includes('t')) {
+                            nextY -= diffH;
+                        }
+                        isSnapped = true;
+                    }
+                }
+
                 element.style.width = `${nextW}px`;
                 element.style.height = `${nextH}px`;
                 element.style.left = `${nextX}px`;
                 element.style.top = `${nextY}px`;
 
                 if (sizeBadge) {
-                    sizeBadge.textContent = `${Math.round(nextW)} × ${Math.round(nextH)}px`;
+                    if (isSnapped) {
+                        sizeBadge.textContent = `${Math.round(nextW)} × ${Math.round(nextH)}px (100% 최적)`;
+                        sizeBadge.classList.add('snapped');
+                    } else {
+                        sizeBadge.textContent = `${Math.round(nextW)} × ${Math.round(nextH)}px`;
+                        sizeBadge.classList.remove('snapped');
+                    }
                 }
 
                 if (wInput) wInput.value = Math.round(nextW);
