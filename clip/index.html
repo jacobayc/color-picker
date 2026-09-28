@@ -954,10 +954,107 @@
         [data-theme="dark"] .text-format-toolbar .tool-btn {
             background: rgba(255, 255, 255, 0.05);
         }
-        .text-format-toolbar .tool-btn:hover {
-            background: var(--accent-color);
-            color: white;
+        /* Floating Minimap Radar & Navigation Controls */
+        .minimap-panel {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .minimap-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s ease;
+        }
+
+        .minimap-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--icon-color);
+            min-width: 28px;
+            height: 28px;
+            padding: 0 6px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .minimap-btn:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
             border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .zoom-level-text {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            min-width: 38px;
+            text-align: center;
+        }
+
+        .minimap-box {
+            width: 180px;
+            height: 120px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            transition: opacity 0.25s ease, transform 0.25s ease, height 0.25s ease;
+        }
+
+        .minimap-box.collapsed {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9) translateY(10px);
+            height: 0;
+            margin: 0;
+            border: none;
+        }
+
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .minimap-badge {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            pointer-events: none;
+            opacity: 0.7;
         }
     </style>
 <body data-theme="light">
@@ -1055,6 +1152,26 @@
         <span id="toast-message">이미지가 추가되었습니다.</span>
     </div>
 
+    <!-- Floating Minimap Radar & Controls -->
+    <div class="minimap-panel" id="minimap-panel">
+        <div class="minimap-controls">
+            <button class="minimap-btn" id="minimap-fit-btn" data-tooltip="전체 화면에 맞추기 (Fit View)" title="전체 화면에 맞추기">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            </button>
+            <button class="minimap-btn" id="minimap-zoom-out" title="축소">-</button>
+            <span class="zoom-level-text" id="zoom-level-indicator">100%</span>
+            <button class="minimap-btn" id="minimap-zoom-in" title="확대">+</button>
+            <button class="minimap-btn" id="minimap-zoom-reset" title="100% 리셋">1:1</button>
+            <button class="minimap-btn" id="minimap-toggle-btn" title="미니맵 토글">
+                <svg id="minimap-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 15 3-3 3 3"/></svg>
+            </button>
+        </div>
+        <div class="minimap-box" id="minimap-box">
+            <span class="minimap-badge">Radar Map</span>
+            <canvas id="minimap-canvas" width="180" height="120"></canvas>
+        </div>
+    </div>
+
     <!-- Logic Script -->
     <script>
         const canvas = document.getElementById('canvas-container');
@@ -1131,9 +1248,394 @@
             }
         }
 
+        // ==========================================
+        // IndexedDB Storage Layer (Lossless & High Capacity)
+        // ==========================================
+        const DB_NAME = 'ClipCanvasDB';
+        const DB_VERSION = 1;
+        const STORE_CARDS = 'cards';
+        let dbInstance = null;
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                if (dbInstance) return resolve(dbInstance);
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_CARDS)) {
+                        db.createObjectStore(STORE_CARDS, { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    dbInstance = e.target.result;
+                    resolve(dbInstance);
+                };
+                req.onerror = (e) => {
+                    console.error('IndexedDB open error:', e);
+                    reject(e);
+                };
+            });
+        }
+
+        async function saveCardsToDB(cards) {
+            try {
+                const db = await openDatabase();
+                const tx = db.transaction([STORE_CARDS], 'readwrite');
+                const store = tx.objectStore(STORE_CARDS);
+                await new Promise((resolve, reject) => {
+                    const clearReq = store.clear();
+                    clearReq.onsuccess = resolve;
+                    clearReq.onerror = reject;
+                });
+                for (const item of cards) {
+                    store.put(item);
+                }
+            } catch (err) {
+                console.error('IndexedDB save failed:', err);
+                try {
+                    localStorage.setItem('clip_canvas_cards', JSON.stringify(cards));
+                } catch(e) {}
+            }
+        }
+
+        async function loadCardsFromDB() {
+            try {
+                const db = await openDatabase();
+                const tx = db.transaction([STORE_CARDS], 'readonly');
+                const store = tx.objectStore(STORE_CARDS);
+                const items = await new Promise((resolve, reject) => {
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = reject;
+                });
+
+                // Auto-migrate from localStorage if IndexedDB is empty
+                if (items.length === 0) {
+                    const legacy = localStorage.getItem('clip_canvas_cards');
+                    if (legacy) {
+                        try {
+                            const parsed = JSON.parse(legacy);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                await saveCardsToDB(parsed);
+                                return parsed;
+                            }
+                        } catch(e) {}
+                    }
+                }
+                return items;
+            } catch (err) {
+                console.error('IndexedDB load failed, fallbacking to localStorage:', err);
+                const legacy = localStorage.getItem('clip_canvas_cards');
+                return legacy ? JSON.parse(legacy) : [];
+            }
+        }
+
+        // ==========================================
+        // Minimap (Radar Map) & Viewport Navigation
+        // ==========================================
+        const minimapBox = document.getElementById('minimap-box');
+        const minimapCanvas = document.getElementById('minimap-canvas');
+        const minimapCtx = minimapCanvas ? minimapCanvas.getContext('2d') : null;
+        const minimapToggleBtn = document.getElementById('minimap-toggle-btn');
+        const zoomLevelIndicator = document.getElementById('zoom-level-indicator');
+        const minimapFitBtn = document.getElementById('minimap-fit-btn');
+        const minimapZoomInBtn = document.getElementById('minimap-zoom-in');
+        const minimapZoomOutBtn = document.getElementById('minimap-zoom-out');
+        const minimapZoomResetBtn = document.getElementById('minimap-zoom-reset');
+
+        let minimapBBox = { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0, scale: 1, offsetX: 0, offsetY: 0 };
+        let minimapRafId = null;
+
+        function updateZoomDisplay() {
+            if (zoomLevelIndicator) {
+                zoomLevelIndicator.textContent = `${Math.round(zoom * 100)}%`;
+            }
+        }
+
+        function requestMinimapUpdate() {
+            if (minimapRafId) cancelAnimationFrame(minimapRafId);
+            minimapRafId = requestAnimationFrame(renderMinimap);
+        }
+
+        function renderMinimap() {
+            if (!minimapCanvas || !minimapCtx || minimapBox.classList.contains('collapsed')) return;
+            const w = minimapCanvas.width;
+            const h = minimapCanvas.height;
+            minimapCtx.clearRect(0, 0, w, h);
+
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+            // Background
+            minimapCtx.fillStyle = isDark ? 'rgba(15, 17, 23, 0.85)' : 'rgba(245, 247, 250, 0.85)';
+            minimapCtx.fillRect(0, 0, w, h);
+
+            // Subdued grid pattern
+            minimapCtx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            minimapCtx.lineWidth = 1;
+            for (let x = 0; x < w; x += 20) {
+                minimapCtx.beginPath();
+                minimapCtx.moveTo(x, 0);
+                minimapCtx.lineTo(x, h);
+                minimapCtx.stroke();
+            }
+            for (let y = 0; y < h; y += 20) {
+                minimapCtx.beginPath();
+                minimapCtx.moveTo(0, y);
+                minimapCtx.lineTo(w, y);
+                minimapCtx.stroke();
+            }
+
+            const wrappers = Array.from(board.querySelectorAll('.image-wrapper'));
+
+            // Viewport rect in board coordinates
+            const vpLeft = -panX / zoom;
+            const vpTop = -panY / zoom;
+            const vpWidth = window.innerWidth / zoom;
+            const vpHeight = window.innerHeight / zoom;
+            const vpRight = vpLeft + vpWidth;
+            const vpBottom = vpTop + vpHeight;
+
+            let minX = vpLeft;
+            let minY = vpTop;
+            let maxX = vpRight;
+            let maxY = vpBottom;
+
+            wrappers.forEach(el => {
+                const elLeft = parseFloat(el.style.left) || 0;
+                const elTop = parseFloat(el.style.top) || 0;
+                const elW = parseFloat(el.style.width) || el.offsetWidth;
+                const elH = parseFloat(el.style.height) || el.offsetHeight;
+                minX = Math.min(minX, elLeft);
+                minY = Math.min(minY, elTop);
+                maxX = Math.max(maxX, elLeft + elW);
+                maxY = Math.max(maxY, elTop + elH);
+            });
+
+            // Add margin around bounding box
+            const margin = Math.max((maxX - minX), (maxY - minY)) * 0.15 + 200;
+            minX -= margin;
+            minY -= margin;
+            maxX += margin;
+            maxY += margin;
+
+            const bbWidth = maxX - minX;
+            const bbHeight = maxY - minY;
+
+            const scaleX = w / bbWidth;
+            const scaleY = h / bbHeight;
+            const scale = Math.min(scaleX, scaleY);
+
+            const renderedW = bbWidth * scale;
+            const renderedH = bbHeight * scale;
+            const offsetX = (w - renderedW) / 2;
+            const offsetY = (h - renderedH) / 2;
+
+            minimapBBox = { minX, minY, maxX, maxY, width: bbWidth, height: bbHeight, scale, offsetX, offsetY };
+
+            // Render cards as miniature boxes
+            wrappers.forEach(el => {
+                const isMemo = el.classList.contains('memo-card');
+                const isActive = el.classList.contains('active');
+                const elLeft = parseFloat(el.style.left) || 0;
+                const elTop = parseFloat(el.style.top) || 0;
+                const elW = parseFloat(el.style.width) || el.offsetWidth;
+                const elH = parseFloat(el.style.height) || el.offsetHeight;
+
+                const mx = offsetX + (elLeft - minX) * scale;
+                const my = offsetY + (elTop - minY) * scale;
+                const mw = Math.max(3, elW * scale);
+                const mh = Math.max(3, elH * scale);
+
+                minimapCtx.fillStyle = isActive 
+                    ? '#3b82f6' 
+                    : (isMemo ? '#fef08a' : (isDark ? '#4b5563' : '#cbd5e1'));
+                minimapCtx.strokeStyle = isActive ? '#1d4ed8' : (isDark ? '#6b7280' : '#94a3b8');
+                minimapCtx.lineWidth = 1;
+
+                minimapCtx.beginPath();
+                minimapCtx.roundRect ? minimapCtx.roundRect(mx, my, mw, mh, 2) : minimapCtx.rect(mx, my, mw, mh);
+                minimapCtx.fill();
+                minimapCtx.stroke();
+            });
+
+            // Render current Viewport viewfinder
+            const mvpX = offsetX + (vpLeft - minX) * scale;
+            const mvpY = offsetY + (vpTop - minY) * scale;
+            const mvpW = vpWidth * scale;
+            const mvpH = vpHeight * scale;
+
+            minimapCtx.fillStyle = 'rgba(59, 130, 246, 0.18)';
+            minimapCtx.strokeStyle = '#3b82f6';
+            minimapCtx.lineWidth = 1.5;
+            minimapCtx.beginPath();
+            minimapCtx.roundRect ? minimapCtx.roundRect(mvpX, mvpY, mvpW, mvpH, 3) : minimapCtx.rect(mvpX, mvpY, mvpW, mvpH);
+            minimapCtx.fill();
+            minimapCtx.stroke();
+        }
+
+        // Fit View to all cards
+        function fitToAllCards() {
+            const wrappers = Array.from(board.querySelectorAll('.image-wrapper'));
+            if (wrappers.length === 0) {
+                zoom = 1;
+                panX = 0;
+                panY = 0;
+                updateBoardTransform();
+                saveBoardState();
+                requestMinimapUpdate();
+                showToast('캔버스가 비어있어 기본 위치로 리셋되었습니다.');
+                return;
+            }
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            wrappers.forEach(el => {
+                const elLeft = parseFloat(el.style.left) || 0;
+                const elTop = parseFloat(el.style.top) || 0;
+                const elW = parseFloat(el.style.width) || el.offsetWidth;
+                const elH = parseFloat(el.style.height) || el.offsetHeight;
+                minX = Math.min(minX, elLeft);
+                minY = Math.min(minY, elTop);
+                maxX = Math.max(maxX, elLeft + elW);
+                maxY = Math.max(maxY, elTop + elH);
+            });
+
+            const contentW = maxX - minX;
+            const contentH = maxY - minY;
+            const padding = 80;
+
+            const availW = window.innerWidth - padding * 2;
+            const availH = window.innerHeight - padding * 2;
+
+            let targetZoom = Math.min(availW / contentW, availH / contentH);
+            targetZoom = Math.min(Math.max(0.15, targetZoom), 1.5); // cap at 150%
+
+            const centerX = minX + contentW / 2;
+            const centerY = minY + contentH / 2;
+
+            zoom = targetZoom;
+            panX = window.innerWidth / 2 - centerX * zoom;
+            panY = window.innerHeight / 2 - centerY * zoom;
+
+            updateBoardTransform();
+            saveBoardState();
+            requestMinimapUpdate();
+            showToast('전체 요소가 화면에 맞추어졌습니다.');
+        }
+
+        // Navigate to clicked coordinate in Minimap
+        if (minimapBox) {
+            let isMinimapDragging = false;
+
+            function panToMinimapCoord(e) {
+                const rect = minimapCanvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                if (!minimapBBox || minimapBBox.scale <= 0) return;
+
+                const boardX = minimapBBox.minX + (clickX - minimapBBox.offsetX) / minimapBBox.scale;
+                const boardY = minimapBBox.minY + (clickY - minimapBBox.offsetY) / minimapBBox.scale;
+
+                panX = window.innerWidth / 2 - boardX * zoom;
+                panY = window.innerHeight / 2 - boardY * zoom;
+
+                updateBoardTransform();
+                saveBoardState();
+                requestMinimapUpdate();
+            }
+
+            minimapBox.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                isMinimapDragging = true;
+                panToMinimapCoord(e);
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isMinimapDragging) {
+                    panToMinimapCoord(e);
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isMinimapDragging) {
+                    isMinimapDragging = false;
+                }
+            });
+        }
+
+        // Minimap Controls Binding
+        if (minimapToggleBtn) {
+            minimapToggleBtn.addEventListener('click', () => {
+                minimapBox.classList.toggle('collapsed');
+                const isCollapsed = minimapBox.classList.contains('collapsed');
+                minimapToggleBtn.title = isCollapsed ? '미니맵 펼치기' : '미니맵 접기';
+                const icon = document.getElementById('minimap-toggle-icon');
+                if (icon) {
+                    icon.innerHTML = isCollapsed 
+                        ? '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m15 9-3 3-3-3"/>'
+                        : '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 15 3-3 3 3"/>';
+                }
+                if (!isCollapsed) requestMinimapUpdate();
+            });
+        }
+
+        if (minimapFitBtn) {
+            minimapFitBtn.addEventListener('click', () => fitToAllCards());
+        }
+
+        if (minimapZoomInBtn) {
+            minimapZoomInBtn.addEventListener('click', () => {
+                const nextZoom = Math.min(zoom * 1.25, 6.0);
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const boardX = (centerX - panX) / zoom;
+                const boardY = (centerY - panY) / zoom;
+                zoom = nextZoom;
+                panX = centerX - boardX * zoom;
+                panY = centerY - boardY * zoom;
+                updateBoardTransform();
+                saveBoardState();
+                requestMinimapUpdate();
+            });
+        }
+
+        if (minimapZoomOutBtn) {
+            minimapZoomOutBtn.addEventListener('click', () => {
+                const nextZoom = Math.max(zoom / 1.25, 0.15);
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const boardX = (centerX - panX) / zoom;
+                const boardY = (centerY - panY) / zoom;
+                zoom = nextZoom;
+                panX = centerX - boardX * zoom;
+                panY = centerY - boardY * zoom;
+                updateBoardTransform();
+                saveBoardState();
+                requestMinimapUpdate();
+            });
+        }
+
+        if (minimapZoomResetBtn) {
+            minimapZoomResetBtn.addEventListener('click', () => {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const boardX = (centerX - panX) / zoom;
+                const boardY = (centerY - panY) / zoom;
+                zoom = 1;
+                panX = centerX - boardX * 1;
+                panY = centerY - boardY * 1;
+                updateBoardTransform();
+                saveBoardState();
+                requestMinimapUpdate();
+                showToast('확대/축소 비율이 100%로 리셋되었습니다.');
+            });
+        }
+
         // Update Transform
         function updateBoardTransform() {
             board.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoom})`;
+            updateZoomDisplay();
+            requestMinimapUpdate();
         }
 
         // Save Board View State
@@ -1154,42 +1656,50 @@
                 } catch (e) {
                     console.error('보드 상태 복원 실패:', e);
                 }
+            } else {
+                updateZoomDisplay();
             }
         }
 
-        // LocalStorage Save Images
+        let saveTimeout = null;
         function saveToLocalStorage() {
-            try {
-                const items = [];
-                board.querySelectorAll('.image-wrapper').forEach(el => {
-                    items.push({
-                        id: el.dataset.id,
-                        src: el.querySelector('img').src,
-                        left: parseFloat(el.style.left) || 0,
-                        top: parseFloat(el.style.top) || 0,
-                        width: parseFloat(el.style.width) || 0,
-                        height: parseFloat(el.style.height) || 0,
-                        zIndex: parseInt(el.style.zIndex) || 1,
-                        keepRatio: el.dataset.keepRatio === 'true'
-                    });
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const cardsData = [];
+                board.querySelectorAll('.image-wrapper').forEach(wrapper => {
+                    const isMemo = wrapper.classList.contains('memo-card');
+                    const data = {
+                        type: isMemo ? 'memo' : 'image',
+                        id: wrapper.dataset.id,
+                        left: parseFloat(wrapper.style.left) || 0,
+                        top: parseFloat(wrapper.style.top) || 0,
+                        width: parseFloat(wrapper.style.width) || wrapper.offsetWidth,
+                        height: parseFloat(wrapper.style.height) || wrapper.offsetHeight,
+                        zIndex: parseInt(wrapper.style.zIndex) || 1,
+                        keepRatio: wrapper.dataset.keepRatio === 'true'
+                    };
+
+                    if (isMemo) {
+                        data.text = wrapper.querySelector('.memo-textarea').innerHTML;
+                        data.opacity = wrapper.dataset.opacity !== undefined ? parseInt(wrapper.dataset.opacity) : 100;
+                    } else {
+                        data.src = wrapper.querySelector('img').src;
+                        if (wrapper.dataset.mergedSources) {
+                            data.mergedSources = JSON.parse(wrapper.dataset.mergedSources);
+                        }
+                    }
+
+                    cardsData.push(data);
                 });
-                localStorage.setItem('clip_canvas_images', JSON.stringify(items));
-            } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    showToast('로컬 용량 부족! 고용량 이미지를 지워주세요.');
-                } else {
-                    console.error(e);
-                }
-            }
+
+                saveCardsToDB(cardsData);
+                requestMinimapUpdate();
+            }, 60);
         }
 
-        // LocalStorage Load Images & Memos
-        function loadFromLocalStorage() {
+        async function loadFromLocalStorage() {
             try {
-                const stored = localStorage.getItem('clip_canvas_cards');
-                if (!stored) return;
-                
-                const cardsData = JSON.parse(stored);
+                const cardsData = await loadCardsFromDB();
                 if (!Array.isArray(cardsData)) return;
 
                 cardsData.forEach(data => {
@@ -1205,13 +1715,15 @@
                         zIndex: data.zIndex,
                         keepRatio: data.keepRatio,
                         opacity: data.opacity !== undefined ? data.opacity : 100,
+                        mergedSources: data.mergedSources || null,
                         shouldSave: false
                     });
                 });
             } catch (err) {
-                console.error('로컬스토리지 로딩 실패:', err);
+                console.error('스토리지 로딩 실패:', err);
             }
             checkEmptyState();
+            requestMinimapUpdate();
         }
 
         // Selection Managers
@@ -1971,117 +2483,29 @@
             saveBoardState();
         }, { passive: false });
 
-        // Save layout state to LocalStorage
-        function saveToLocalStorage() {
-            const cardsData = [];
-            document.querySelectorAll('.image-wrapper').forEach(wrapper => {
-                const isMemo = wrapper.classList.contains('memo-card');
-                const data = {
-                    type: isMemo ? 'memo' : 'image',
-                    id: wrapper.dataset.id,
-                    left: parseFloat(wrapper.style.left) || 0,
-                    top: parseFloat(wrapper.style.top) || 0,
-                    width: parseFloat(wrapper.style.width) || wrapper.offsetWidth,
-                    height: parseFloat(wrapper.style.height) || wrapper.offsetHeight,
-                    zIndex: parseInt(wrapper.style.zIndex) || 1,
-                    keepRatio: wrapper.dataset.keepRatio === 'true'
-                };
-
-                if (isMemo) {
-                    data.text = wrapper.querySelector('.memo-textarea').innerHTML;
-                    data.opacity = wrapper.dataset.opacity !== undefined ? parseInt(wrapper.dataset.opacity) : 100;
-                } else {
-                    data.src = wrapper.querySelector('img').src;
-                    if (wrapper.dataset.mergedSources) {
-                        data.mergedSources = JSON.parse(wrapper.dataset.mergedSources);
-                    }
-                }
-
-                cardsData.push(data);
-            });
-
-            localStorage.setItem('clip_canvas_cards', JSON.stringify(cardsData));
-        }
-
-        // Restore layout state from LocalStorage
-        function loadFromLocalStorage() {
-            try {
-                const stored = localStorage.getItem('clip_canvas_cards');
-                if (!stored) return;
-                
-                const cardsData = JSON.parse(stored);
-                if (!Array.isArray(cardsData)) return;
-
-                cardsData.forEach(data => {
-                    createCard({
-                        type: data.type || 'image',
-                        src: data.src || '',
-                        text: data.text || '',
-                        x: data.left,
-                        y: data.top,
-                        w: data.width,
-                        h: data.height,
-                        id: data.id,
-                        zIndex: data.zIndex,
-                        keepRatio: data.keepRatio,
-                        mergedSources: data.mergedSources || null,
-                        shouldSave: false
-                    });
-                });
-            } catch (err) {
-                console.error('로컬스토리지 로딩 실패:', err);
-            }
-            checkEmptyState();
-        }
-
-        // Image Compression Helper (Canvas based, JPEG 75% quality, max 1280px)
-        function compressImage(base64Src, callback) {
-            const img = new Image();
-            img.src = base64Src;
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                const maxDim = 1280;
-                let w = img.width;
-                let h = img.height;
-                
-                if (w > maxDim || h > maxDim) {
-                    if (w > h) {
-                        h = (maxDim / w) * h;
-                        w = maxDim;
-                    } else {
-                        w = (maxDim / h) * w;
-                        h = maxDim;
-                    }
-                }
-                
-                canvas.width = w;
-                canvas.height = h;
-                ctx.drawImage(img, 0, 0, w, h);
-                
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-                callback(compressedDataUrl, img.width, img.height);
-            };
-        }
-
-        // Helper to process and place image blob on canvas
+        // Helper to process and place image blob on canvas (Lossless Full Quality)
         function processImageBlob(blob) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                const base64Url = event.target.result;
-                compressImage(base64Url, function(compressedUrl, origW, origH) {
+                const originalDataUrl = event.target.result;
+                const tempImg = new Image();
+                tempImg.src = originalDataUrl;
+                tempImg.onload = function() {
+                    const origW = tempImg.naturalWidth;
+                    const origH = tempImg.naturalHeight;
+
+                    // Display size default on canvas (max 400px initial view, but natural resolution 100% kept)
                     const maxInitSize = 400;
-                    let w = origW;
-                    let h = origH;
-                    
-                    if (w > maxInitSize || h > maxInitSize) {
-                        if (w > h) {
-                            h = (maxInitSize / w) * h;
-                            w = maxInitSize;
+                    let displayW = origW;
+                    let displayH = origH;
+
+                    if (displayW > maxInitSize || displayH > maxInitSize) {
+                        if (displayW > displayH) {
+                            displayH = (maxInitSize / displayW) * displayH;
+                            displayW = maxInitSize;
                         } else {
-                            w = (maxInitSize / h) * w;
-                            h = maxInitSize;
+                            displayW = (maxInitSize / displayH) * displayW;
+                            displayH = maxInitSize;
                         }
                     }
 
@@ -2089,20 +2513,20 @@
                     const viewportCenterY = window.innerHeight / 2;
                     const randomOffset = Math.random() * 40 - 20;
 
-                    const x = (viewportCenterX - panX) / zoom - w / 2 + randomOffset;
-                    const y = (viewportCenterY - panY) / zoom - h / 2 + randomOffset;
-                    
+                    const x = (viewportCenterX - panX) / zoom - displayW / 2 + randomOffset;
+                    const y = (viewportCenterY - panY) / zoom - displayH / 2 + randomOffset;
+
                     createCard({
                         type: 'image',
-                        src: compressedUrl,
+                        src: originalDataUrl,
                         x: x,
                         y: y,
-                        w: w,
-                        h: h,
+                        w: displayW,
+                        h: displayH,
                         keepRatio: true,
                         shouldSave: true
                     });
-                });
+                };
             };
             reader.readAsDataURL(blob);
         }
@@ -2808,14 +3232,16 @@
         });
 
         // Clear All
-        clearAllBtn.addEventListener('click', () => {
+        clearAllBtn.addEventListener('click', async () => {
             const cardCount = board.querySelectorAll('.image-wrapper').length;
             if (cardCount === 0) return;
             if (confirm('캔버스의 모든 요소를 삭제하시겠습니까?')) {
                 board.querySelectorAll('.image-wrapper').forEach(el => el.remove());
                 localStorage.removeItem('clip_canvas_cards');
+                await saveCardsToDB([]);
                 deselectAll();
                 checkEmptyState();
+                requestMinimapUpdate();
                 showToast('캔버스가 초기화되었습니다.');
             }
         });
