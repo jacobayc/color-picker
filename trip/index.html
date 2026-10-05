@@ -1,596 +1,898 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>🚗 천안·세종 2박 3일 가족 여행 가이드</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --bg-color: #f1f5f9;
-        --card-bg: #ffffff;
-        --card-border: #e2e8f0;
-        --card-shadow:
-          0 4px 16px -2px rgba(15, 23, 42, 0.06),
-          0 2px 4px -2px rgba(15, 23, 42, 0.04);
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --accent-gold: #b45309;
-        --accent-emerald: #059669;
-        --accent-rose: #e11d48;
-        --text-main: #0f172a;
-        --text-body: #1e293b;
-        --text-muted: #475569;
-        --radius-lg: 20px;
-        --radius-md: 14px;
-        --radius-sm: 8px;
-      }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family:
-          "Pretendard",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      body {
-        background-color: var(--bg-color);
-        color: var(--text-body);
-        line-height: 1.6;
-        padding-bottom: 70px;
-        min-height: 100vh;
-        font-size: 16px;
-      }
-
-      .container {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 24px 18px;
-      }
-
-      /* Header */
-      .header {
-        text-align: center;
-        padding: 20px 16px 22px;
-        margin-bottom: 22px;
-      }
-
-      .badge-dday {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1e40af;
-        padding: 7px 18px;
-        border-radius: 999px;
-        font-size: 0.9rem;
-        font-weight: 800;
-        letter-spacing: 0.3px;
-        margin-bottom: 12px;
-      }
-
-      .header h1 {
-        font-size: 1.85rem;
-        font-weight: 800;
-        line-height: 1.35;
-        margin-bottom: 8px;
-        color: var(--text-main);
-        letter-spacing: -0.5px;
-      }
-
-      .header p {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: var(--text-muted);
-      }
-
-      /* Room Assignment Box */
-      .section-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        margin: 26px 0 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--text-main);
-      }
-
-      .room-container {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        margin-bottom: 24px;
-        box-shadow: var(--card-shadow);
-      }
-
-      .room-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #f1f5f9;
-      }
-
-      .room-header span:first-child {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--text-main);
-      }
-
-      .room-header span:last-child {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #b45309;
-        background: #fef3c7;
-        padding: 4px 12px;
-        border-radius: 999px;
-        border: 1px solid #fde68a;
-      }
-
-      .room-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .room-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: var(--radius-md);
-        padding: 14px 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .room-name-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .room-user {
-        font-weight: 800;
-        font-size: 1.05rem;
-        color: var(--text-main);
-      }
-
-      .tag-stay {
-        font-size: 0.82rem;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-weight: 800;
-      }
-
-      .tag-stay.stay {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-      }
-
-      .tag-stay.move {
-        background: #fff1f2;
-        color: #9f1239;
-        border: 1px solid #fecdd3;
-      }
-
-      .room-details {
-        font-size: 0.95rem;
-        color: var(--text-body);
-        line-height: 1.5;
-      }
-
-      .room-details strong {
-        color: var(--text-main);
-        font-weight: 800;
-      }
-
-      .room-tip {
-        margin-top: 16px;
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-        padding: 14px 16px;
-        border-radius: var(--radius-sm);
-        font-size: 0.92rem;
-        color: #78350f;
-        line-height: 1.55;
-      }
-
-      /* Day Tabs */
-      .tab-nav {
-        display: flex;
-        gap: 8px;
-        background: #ffffff;
-        padding: 6px;
-        border-radius: var(--radius-md);
-        margin-bottom: 22px;
-        position: sticky;
-        top: 12px;
-        z-index: 50;
-        border: 1px solid var(--card-border);
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
-      }
-
-      .tab-btn {
-        flex: 1;
-        padding: 12px 0;
-        border: none;
-        background: #f8fafc;
-        color: #475569;
-        font-size: 0.98rem;
-        font-weight: 700;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-      }
-
-      .tab-btn.active {
-        background: var(--primary);
-        color: #ffffff;
-        font-weight: 800;
-        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
-      }
-
-      /* Day Content */
-      .day-panel {
-        display: none;
-        animation: fadeIn 0.3s ease forwards;
-      }
-
-      .day-panel.active {
-        display: block;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .day-header-box {
-        margin-bottom: 20px;
-        padding: 16px 18px;
-        background: #ffffff;
-        border: 1px solid var(--card-border);
-        border-left: 5px solid var(--primary);
-        border-radius: 0 var(--radius-md) var(--radius-md) 0;
-        box-shadow: var(--card-shadow);
-      }
-
-      .day-header-box h2 {
-        font-size: 1.18rem;
-        color: var(--text-main);
-        font-weight: 800;
-      }
-
-      .day-header-box p {
-        font-size: 0.94rem;
-        color: var(--text-muted);
-        margin-top: 4px;
-        font-weight: 500;
-      }
-
-      /* Timeline Structure */
-      .timeline {
-        position: relative;
-        padding-left: 28px;
-      }
-
-      .timeline::before {
-        content: "";
-        position: absolute;
-        left: 9px;
-        top: 14px;
-        bottom: 20px;
-        width: 3px;
-        background: #cbd5e1;
-        border-radius: 2px;
-      }
 
-      .timeline-item {
-        position: relative;
-        margin-bottom: 24px;
-      }
-
-      .timeline-dot {
-        position: absolute;
-        left: -28px;
-        top: 18px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 4px solid var(--primary);
-        box-sizing: border-box;
-        z-index: 2;
-        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-      }
-
-      .timeline-dot.finish {
-        border-color: var(--accent-emerald);
-        background: #ecfdf5;
-        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-      }
-
-      .step-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: var(--radius-md);
-        padding: 16px 18px;
-        box-shadow: var(--card-shadow);
-      }
-
-      .step-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-
-      .step-number {
-        font-size: 0.82rem;
-        font-weight: 800;
-        color: var(--primary);
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-      }
-
-      .step-duration {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.82rem;
-        color: #1e40af;
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-weight: 700;
-      }
-
-      .step-title {
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: var(--text-main);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-
-      .step-details {
-        font-size: 0.95rem;
-        color: var(--text-body);
-        line-height: 1.6;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        padding: 12px 14px;
-        border-radius: var(--radius-sm);
-      }
-
-      .step-details ul {
-        list-style: none;
-      }
-
-      .step-details li {
-        position: relative;
-        padding-left: 14px;
-        margin-bottom: 6px;
-      }
-
-      .step-details li:last-child {
-        margin-bottom: 0;
-      }
-
-      .step-details li::before {
-        content: "•";
-        position: absolute;
-        left: 0;
-        color: var(--primary);
-        font-weight: 800;
-        font-size: 1.1rem;
-      }
-
-      .step-details strong {
-        color: var(--text-main);
-        font-weight: 800;
-      }
-
-      .highlight-tag {
-        display: inline-block;
-        background: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 0.82rem;
-        font-weight: 800;
-        margin-top: 4px;
-      }
-
-      /* Train Ticket Card */
-      .train-ticket {
-        background: #ffffff;
-        border: 1px solid #bfdbfe;
-        border-left: 5px solid #2563eb;
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-top: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
-      }
-
-      .train-ticket.mugunghwa {
-        border-color: #fed7aa;
-        border-left-color: #ea580c;
-        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
-      }
-
-      .train-ticket-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .train-badge-group {
-        display: flex;
-        align-items: baseline;
-        gap: 6px;
-      }
-
-      .train-name {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #dc2626;
-      }
-
-      .train-ticket.mugunghwa .train-name {
-        color: #ea580c;
-      }
-
-      .train-code {
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: #0f172a;
-      }
-
-      .train-time-badge {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #475569;
-        background: #f1f5f9;
-        padding: 2px 8px;
-        border-radius: 999px;
-      }
-
-      .train-schedule-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 10px 14px;
-        border: 1px solid #e2e8f0;
-      }
-
-      .station-box {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .station-box.right {
-        text-align: right;
-        align-items: flex-end;
-      }
-
-      .station-box .st-title {
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: #0f172a;
-      }
-
-      .station-box .st-clock {
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: #2563eb;
-      }
-
-      .train-ticket.mugunghwa .station-box .st-clock {
-        color: #ea580c;
-      }
-
-      .schedule-arrow {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.78rem;
-        color: #64748b;
-        font-weight: 700;
-      }
-
-      .schedule-arrow .arrow-symbol {
-        font-size: 1.2rem;
-        line-height: 1;
-        color: #94a3b8;
-      }
-
-      /* Floating Share / Action */
-      .quick-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 30px;
-      }
-
-      .btn-action {
-        flex: 1;
-        padding: 15px 0;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: var(--text-main);
-        border-radius: var(--radius-md);
-        font-size: 0.98rem;
-        font-weight: 800;
-        text-align: center;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
-        transition: all 0.15s ease;
-      }
-
-      .btn-action:active {
-        background: #f1f5f9;
-        transform: scale(0.99);
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <!-- Top Header -->
-      <header class="header">
-        <div class="badge-dday">🍁 2박 3일 가족 여행</div>
-        <h1>떠나자! 3대(代)가 함께하는<br />천안·세종 가을 나들이</h1>
-        <p>2026. 10. 8 (목) ~ 10. 10 (토) · 총 9명</p>
-      </header>
-
-      <!-- Room Allocation Box -->
-      <div class="section-title"><span>🏨</span> 숙소 배정 (소노벨 천안)</div>
-
-      <div class="room-container">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🍁 2026 천안·세종 가을 여행 (A Warm Autumn Getaway)</title>
+
+  <!-- 오픈그래프 (카카오톡, 문자 공유 썸네일) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="🍁 2026 천안·세종 가을 여행 (A Warm Autumn Getaway)" />
+  <meta property="og:description" content="10.8(목)~10.10(토) 온 가족 9명이 함께하는 천안·세종 2박 3일 여행 일정표 및 숙소 배정 안내" />
+  <meta property="og:image" content="poster.jpg" />
+  <meta property="og:image:alt" content="2026 천안·세종 가을 여행 가족 포스터" />
+
+  <!-- 트위터 카드 -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="🍁 2026 천안·세종 가을 여행" />
+  <meta name="twitter:description" content="온 가족 9명이 함께하는 천안·세종 2박 3일 여행 가이드" />
+  <meta name="twitter:image" content="poster.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&family=Gaegu:wght@700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      /* 따뜻한 가을 포스터 컬러 팔레트 */
+      --bg-color: #faf5ed;
+      --card-bg: #ffffff;
+      --card-border: #eddcc8;
+      --card-shadow: 0 4px 18px rgba(138, 75, 23, 0.08);
+      --primary: #c2410c;
+      /* 단풍 오렌지 */
+      --primary-dark: #9a3412;
+      /* 딥 브라운 오렌지 */
+      --accent-amber: #d97706;
+      /* 가을 골드 */
+      --accent-emerald: #15803d;
+      /* 수목원 그린 */
+      --badge-time-bg: #3c2415;
+      /* 포스터 속 어두운 시간 캡슐 */
+      --badge-time-text: #fffbeb;
+      --text-main: #2b1810;
+      /* 따뜻한 다크 브라운 */
+      --text-body: #4a3528;
+      --text-muted: #785a44;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 10px;
+
+      /* 기본 폰트 사이즈 스케일 */
+      --font-base: 16px;
+      --font-title: 1.25rem;
+      --font-h1: 1.85rem;
+    }
+
+    /* 어르신을 위한 큰 글씨 모드 (시니어 친화 UI - 가로 여백 극대화 최적화) */
+    body.senior-mode {
+      --font-base: 18.5px;
+      --font-title: 1.35rem;
+      --font-h1: 2rem;
+    }
+
+    body.senior-mode .container {
+      padding: 10px 10px 40px; /* 전체 좌우 여백을 줄여 카드 본문 가로폭 대폭 확장 */
+    }
+
+    body.senior-mode .timeline {
+      padding-left: 18px; /* 타임라인 좌측 선 여백 축소 */
+    }
+
+    body.senior-mode .timeline::before {
+      left: 5px;
+    }
+
+    body.senior-mode .timeline-dot {
+      left: -19px;
+      width: 16px;
+      height: 16px;
+      border-width: 3.5px;
+    }
+
+    body.senior-mode .step-card {
+      padding: 12px 13px; /* 카드 내부 패딩을 18px -> 13px로 타이트하게 압축 */
+    }
+
+    body.senior-mode .step-title {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    body.senior-mode .step-details {
+      padding: 10px 11px; /* 세부 박스 패딩 압축 */
+    }
+
+    body.senior-mode .step-details li {
+      font-size: 1.08rem;
+      line-height: 1.6;
+      padding-left: 12px; /* 불릿 왼쪽 여백 축소 */
+      margin-bottom: 5px;
+      letter-spacing: -0.2px;
+    }
+
+    body.senior-mode .time-capsule {
+      font-size: 0.98rem;
+      padding: 5px 10px;
+    }
+
+    body.senior-mode .room-container {
+      padding: 12px 14px;
+    }
+
+    body.senior-mode .room-card {
+      padding: 10px 12px;
+    }
+
+    body.senior-mode .room-details {
+      font-size: 1.08rem;
+    }
+
+    body.senior-mode .btn-map {
+      padding: 8px 4px;
+      font-size: 0.92rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family:
+        "Pretendard",
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      word-break: keep-all; /* 단어 단위 자연스러운 줄바꿈 */
+      overflow-wrap: break-word; /* 지나치게 긴 단어만 박스 내 개행 */
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+      min-height: 100vh;
+      font-size: var(--font-base);
+      word-break: keep-all;
+      transition: font-size 0.2s ease;
+    }
+
+    .container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 12px 10px 40px; /* 작은 글씨 모드에서도 좌우 공간이 넓은 느낌으로 확장 */
+    }
+
+    /* 상단 바: 어르신 모드 스위치 & 포스터 보기 */
+    .top-utility-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 6px 8px;
+      background: #f4ebd9;
+      border-radius: 999px;
+      border: 1px solid #e8d7be;
+    }
+
+    .font-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #d4bda4;
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .font-toggle-btn:active {
+      transform: scale(0.97);
+      background: #ffedd5;
+    }
+
+    .poster-view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #c2410c;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* 포스터 감성 헤더 */
+    .header {
+      text-align: center;
+      padding: 16px 12px 20px;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, #fff9f0 0%, #fdf5e8 100%);
+      border: 1.5px solid #eedecb;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 16px rgba(154, 52, 18, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: "🍁";
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 1.5rem;
+      opacity: 0.4;
+    }
+
+    .header::after {
+      content: "🍂";
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 1.5rem;
+      opacity: 0.4;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffedd5;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: var(--font-h1);
+      font-weight: 900;
+      line-height: 1.3;
+      color: #431407;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .header .sub-english {
+      font-family: "Gaegu", cursive, sans-serif;
+      font-size: 1.35rem;
+      color: #ea580c;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .header .date-text {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #78350f;
+    }
+
+
+    /* 섹션 타이틀 */
+    .section-title {
+      font-size: var(--font-title);
+      font-weight: 900;
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #431407;
+    }
+
+    /* 숙소 배정 아코디언 카드 */
+    .room-container {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 24px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s ease;
+    }
+
+    .room-summary-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .room-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .room-summary-title {
+      font-size: 1.08rem;
+      font-weight: 900;
+      color: #431407;
+    }
+
+    .room-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffedd5;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .room-toggle-btn:active {
+      transform: scale(0.97);
+    }
+
+    .room-toggle-arrow {
+      display: inline-block;
+      transition: transform 0.25s ease;
+      font-size: 0.85rem;
+    }
+
+    .room-container.open .room-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .room-content {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 2px dashed #f1ded0;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .room-container.open .room-content {
+      display: block;
+    }
+
+    .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .room-header span:first-child {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #431407;
+    }
+
+    .room-header span:last-child {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #9a3412;
+      background: #ffedd5;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid #fed7aa;
+    }
+
+    .room-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .room-card {
+      background: #fdfaf6;
+      border: 1px solid #eddcc8;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+
+    .room-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .room-user {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #2b1810;
+    }
+
+    .tag-stay {
+      font-size: 0.82rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .tag-stay.stay {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .tag-stay.move {
+      background: #fff1f2;
+      color: #9f1239;
+      border: 1px solid #fecdd3;
+    }
+
+    .room-details {
+      font-size: 0.98rem;
+      color: var(--text-body);
+    }
+
+    .room-details strong {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+    .room-tip {
+      margin-top: 14px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      color: #78350f;
+      line-height: 1.5;
+    }
+
+    /* 일자별 Sticky 탭 */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      background: #ffffff;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      position: sticky;
+      top: 10px;
+      z-index: 50;
+      border: 1.5px solid #e8d7be;
+      box-shadow: 0 4px 16px rgba(67, 20, 7, 0.1);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 0;
+      border: none;
+      background: #faf3e8;
+      color: #78350f;
+      font-size: 1rem;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #ea580c;
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
+    }
+
+    /* 일자별 패널 */
+    .day-panel {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .day-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 포스터 감성 리본 일자 헤더 */
+    .day-header-box {
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      background: #ffffff;
+      border: 1.5px solid #ecd5b8;
+      border-left: 6px solid #ea580c;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      box-shadow: var(--card-shadow);
+    }
+
+    .day-header-box h2 {
+      font-size: 1.25rem;
+      color: #431407;
+      font-weight: 900;
+    }
+
+    .day-header-box p {
+      font-size: 0.95rem;
+      color: #785a44;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* 타임라인 레이아웃 (기본 모드에서도 넉넉한 가로폭 확보) */
+    .timeline {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 14px;
+      bottom: 24px;
+      width: 3px;
+      background: #dfc9b0;
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 22px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -19px;
+      top: 18px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3.5px solid #ea580c;
+      box-sizing: border-box;
+      z-index: 2;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+    }
+
+    .timeline-dot.finish {
+      border-color: #15803d;
+      background: #f0fdf4;
+    }
+
+    /* 스텝 카드 */
+    .step-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .step-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    /* 포스터 속 캡슐 시간 뱃지 */
+    .time-capsule {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--badge-time-bg);
+      color: var(--badge-time-text);
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 5px 11px;
+      border-radius: 999px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .step-tag {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #c2410c;
+      background: #ffedd5;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .step-title {
+      font-size: 1.18rem;
+      font-weight: 900;
+      color: #2b1810;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .step-details {
+      font-size: 0.96rem;
+      color: var(--text-body);
+      line-height: 1.55;
+      background: #fdfaf6;
+      border: 1px solid #eddcc8;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .step-details ul {
+      list-style: none;
+    }
+
+    .step-details li {
+      position: relative;
+      padding-left: 14px;
+      margin-bottom: 6px;
+    }
+
+    .step-details li:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-details li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #ea580c;
+      font-weight: 900;
+      font-size: 1.2rem;
+    }
+
+    .step-details strong {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+    /* 길찾기 원클릭 버튼 */
+    .action-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-map {
+      flex: 1;
+      padding: 9px 0;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-map:active {
+      background: #fed7aa;
+    }
+
+    /* 열차 승차권 UI */
+    .train-ticket {
+      background: #ffffff;
+      border: 1.5px solid #fed7aa;
+      border-left: 6px solid #ea580c;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
+    }
+
+    .train-ticket-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .train-badge-group {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .train-name {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #dc2626;
+    }
+
+    .train-code {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .train-time-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #78350f;
+      background: #fef3c7;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .train-schedule-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fffaf0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid #fde68a;
+    }
+
+    .station-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .station-box.right {
+      text-align: right;
+      align-items: flex-end;
+    }
+
+    .station-box .st-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #2b1810;
+    }
+
+    .station-box .st-clock {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #ea580c;
+    }
+
+    .schedule-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #785a44;
+      font-weight: 700;
+    }
+
+    /* 하단 플로팅 액션 */
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 16px 0;
+      background: #ffffff;
+      border: 1.5px solid #dfc9b0;
+      color: #431407;
+      border-radius: var(--radius-md);
+      font-size: 1.02rem;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 3px 8px rgba(67, 20, 7, 0.08);
+      transition: all 0.15s ease;
+    }
+
+    .btn-action:active {
+      background: #faf3e8;
+      transform: scale(0.99);
+    }
+
+    /* 모달 팝업 (포스터 확대 보기) */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      background: transparent;
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 상단 시니어 모드 & 포스터 버튼 -->
+    <div class="top-utility-bar">
+      <button class="font-toggle-btn" id="seniorToggleBtn" onclick="toggleSeniorMode()">
+        🔍 큰 글씨로 보기
+      </button>
+      <button class="poster-view-btn" onclick="openPosterModal()">
+        🎨 포스터 보기
+      </button>
+    </div>
+
+    <!-- 헤더 (포스터 폰트 및 감성 반영) -->
+    <header class="header">
+      <div class="header-badge">🍁 온 가족 가을 나들이</div>
+      <h1>2026 천안·세종 가을 여행</h1>
+      <div class="sub-english">A Warm Autumn Getaway</div>
+      <p class="date-text">2026. 10. 8 (목) ~ 10. 10 (토) · 총 9명</p>
+    </header>
+
+
+    <!-- 숙소 배정 현황 (소노벨 천안 - 기본 접힘 아코디언) -->
+    <div class="room-container" id="roomContainer">
+      <div class="room-summary-bar" onclick="toggleRoomContainer()">
+        <div class="room-summary-left">
+          <span>🏨</span>
+          <span class="room-summary-title">숙소 배정 (소노벨 천안)</span>
+        </div>
+        <div class="room-toggle-btn" id="roomToggleBtn">
+          <span>객실 자세히 보기</span>
+          <span class="room-toggle-arrow">▼</span>
+        </div>
+      </div>
+
+      <div class="room-content" id="roomContent">
         <div class="room-header">
-          <span style="color: var(--text-main); font-size: 0.9rem"
-            >스위트 객실 현황</span
-          >
+          <span>스위트 객실 현황</span>
           <span>총 어른 6 / 아이 3</span>
         </div>
 
@@ -632,547 +934,590 @@
         </div>
 
         <div class="room-tip">
-          💡 <strong>방 이동 팁:</strong> 9일 아침 외출 전 6862호(유엘 방)에 짐
-          임시 보관 후 출발! (사전 문의 시 연박 배정 가능성 확인 권장)
+          💡 <strong>2일 차 방 이동 팁:</strong> 9일 아침 외출 전 6862호(유엘
+          방)에 짐 임시 보관 후 출발! (프런트 사전 문의 시 연박 가능 여부 확인
+          권장)
         </div>
-      </div>
-
-      <!-- Day Selector Sticky Nav -->
-      <div class="tab-nav" id="tabNav">
-        <button class="tab-btn active" onclick="switchDay(1)">
-          1일 차 (10.8)
-        </button>
-        <button class="tab-btn" onclick="switchDay(2)">2일 차 (10.9)</button>
-        <button class="tab-btn" onclick="switchDay(3)">3일 차 (10.10)</button>
-      </div>
-
-      <!-- ================= DAY 1 ================= -->
-      <div id="day1" class="day-panel active">
-        <div class="day-header-box">
-          <h2>🚩 1일 차: 천안 도착 & 생일 축하</h2>
-          <p>기차 이동, 편안한 점심 식사 후 화수목 정원 생일 파티</p>
-        </div>
-
-        <div class="timeline">
-          <!-- Step 1 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 1</span>
-                <span class="step-duration">⏱️ 1시간 5분 (10:48 ~ 11:53)</span>
-              </div>
-              <div class="step-title">🚄 서울역 출발 ➔ 천안역 도착</div>
-              <div class="step-details">
-                <ul>
-                  <li>천안행 기차 탑승 및 편안하게 이동</li>
-                  <li>11:53 천안역 도착 후 렌트카 수령(STEP 2) 연계</li>
-                </ul>
-
-                <!-- Train Ticket -->
-                <div class="train-ticket">
-                  <div class="train-ticket-head">
-                    <div class="train-badge-group">
-                      <span class="train-name">ITX-마음</span>
-                      <span class="train-code">1011</span>
-                    </div>
-                    <span class="train-time-badge">소요시간: 1시간 5분</span>
-                  </div>
-                  <div class="train-schedule-row">
-                    <div class="station-box">
-                      <span class="st-title">서울</span>
-                      <span class="st-clock">10:48</span>
-                    </div>
-                    <div class="schedule-arrow">
-                      <span class="arrow-symbol">➔</span>
-                    </div>
-                    <div class="station-box right">
-                      <span class="st-title">천안</span>
-                      <span class="st-clock">11:53</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 2</span>
-                <span class="step-duration">⏱️ 차 4분</span>
-              </div>
-              <div class="step-title">🚉 천안역 도착 & 렌트카</div>
-              <div class="step-details">
-                <ul>
-                  <li>천안역 도착 후 예약된 렌트카 수령</li>
-                  <li>식당으로 즉시 이동</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 3</span>
-                <span class="step-duration">⏱️ 차 20분 이동</span>
-              </div>
-              <div class="step-title">🐟 점심: 부엉이식당</div>
-              <div class="step-details">
-                <ul>
-                  <li>위치: 천안역 인근 (차 4분 / 도보 15분)</li>
-                  <li>
-                    <strong>메뉴:</strong> 생선구이 백반, 구수한 청국장 정식
-                  </li>
-                  <li>온 가족 편안하게 한식 식사</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 4 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 4</span>
-                <span class="step-duration">⏱️ 차 10~15분 이동</span>
-              </div>
-              <div class="step-title">🏨 소노벨 천안 (체크인)</div>
-              <div class="step-details">
-                <ul>
-                  <li>1일 차 객실 체크인 (7009호, 7005호, 6862호)</li>
-                  <li>짐 정리 및 잠시 휴식</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 5 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 5</span>
-                <span class="step-duration">도보 이동</span>
-              </div>
-              <div class="step-title">🌳 아름다운정원 화수목</div>
-              <div class="step-details">
-                <ul>
-                  <li>위치: 천안시 목천읍 (소노벨 인근 10~15분 거리)</li>
-                  <li>완만한 야외 정원 힐링 산책 & 포토 타임</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 6 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 6</span>
-                <span class="step-duration">⏱️ 차 10~15분 이동</span>
-              </div>
-              <div class="step-title">🎂 화수목 식당 & 생일 파티</div>
-              <div class="step-details">
-                <ul>
-                  <li>정원 내 레스토랑/카페에서 맛있는 저녁 식사</li>
-                  <li>
-                    <span class="highlight-tag">🎉 하이라이트</span> 온 가족
-                    함께하는 생일 축하 파티
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Finish -->
-          <div class="timeline-item">
-            <div class="timeline-dot finish"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number" style="color: var(--accent-emerald)"
-                  >FINISH</span
-                >
-              </div>
-              <div class="step-title">🛏️ 소노벨 천안 복귀</div>
-              <div class="step-details">
-                <ul>
-                  <li>숙소 복귀 후 편안한 휴식 및 1일 차 마무리</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= DAY 2 ================= -->
-      <div id="day2" class="day-panel">
-        <div class="day-header-box">
-          <h2>🚩 2일 차: 곰 관람 & 단풍나무숲길</h2>
-          <p>베어트리파크 먹이주기 체험 및 가을 정취 가득한 독립기념관 산책</p>
-        </div>
-
-        <div class="timeline">
-          <!-- Step 1 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 1</span>
-                <span class="step-duration">도보 2분</span>
-              </div>
-              <div class="step-title">🥐 조식: 브레드보드</div>
-              <div class="step-details">
-                <ul>
-                  <li>호텔 정문 맞은편 대형 베이커리 카페</li>
-                  <li>따뜻한 빵과 모닝 커피로 여유로운 아침</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 2</span>
-                <span class="step-duration">⏱️ 차 15~20분 이동</span>
-              </div>
-              <div class="step-title">🧳 소노벨 천안 (짐 보관)</div>
-              <div class="step-details">
-                <ul>
-                  <li>
-                    방 이동 객실(7009, 7005) 짐을 6862호(연박)로 임시 이동
-                  </li>
-                  <li>가벼운 마음으로 베어트리파크 출발</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 3</span>
-                <span class="step-duration">⏱️ 차 15~20분 이동</span>
-              </div>
-              <div class="step-title">🐻 세종 베어트리파크</div>
-              <div class="step-details">
-                <ul>
-                  <li>
-                    <strong>체험:</strong> 반달곰 & 비단잉어 먹이주기 체험
-                    (아이들 최고 인기)
-                  </li>
-                  <li><strong>입장료:</strong> 대인 13,000원 / 소인 9,000원</li>
-                  <li>
-                    <strong>식사 & 휴식:</strong> 파크 내 점심 식사 ➔ 통창 뷰
-                    카페 티타임
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 4 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 4</span>
-                <span class="step-duration">⏱️ 차 8분 이동</span>
-              </div>
-              <div class="step-title">🏨 소노벨 천안 (새 객실 입실)</div>
-              <div class="step-details">
-                <ul>
-                  <li>새 객실(7135호, 7184호) 체크인 및 짐 정리</li>
-                  <li>오후 산책 전 잠시 룸에서 꿀휴식</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 5 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 5</span>
-                <span class="step-duration">차량 이동</span>
-              </div>
-              <div class="step-title">🍁 천안 독립기념관</div>
-              <div class="step-details">
-                <ul>
-                  <li>
-                    <strong>단풍나무숲길 둘레길:</strong> 완만한 코스로 약 1시간
-                    산책
-                  </li>
-                  <li>어르신과 아이 모두 걷기 편안한 힐링 숲길</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 6 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 6</span>
-                <span class="step-duration">차량 이동</span>
-              </div>
-              <div class="step-title">🍲 저녁 식사</div>
-              <div class="step-details">
-                <ul>
-                  <li>목천/천안 인근 맛집에서 가족 저녁 식사</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Finish -->
-          <div class="timeline-item">
-            <div class="timeline-dot finish"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number" style="color: var(--accent-emerald)"
-                  >FINISH</span
-                >
-              </div>
-              <div class="step-title">🛏️ 소노벨 천안 복귀</div>
-              <div class="step-details">
-                <ul>
-                  <li>숙소 복귀 후 자유 휴식 및 2일 차 마무리</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= DAY 3 ================= -->
-      <div id="day3" class="day-panel">
-        <div class="day-header-box">
-          <h2>🚩 3일 차: 47층 전망대 뷰 & 귀가</h2>
-          <p>여유로운 브런치 후 천안타운홀 47층 전망 감상 & 서울 복귀</p>
-        </div>
-
-        <div class="timeline">
-          <!-- Step 1 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 1</span>
-                <span class="step-duration">도보 2분</span>
-              </div>
-              <div class="step-title">☕ 조식: 브레드보드</div>
-              <div class="step-details">
-                <ul>
-                  <li>모닝 브런치 & 커피로 여유로운 마지막 날 아침</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 2</span>
-                <span class="step-duration">⏱️ 차 20분 이동</span>
-              </div>
-              <div class="step-title">🚪 소노벨 천안 체크아웃</div>
-              <div class="step-details">
-                <ul>
-                  <li><strong>11:00</strong> 객실 체크아웃 완료</li>
-                  <li>천안역으로 출발</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 3</span>
-                <span class="step-duration">도보 이동</span>
-              </div>
-              <div class="step-title">🚗 천안역 (렌트카 반납)</div>
-              <div class="step-details">
-                <ul>
-                  <li>렌트카 안전 반납 완료</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 4 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 4</span>
-                <span class="step-duration">도보 이동</span>
-              </div>
-              <div class="step-title">🍱 천안역 인근 점심 식사</div>
-              <div class="step-details">
-                <ul>
-                  <li>역 주변 맛있는 식당에서 든든한 점심 식사</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 5 -->
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number">STEP 5</span>
-                <span class="step-duration">도보 이동</span>
-              </div>
-              <div class="step-title">🏙️ 천안타운홀 카페 (47층)</div>
-              <div class="step-details">
-                <ul>
-                  <li>힐스테이트 47층 스카이라운지 카페</li>
-                  <li>천안 도심 파노라마 뷰 감상 & 여행 마무리 담소</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Finish -->
-          <div class="timeline-item">
-            <div class="timeline-dot finish"></div>
-            <div class="step-card">
-              <div class="step-top">
-                <span class="step-number" style="color: var(--accent-emerald)"
-                  >FINISH</span
-                >
-                <span class="step-duration">⏱️ 1시간 11분 (14:21 ~ 15:32)</span>
-              </div>
-              <div class="step-title">🚅 천안역 ➔ 서울행 귀가</div>
-              <div class="step-details">
-                <ul>
-                  <li>
-                    기차 탑승 및 15:32 서울역 안전 귀가! 수고하셨습니다 👏
-                  </li>
-                </ul>
-
-                <!-- Train Ticket -->
-                <div class="train-ticket mugunghwa">
-                  <div class="train-ticket-head">
-                    <div class="train-badge-group">
-                      <span class="train-name">무궁화</span>
-                      <span class="train-code">1156</span>
-                    </div>
-                    <span class="train-time-badge">소요시간: 1시간 11분</span>
-                  </div>
-                  <div class="train-schedule-row">
-                    <div class="station-box">
-                      <span class="st-title">천안</span>
-                      <span class="st-clock">14:21</span>
-                    </div>
-                    <div class="schedule-arrow">
-                      <span class="arrow-symbol">➔</span>
-                    </div>
-                    <div class="station-box right">
-                      <span class="st-title">서울</span>
-                      <span class="st-clock">15:32</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom Action -->
-      <div class="quick-actions">
-        <button
-          class="btn-action"
-          onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        >
-          ⬆️ 맨 위로 이동
-        </button>
-        <button class="btn-action" onclick="copyUrl()">
-          🔗 링크/일정 복사
-        </button>
       </div>
     </div>
 
-    <script>
-      function switchDay(dayNum) {
-        // Tab active
-        const buttons = document.querySelectorAll(".tab-btn");
-        buttons.forEach((btn, idx) => {
-          if (idx === dayNum - 1) {
-            btn.classList.add("active");
-          } else {
-            btn.classList.remove("active");
-          }
-        });
+    <!-- Day Selector Sticky Nav -->
+    <div class="tab-nav" id="tabNav">
+      <button class="tab-btn active" onclick="switchDay(1)">
+        10/8 (목) 1일차
+      </button>
+      <button class="tab-btn" onclick="switchDay(2)">
+        10/9 (금) 2일차
+      </button>
+      <button class="tab-btn" onclick="switchDay(3)">
+        10/10 (토) 3일차
+      </button>
+    </div>
 
-        // Panel active
-        const panels = document.querySelectorAll(".day-panel");
-        let activePanel = null;
-        panels.forEach((panel, idx) => {
-          if (idx === dayNum - 1) {
-            panel.classList.add("active");
-            activePanel = panel;
-          } else {
-            panel.classList.remove("active");
-          }
-        });
+    <!-- ================= DAY 1 ================= -->
+    <div id="day1" class="day-panel active">
+      <div class="day-header-box">
+        <h2>🚩 10/8 (목) 1일차 : 천안 도착 & 생일 축하</h2>
+        <p>서울역 출발 ➔ 천안역 도착 ➔ 소노벨 체크인 ➔ 화수목 생일 파티</p>
+      </div>
 
-        // day-header-box 위치로 부드럽게 스크롤 이동 (상단 sticky 탭 바 높이 보정)
-        if (activePanel) {
-          const headerBox =
-            activePanel.querySelector(".day-header-box") || activePanel;
-          if (headerBox) {
-            const nav = document.getElementById("tabNav");
-            const navOffset = nav
-              ? nav.getBoundingClientRect().height + 16
-              : 70;
-            const targetY =
-              headerBox.getBoundingClientRect().top +
-              window.pageYOffset -
-              navOffset;
-            window.scrollTo({ top: targetY, behavior: "smooth" });
-          }
-        }
+      <div class="timeline">
+        <!-- Step 1 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 10:48 ~ 11:53</span>
+              <span class="step-tag">서울 ➔ 천안</span>
+            </div>
+            <div class="step-title">🚄 서울역 출발 ➔ 천안역 도착</div>
+            <div class="step-details">
+              <ul>
+                <li>기차로 편안하게 천안역 이동 (소요시간 65분)</li>
+                <li>11:53 천안역 도착 후 렌터카 인수 연계</li>
+              </ul>
+
+              <!-- Train Ticket -->
+              <div class="train-ticket">
+                <div class="train-ticket-head">
+                  <div class="train-badge-group">
+                    <span class="train-name">ITX-마음</span>
+                    <span class="train-code">1011호</span>
+                  </div>
+                  <span class="train-time-badge">65분 소요</span>
+                </div>
+                <div class="train-schedule-row">
+                  <div class="station-box">
+                    <span class="st-title">서울역</span>
+                    <span class="st-clock">10:48</span>
+                  </div>
+                  <div class="schedule-arrow">
+                    <span>➔</span>
+                  </div>
+                  <div class="station-box right">
+                    <span class="st-title">천안역</span>
+                    <span class="st-clock">11:53</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 12:00 ~ 13:30</span>
+              <span class="step-tag">점심 식사</span>
+            </div>
+            <div class="step-title">🐟 점심 식사 및 렌터카 인수</div>
+            <div class="step-details">
+              <ul>
+                <li>천안역 앞 렌터카 수령 및 짐 싣기</li>
+                <li><strong>식당: 부엉이식당</strong> (천안역에서 차로 약 10~15분)</li>
+                <li><strong>주소:</strong> 충남 천안시 동남구 통정9로 43-13 1층</li>
+                <li><strong>메뉴:</strong> 생선구이 백반, 구수한 청국장 정식</li>
+              </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/천안시 동남구 통정9로 43-13" target="_blank" class="btn-map">📍 부엉이식당 길찾기</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 13:30 ~ 14:30</span>
+              <span class="step-tag">숙소 입실</span>
+            </div>
+            <div class="step-title">🏨 소노벨 천안 이동 및 체크인</div>
+            <div class="step-details">
+              <ul>
+                <li>1일 차 객실 체크인 (7009호, 7005호, 6862호)</li>
+                <li>각자 객실에 짐 풀고 잠시 편안하게 휴식 ☕</li>
+              </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/소노벨 천안" target="_blank" class="btn-map">📍 소노벨 천안 길찾기</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 14:30 ~ 19:30</span>
+              <span class="step-tag">하이라이트 🎉</span>
+            </div>
+            <div class="step-title">🌳 아름다운정원 화수목 & 생일 파티</div>
+            <div class="step-details">
+              <ul>
+                <li>위치: 천안시 목천읍 (소노벨에서 차로 10~15분)</li>
+                <li>완만한 야외 수목원 힐링 산책 & 가족 포토 타임 📸</li>
+                <li><strong>저녁 식사:</strong> 정원 내 레스토랑/베이커리</li>
+                <li>🎂 <strong>온 가족 함께하는 생일 축하 파티!</strong></li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/아름다운정원 화수목" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/mhcooking/224369987240" target="_blank" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">📝 리뷰 1</a>
+                <a href="https://blog.naver.com/bobmaker/222555600745" target="_blank" class="btn-map" style="background: #fefce8; border-color: #fde047; color: #854d0e;">☕ 리뷰 2</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finish -->
+        <div class="timeline-item">
+          <div class="timeline-dot finish"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule" style="background: #15803d; color: #fff">저녁 이후</span>
+              <span class="step-tag">1일차 마무리</span>
+            </div>
+            <div class="step-title">🛏️ 소노벨 천안 복귀 및 휴식</div>
+            <div class="step-details">
+              <ul>
+                <li>숙소 복귀 후 자유 휴식 및 첫날 일정 마무리 🌙</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DAY 2 ================= -->
+    <div id="day2" class="day-panel">
+      <div class="day-header-box">
+        <h2>🚩 10/9 (금) 2일차 : 곰 관람 & 단풍나무숲길</h2>
+        <p>
+          베어트리파크 ➔ 숙소 휴식 ➔ 가을 정취 독립기념관 단풍나무숲길 산책
+        </p>
+      </div>
+
+      <div class="timeline">
+        <!-- Step 1 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 09:30 ~ 10:30</span>
+              <span class="step-tag">조식 & 짐보관</span>
+            </div>
+            <div class="step-title">🥐 기상 및 아침 식사 (브레드보드)</div>
+            <div class="step-details">
+              <ul>
+                <li>호텔 정문 맞은편 대형 베이커리 카페 (도보 2분)</li>
+                <li>따뜻한 빵과 모닝 커피로 여유로운 조식</li>
+                <li>
+                  <strong>방 이동 준비:</strong> 이동 객실 짐을 6862호(유엘
+                  방)에 임시 보관
+                </li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/브레드보드 천안" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/youki42/224385787254" target="_blank" class="btn-map" style="background: #fefce8; border-color: #fde047; color: #854d0e;">🥐 리뷰 1</a>
+                <a href="https://blog.naver.com/blaz723/224285705106" target="_blank" class="btn-map" style="background: #fff7ed; border-color: #fdba74; color: #9a3412;">☕ 리뷰 2</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 10:30 ~ 13:30</span>
+              <span class="step-tag">아이들 최고 인기 🐻</span>
+            </div>
+            <div class="step-title">🐻 베어트리파크 관람 (동물 먹이주기)</div>
+            <div class="step-details">
+              <ul>
+                <li>세종시 전동면 이동 (차 15~20분)</li>
+                <li><strong>체험:</strong> 반달곰 & 비단잉어 먹이주기 체험</li>
+                <li>아름다운 수목원 정원 관람 & 포토존 힐링</li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/베어트리파크" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/f1y2thesky/224423209561" target="_blank" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">🐻 리뷰 1</a>
+                <a href="https://blog.naver.com/bolikeme/224376066974" target="_blank" class="btn-map" style="background: #fefce8; border-color: #fde047; color: #854d0e;">🌳 리뷰 2</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 13:30 ~ 15:00</span>
+              <span class="step-tag">점심 & 카페</span>
+            </div>
+            <div class="step-title">🍲 점심: 웰컴 레스토랑 & 카페</div>
+            <div class="step-details">
+              <ul>
+                <li><strong>식당: 웰컴 레스토랑</strong> (베어트리파크 내 위치)</li>
+                <li>식사 후 통창 뷰 카페에서 여유로운 커피 타임 ☕</li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://blog.naver.com/cafe_ggangfe/224265742394" target="_blank" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">🍲 리뷰</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 (소노벨 새 객실 입실 및 충전 휴식) -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 15:00 ~ 16:00</span>
+              <span class="step-tag">체력 충전 꿀휴식</span>
+            </div>
+            <div class="step-title">🏨 소노벨 새 객실 입실 & 휴식</div>
+            <div class="step-details">
+              <ul>
+                <li>소노벨 복귀 후 새 객실(7135호, 7184호) 키 수령 및 입실</li>
+                <li>짐 정리 후 방에서 편안하게 낮잠/휴식 (체력 안배!)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 16:00 ~ 18:30</span>
+              <span class="step-tag">가을 단풍 힐링 🍁</span>
+            </div>
+            <div class="step-title">🍁 독립기념관 단풍나무숲길 산책</div>
+            <div class="step-details">
+              <ul>
+                <li>소노벨에서 차로 8분 거리</li>
+                <li>선선한 늦은 오후, 붉게 물든 단풍나무숲길 산책 (약 1시간)</li>
+                <li>어르신·아이 컨디션에 맞춰 겨레의 집 중심 완만 코스 산책</li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/독립기념관 단풍나무숲길" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/hyenyang23/224431124592" target="_blank" class="btn-map" style="background: #fef2f2; border-color: #fca5a5; color: #991b1b;">🍁 리뷰</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="timeline-item">
+          <div class="timeline-dot finish"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 18:30 ~</span>
+              <span class="step-tag">저녁 & 휴식</span>
+            </div>
+            <div class="step-title">🍲 저녁 식사 및 숙소 복귀</div>
+            <div class="step-details">
+              <ul>
+                <li>목천/천안 인근 맛집에서 편안한 가족 저녁 식사</li>
+                <li>소노벨 복귀 후 2일 차 마무리 휴식 🌙</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DAY 3 ================= -->
+    <div id="day3" class="day-panel">
+      <div class="day-header-box">
+        <h2>🚩 10/10 (토) 3일차 : 47층 전망대 뷰 & 귀가</h2>
+        <p>여유로운 체크아웃 ➔ 렌터카 반납 ➔ 47층 천안타운홀 ➔ 기차 탑승</p>
+      </div>
+
+      <div class="timeline">
+        <!-- Step 1 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 09:30 ~ 11:00</span>
+              <span class="step-tag">조식 & 체크아웃</span>
+            </div>
+            <div class="step-title">☕ 기상 및 체크아웃 준비</div>
+            <div class="step-details">
+              <ul>
+                <li>브레드보드 모닝 브런치 & 커피로 여유로운 아침</li>
+                <li><strong>11:00</strong> 3개 객실 짐 챙겨서 체크아웃 완료</li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/브레드보드 천안" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/youki42/224385787254" target="_blank" class="btn-map" style="background: #fefce8; border-color: #fde047; color: #854d0e;">🥐 리뷰 1</a>
+                <a href="https://blog.naver.com/blaz723/224285705106" target="_blank" class="btn-map" style="background: #fff7ed; border-color: #fdba74; color: #9a3412;">☕ 리뷰 2</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 11:00 ~ 11:30</span>
+              <span class="step-tag">이동 & 반납</span>
+            </div>
+            <div class="step-title">🚗 렌터카 반납 및 천안역 이동</div>
+            <div class="step-details">
+              <ul>
+                <li>소노벨 ➔ 천안역 이동 (차 20분)</li>
+                <li>천안역 렌터카 안전하게 반납 완료</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 11:30 ~ 12:30</span>
+              <span class="step-tag">점심 식사</span>
+            </div>
+            <div class="step-title">🍱 점심 식사</div>
+            <div class="step-details">
+              <ul>
+                <li>천안역 인근 맛있는 식당가에서 든든하게 점심 식사</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 12:30 ~ 13:40</span>
+              <span class="step-tag">전망대 뷰 🏙️</span>
+            </div>
+            <div class="step-title">🏙️ 천안타운홀 카페 (47층) 방문</div>
+            <div class="step-details">
+              <ul>
+                <li>천안역 도보 5분 힐스테이트 47층 스카이라운지</li>
+                <li>탁 트인 47층 천안 도심 파노라마 전경 감상!</li>
+                <li>시원한 커피/음료와 함께 여행 마무리 담소 나누기</li>
+              </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/천안타운홀 카페" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://blog.naver.com/oct224/224430049893" target="_blank" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">🏙️ 리뷰</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 13:40 ~ 14:21</span>
+              <span class="step-tag">기차 대기</span>
+            </div>
+            <div class="step-title">🚉 천안역 이동 및 기차 탑승 준비</div>
+            <div class="step-details">
+              <ul>
+                <li>천안역 대합실 이동 및 화장실 이용, 승차권 점검</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finish -->
+        <div class="timeline-item">
+          <div class="timeline-dot finish"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 14:21 출발</span>
+              <span class="step-tag">서울 귀가</span>
+            </div>
+            <div class="step-title">🚅 천안역 ➔ 서울행 기차 귀가</div>
+            <div class="step-details">
+              <ul>
+                <li>14:21 천안역 출발 ➔ 15:32 서울역 도착! (71분 소요)</li>
+                <li>온 가족 안전하게 귀가 완료! 고생 많으셨습니다 👏</li>
+              </ul>
+
+              <!-- Train Ticket -->
+              <div class="train-ticket">
+                <div class="train-ticket-head">
+                  <div class="train-badge-group">
+                    <span class="train-name" style="color: #ea580c">무궁화호</span>
+                    <span class="train-code">1156호</span>
+                  </div>
+                  <span class="train-time-badge">71분 소요</span>
+                </div>
+                <div class="train-schedule-row">
+                  <div class="station-box">
+                    <span class="st-title">천안역</span>
+                    <span class="st-clock">14:21</span>
+                  </div>
+                  <div class="schedule-arrow">
+                    <span>➔</span>
+                  </div>
+                  <div class="station-box right">
+                    <span class="st-title">서울역</span>
+                    <span class="st-clock">15:32</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 플로팅 액션 -->
+    <div class="quick-actions">
+      <button class="btn-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+        ⬆️ 맨 위로 이동
+      </button>
+      <button class="btn-action" onclick="copyUrl()">
+        🔗 일정 링크 복사
+      </button>
+    </div>
+  </div>
+
+  <!-- 포스터 원본 확대 모달 -->
+  <div class="modal-overlay" id="posterModal" onclick="closePosterModal(event)">
+    <div class="modal-content">
+      <button class="btn-close-modal" onclick="closePosterModal(event)">
+        ✕
+      </button>
+      <img src="poster.jpg" alt="가족 가을 여행 포스터 원본" />
+    </div>
+  </div>
+
+  <script>
+    // 어르신 모드 토글 (큰 글씨)
+    function toggleSeniorMode() {
+      const body = document.body;
+      const btn = document.getElementById("seniorToggleBtn");
+      body.classList.toggle("senior-mode");
+      const isSenior = body.classList.contains("senior-mode");
+      localStorage.setItem("senior_font_mode", isSenior ? "true" : "false");
+
+      if (isSenior) {
+        btn.textContent = "🔍 보통 글씨로 보기";
+        btn.style.background = "#ffedd5";
+      } else {
+        btn.textContent = "🔍 큰 글씨로 보기";
+        btn.style.background = "#ffffff";
       }
+    }
 
-      function copyUrl() {
-        if (navigator.clipboard) {
-          navigator.clipboard
-            .writeText(window.location.href)
-            .then(() => {
-              alert(
-                "페이지 주소가 복사되었습니다. 가족 단톡방에 공유해보세요!",
-              );
-            })
-            .catch(() => {
-              alert("주소를 복사하지 못했습니다.");
-            });
+    // 숙소 배정 접기/펼치기 아코디언 토글
+    function toggleRoomContainer() {
+      const container = document.getElementById("roomContainer");
+      const btn = document.getElementById("roomToggleBtn");
+      container.classList.toggle("open");
+      const isOpen = container.classList.contains("open");
+
+      if (isOpen) {
+        btn.innerHTML = '<span>접기</span> <span class="room-toggle-arrow">▲</span>';
+        btn.style.background = "#fed7aa";
+      } else {
+        btn.innerHTML = '<span>객실 자세히 보기</span> <span class="room-toggle-arrow">▼</span>';
+        btn.style.background = "#ffedd5";
+      }
+    }
+
+    // 저장된 글씨 크기 설정 복원
+    window.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("senior_font_mode") === "true") {
+        toggleSeniorMode();
+      }
+    });
+
+    // 일자 탭 전환
+    function switchDay(dayNum) {
+      const buttons = document.querySelectorAll(".tab-btn");
+      buttons.forEach((btn, idx) => {
+        if (idx === dayNum - 1) {
+          btn.classList.add("active");
         } else {
-          alert("이 브라우저에서는 클립보드 복사를 지원하지 않습니다.");
+          btn.classList.remove("active");
+        }
+      });
+
+      const panels = document.querySelectorAll(".day-panel");
+      let activePanel = null;
+      panels.forEach((panel, idx) => {
+        if (idx === dayNum - 1) {
+          panel.classList.add("active");
+          activePanel = panel;
+        } else {
+          panel.classList.remove("active");
+        }
+      });
+
+      if (activePanel) {
+        const headerBox =
+          activePanel.querySelector(".day-header-box") || activePanel;
+        if (headerBox) {
+          const nav = document.getElementById("tabNav");
+          const navOffset = nav
+            ? nav.getBoundingClientRect().height + 16
+            : 70;
+          const targetY =
+            headerBox.getBoundingClientRect().top +
+            window.pageYOffset -
+            navOffset;
+          window.scrollTo({ top: targetY, behavior: "smooth" });
         }
       }
-    </script>
-  </body>
+    }
+
+    // 포스터 모달
+    function openPosterModal() {
+      document.getElementById("posterModal").classList.add("active");
+    }
+
+    function closePosterModal(e) {
+      if (
+        e.target.id === "posterModal" ||
+        e.target.classList.contains("btn-close-modal")
+      ) {
+        document.getElementById("posterModal").classList.remove("active");
+      }
+    }
+
+    // URL 복사
+    function copyUrl() {
+      if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(window.location.href)
+          .then(() => {
+            alert(
+              "여행 일정 페이지 주소가 복사되었습니다. 가족 단톡방에 공유해보세요!",
+            );
+          })
+          .catch(() => {
+            alert("주소를 복사하지 못했습니다.");
+          });
+      } else {
+        alert("이 브라우저에서는 클립보드 복사를 지원하지 않습니다.");
+      }
+    }
+  </script>
+</body>
+
 </html>
