@@ -1093,13 +1093,13 @@
       </div>
     </div>
 
-    <!-- 💡 결정이 필요한 사항 (확인 및 결정 필요 3곳 안내) -->
+    <!-- 💡 주요 확정 장소 및 예약 안내 -->
     <div class="decision-container" id="decisionContainer">
       <div class="decision-summary-bar" onclick="toggleDecisionContainer()">
         <div class="decision-summary-left">
-          <span>💡</span>
-          <span class="decision-summary-title">결정이 필요한 사항</span>
-          <span class="decision-badge">3건</span>
+          <span>✨</span>
+          <span class="decision-summary-title">주요 방문 식당 & 장소 안내</span>
+          <span class="decision-badge" style="background: #15803d; color: #fff;">확정 5곳</span>
         </div>
         <div class="decision-toggle-btn" id="decisionToggleBtn">
           <span>내용 보기</span>
@@ -1108,40 +1108,67 @@
       </div>
 
       <div class="decision-content" id="decisionContent">
-        <!-- 항목 1: 부엉이식당 재확인 -->
+        <!-- 항목 1: 달빛에구운고등어 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🐟 1일 차 점심: 부엉이식당 위치·메뉴 재확인</span>
-            <span class="decision-status-tag" style="background: #fef3c7; color: #92400e; border-color: #fde68a;">위치 확인
-            </span>
+            <span class="decision-item-title">🐟 1일 차 점심: 달빛에구운고등어 천안구성점</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
           </div>
           <div class="decision-desc">
-            • <strong>현황:</strong> 천안역 인근 지도상에서 청국장·생선구이 백반을 판매하는 '부엉이식당'의 정확한 위치/영업 여부 재확인 필요<br>
-            • <strong>메모:</strong> 식당의 정확한 상호명 확인 또는 천안역 인근 백반 대체 식당 선정 고려
+            • <strong>시간:</strong> 13:00 ~ 14:00 (렌터카 인수 후 이동)<br>
+            • <strong>주소:</strong> 충남 천안시 동남구 천안대로 500 (📞 041-555-3392)<br>
+            • <strong>메뉴:</strong> 화덕 생선구이 모듬 & 셀프바 반찬 (3대 가족 식사 최적)
           </div>
         </div>
 
-        <!-- 미정 2 -->
+        <!-- 항목 2: 알토 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🍽️ 2일 차 저녁 식사 (10/9 금)</span>
-            <span class="decision-status-tag">식당 미정</span>
+            <span class="decision-item-title">🎂 1일 차 저녁: 알토 (ALTO) - 생일 축하 파티</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">예약 추천</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 18:30 이후 (독립기념관 단풍나무숲길 산책 후)<br>
-            • <strong>추천 위치:</strong> 소노벨/독립기념관 인근 목천읍 맛집 (한식, 석갈비 등 온 가족 편안한 룸/식당)
+            • <strong>시간:</strong> 17:30 ~ 18:30 (소노벨 휴식 후 이동)<br>
+            • <strong>주소:</strong> 충남 천안시 동남구 청수10길 4-120 (청수동)<br>
+            • <strong>메뉴:</strong> 나폴리 화덕피자, 파스타 이탈리안 디너 & 생일 파티 🎉
           </div>
         </div>
 
-        <!-- 미정 3 -->
+        <!-- 항목 3: 사월에보리밥과 쭈꾸미 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🍱 3일 차 점심 식사 (10/10 토)</span>
-            <span class="decision-status-tag">식당 미정</span>
+            <span class="decision-item-title">🐙 2일 차 저녁: 사월에보리밥과 쭈꾸미 천안점</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 11:30 ~ 12:30 (렌터카 반납 후, 47층 카페 전)<br>
-            • <strong>추천 위치:</strong> 천안역 또는 천안타운홀 도보 이동 가능한 깔끔한 식당 (국밥, 불고기, 백반 등)
+            • <strong>시간:</strong> 17:40 ~ 18:30 (독립기념관 단풍 산책 후 이동)<br>
+            • <strong>주소:</strong> 충남 천안시 동남구 삼룡동 204 (천안삼거리공원 맞은편)<br>
+            • <strong>메뉴:</strong> 불향 쭈꾸미 볶음, 고르곤졸라 피자, 보리밥 셀프바 정식
+          </div>
+        </div>
+
+        <!-- 항목 4: 셰프스키친 -->
+        <div class="decision-item">
+          <div class="decision-item-head">
+            <span class="decision-item-title">🍽️ 3일 차 조식: 소노벨 천안 셰프스키친</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">조식 뷔페</span>
+          </div>
+          <div class="decision-desc">
+            • <strong>시간:</strong> 09:00 ~ 10:00 (웨스트타워 1층)<br>
+            • <strong>참고:</strong> 전일 21시까지 사전 예약 결제 시 투숙객 할인 (09:30 이전 입장 권장)
+          </div>
+        </div>
+
+        <!-- 항목 5: 태조산시골막국수 -->
+        <div class="decision-item">
+          <div class="decision-item-head">
+            <span class="decision-item-title">🍜 3일 차 점심: 태조산시골막국수</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
+          </div>
+          <div class="decision-desc">
+            • <strong>시간:</strong> 11:00 ~ 12:00 (체크아웃 후 이동)<br>
+            • <strong>주소:</strong> 충남 천안시 동남구 태조산길 83 (📞 041-565-2589)<br>
+            • <strong>메뉴:</strong> 메밀물막국수, 비빔막국수, 석갈비, 메밀전
           </div>
         </div>
       </div>
@@ -1163,12 +1190,30 @@
     <!-- ================= DAY 1 ================= -->
     <div id="day1" class="day-panel active">
       <div class="day-header-box">
-        <h2>🚩 10/8 (목) 1일차 : 천안 도착 & 생일 축하</h2>
-        <p>서울역 출발 ➔ 천안역 도착 ➔ 소노벨 체크인 ➔ 화수목 생일 파티</p>
+        <h2>🚩 10/8 (목) 1일차 : 천안 도착, 화수목 산책 & 생일 파티</h2>
+        <p>서울역 집결 ➔ 천안역 ➔ 고등어구이 점심 ➔ 화수목 정원 산책 ➔ 숙소 체크인&휴식 ➔ 알토 저녁&생일파티</p>
       </div>
 
       <div class="timeline">
-        <!-- Step 1 -->
+        <!-- Step 1: 서울역 집결 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 10:00 ~ 10:30</span>
+              <span class="step-tag">서울역 집결</span>
+            </div>
+            <div class="step-title">🚅 서울역 이동 및 가족 만남</div>
+            <div class="step-details">
+              <ul>
+                <li>규식-예찬네 서울역 대합실에서 만나기</li>
+                <li>승차권 확인 및 열차 탑승 준비</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: 기차 이동 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
@@ -1210,67 +1255,61 @@
           </div>
         </div>
 
-        <!-- Step 2 -->
+        <!-- Step 3: 렌터카 인수 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 12:00 ~ 13:30</span>
-              <span class="step-tag">점심 식사</span>
+              <span class="time-capsule">⏱️ 12:10 ~ 12:30</span>
+              <span class="step-tag">렌터카 수령</span>
             </div>
-            <div class="step-title">🐟 점심 식사 및 렌터카 인수</div>
+            <div class="step-title">🚗 천안역 도착 & 렌터카 인수</div>
             <div class="step-details">
               <ul>
-                <li>천안역 앞 렌터카 수령 및 짐 싣기</li>
-                <li><strong>식당: 부엉이식당</strong> (천안역에서 차로 약 10~15분)</li>
-                <li><strong>주소(후보):</strong> 충남 천안시 동남구 통정9로 43-13 1층</li>
-                <li><strong>메뉴(예정):</strong> 생선구이 백반, 구수한 청국장 정식</li>
-                <li style="color: #b45309; font-weight: 700;">⚠️ <strong>확인 필요:</strong> 지도상 백반 메뉴 판매 여부 재확인 필요</li>
+                <li>천안역 렌터카 인수 및 차량 상태 확인</li>
+                <li>가족 짐 트렁크 적재 후 점심 식당으로 이동 준비</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: 점심 식사 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 13:00 ~ 14:00</span>
+              <span class="step-tag">점심 식사 🐟</span>
+            </div>
+            <div class="step-title">🐟 점심: 달빛에구운고등어 천안구성점</div>
+            <div class="step-details">
+              <ul>
+                <li><strong>위치:</strong> 충남 천안시 동남구 천안대로 500 (천안역 차 10~15분)</li>
+                <li><strong>특징:</strong> 화덕 생선구이 전문점, 푸짐한 셀프바 반찬</li>
+                <li>아이들과 어르신 모두 편안하게 드실 수 있는 영양 만점 한식</li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/천안시 동남구 통정9로 43-13" target="_blank" class="btn-map">📍 부엉이식당
-                  길찾기</a>
+                <a href="https://map.kakao.com/link/search/달빛에구운고등어 천안구성점" target="_blank" class="btn-map">📍 카카오맵 길찾기</a>
+                <a href="tel:041-555-3392" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">📞 041-555-3392</a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 3 -->
+        <!-- Step 5: 화수목 정원 산책 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 13:30 ~ 14:30</span>
-              <span class="step-tag">숙소 입실</span>
+              <span class="time-capsule">⏱️ 14:00 ~ 15:30</span>
+              <span class="step-tag">정원 힐링 🌳</span>
             </div>
-            <div class="step-title">🏨 소노벨 천안 이동 및 체크인</div>
+            <div class="step-title">🌳 아름다운정원 화수목 산책 & 베이커리</div>
             <div class="step-details">
               <ul>
-                <li>1일 차 객실 체크인 (7009호, 7005호, 6862호)</li>
-                <li>각자 객실에 짐 풀고 잠시 편안하게 휴식 ☕</li>
-              </ul>
-              <div class="action-row">
-                <a href="https://map.kakao.com/link/search/소노벨 천안" target="_blank" class="btn-map">📍 소노벨 천안 길찾기</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="step-card">
-            <div class="step-top">
-              <span class="time-capsule">⏱️ 14:30 ~ 19:30</span>
-              <span class="step-tag">하이라이트 🎉</span>
-            </div>
-            <div class="step-title">🌳 아름다운정원 화수목 & 생일 파티</div>
-            <div class="step-details">
-              <ul>
-                <li>위치: 천안시 목천읍 (소노벨에서 차로 10~15분)</li>
-                <li>완만한 야외 수목원 힐링 산책 & 가족 포토 타임 📸</li>
-                <li><strong>저녁 식사:</strong> 정원 내 레스토랑/베이커리</li>
-                <li>🎂 <strong>온 가족 함께하는 생일 축하 파티!</strong></li>
+                <li><strong>14:00 ~ 14:20:</strong> 아름다운정원 화수목 이동 (차 15분)</li>
+                <li><strong>14:30 ~ 15:30:</strong> 대한민국 민간정원 1호 야외 정원 산책 & 베이커리 카페</li>
+                <li>완만한 코스로 어르신·아이 산책 및 포토존 가족 사진 📸</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
                 <a href="https://map.kakao.com/link/search/아름다운정원 화수목" target="_blank" class="btn-map">📍 길찾기</a>
@@ -1283,18 +1322,62 @@
           </div>
         </div>
 
+        <!-- Step 6: 숙소 체크인 및 휴식 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 15:40 ~ 16:30</span>
+              <span class="step-tag">숙소 입실 🏨</span>
+            </div>
+            <div class="step-title">🏨 숙소(소노벨 천안) 체크인 및 휴식</div>
+            <div class="step-details">
+              <ul>
+                <li><strong>15:40 ~ 16:00:</strong> 소노벨 천안 이동 (차 10~15분)</li>
+                <li><strong>16:00 ~ 16:30:</strong> 1일 차 객실 체크인 (7009호, 7005호, 6862호)</li>
+                <li>각자 객실에 짐 풀고 잠시 편안하게 충전 휴식 ☕</li>
+              </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/소노벨 천안" target="_blank" class="btn-map">📍 소노벨 천안 길찾기</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 7: 저녁 식사 및 생일파티 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 16:30 ~ 18:30</span>
+              <span class="step-tag">생일 축하 파티 🎂</span>
+            </div>
+            <div class="step-title">🎂 저녁: 알토 (ALTO) & 생일파티</div>
+            <div class="step-details">
+              <ul>
+                <li><strong>16:30 ~ 17:00:</strong> 식당 이동 (충남 천안시 동남구 청수10길 4-120)</li>
+                <li><strong>17:30 ~ 18:30:</strong> 나폴리 화덕피자 & 파스타 이탈리안 디너</li>
+                <li>🎉 <strong>온 가족 함께하는 생일 축하 파티!</strong></li>
+              </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/알토 천안 청수동" target="_blank" class="btn-map">📍 알토 길찾기</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Finish -->
         <div class="timeline-item">
           <div class="timeline-dot finish"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule" style="background: #15803d; color: #fff">저녁 이후</span>
+              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 18:30 ~ 19:00</span>
               <span class="step-tag">1일차 마무리</span>
             </div>
-            <div class="step-title">🛏️ 소노벨 천안 복귀 및 휴식</div>
+            <div class="step-title">🛏️ 숙소 복귀 및 휴식</div>
             <div class="step-details">
               <ul>
-                <li>숙소 복귀 후 자유 휴식 및 첫날 일정 마무리 🌙</li>
+                <li>소노벨 천안 복귀 후 자유 휴식 및 첫날 일정 마무리 🌙</li>
               </ul>
             </div>
           </div>
@@ -1305,10 +1388,8 @@
     <!-- ================= DAY 2 ================= -->
     <div id="day2" class="day-panel">
       <div class="day-header-box">
-        <h2>🚩 10/9 (금) 2일차 : 곰 관람 & 단풍나무숲길</h2>
-        <p>
-          베어트리파크 ➔ 숙소 휴식 ➔ 가을 정취 독립기념관 단풍나무숲길 산책
-        </p>
+        <h2>🚩 10/9 (금) 2일차 : 곰 관람 & 단풍나무숲길 산책</h2>
+        <p>베어트리파크 ➔ 숙소 복귀 및 휴식 ➔ 독립기념관 단풍나무숲길 ➔ 사월에보리밥 저녁</p>
       </div>
 
       <div class="timeline">
@@ -1320,15 +1401,12 @@
               <span class="time-capsule">⏱️ 09:30 ~ 10:30</span>
               <span class="step-tag">조식 & 짐보관</span>
             </div>
-            <div class="step-title">🥐 기상 및 아침 식사 (브레드보드)</div>
+            <div class="step-title">🥐 기상 & 아침식사 (브레드보드)</div>
             <div class="step-details">
               <ul>
                 <li>호텔 정문 맞은편 대형 베이커리 카페 (도보 2분)</li>
                 <li>따뜻한 빵과 모닝 커피로 여유로운 조식</li>
-                <li>
-                  <strong>방 이동 준비:</strong> 이동 객실 짐을 6862호(유엘
-                  방)에 임시 보관
-                </li>
+                <li><strong>방 이동 준비:</strong> 이동 객실 짐을 6862호(유엘 방)에 임시 보관</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
                 <a href="https://map.kakao.com/link/search/브레드보드 천안" target="_blank" class="btn-map">📍 길찾기</a>
@@ -1352,8 +1430,8 @@
             <div class="step-title">🐻 베어트리파크 관람 (동물 먹이주기)</div>
             <div class="step-details">
               <ul>
-                <li>세종시 전동면 이동 (차 15~20분)</li>
-                <li><strong>체험:</strong> 반달곰 & 비단잉어 먹이주기 체험</li>
+                <li><strong>10:30 ~ 11:00:</strong> 세종시 전동면 베어트리파크 이동 (차 25~30분)</li>
+                <li><strong>11:00 ~ 13:30:</strong> 반달곰 & 비단잉어 먹이주기 체험</li>
                 <li>아름다운 수목원 정원 관람 & 포토존 힐링</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
@@ -1379,7 +1457,7 @@
             <div class="step-details">
               <ul>
                 <li><strong>식당: 웰컴 레스토랑</strong> (베어트리파크 내 위치)</li>
-                <li>식사 후 통창 뷰 카페에서 여유로운 커피 타임 ☕</li>
+                <li>식사 후 통창 뷰 카페에서 여유로운 커피 타임 & 휴식 ☕</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
                 <a href="https://blog.naver.com/cafe_ggangfe/224265742394" target="_blank" class="btn-map"
@@ -1389,7 +1467,7 @@
           </div>
         </div>
 
-        <!-- Step 4 (소노벨 새 객실 입실 및 충전 휴식) -->
+        <!-- Step 4 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
@@ -1397,11 +1475,11 @@
               <span class="time-capsule">⏱️ 15:00 ~ 16:00</span>
               <span class="step-tag">체력 충전 꿀휴식</span>
             </div>
-            <div class="step-title">🏨 소노벨 새 객실 입실 & 휴식</div>
+            <div class="step-title">🏨 숙소 복귀 및 휴식</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 복귀 후 새 객실(7135호, 7184호) 키 수령 및 입실</li>
-                <li>짐 정리 후 방에서 편안하게 낮잠/휴식 (체력 안배!)</li>
+                <li>소노벨 복귀 후 새 객실(7135호, 7184호) 입실 및 짐 정리</li>
+                <li>오후 산책 전 객실에서 편안하게 낮잠/휴식 (체력 안배!)</li>
               </ul>
             </div>
           </div>
@@ -1412,15 +1490,15 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 16:00 ~ 18:30</span>
+              <span class="time-capsule">⏱️ 16:00 ~ 17:30</span>
               <span class="step-tag">가을 단풍 힐링 🍁</span>
             </div>
-            <div class="step-title">🍁 독립기념관 단풍나무숲길 산책</div>
+            <div class="step-title">🍁 천안독립기념관 단풍나무숲길 산책</div>
             <div class="step-details">
               <ul>
-                <li>소노벨에서 차로 8분 거리</li>
-                <li>선선한 늦은 오후, 붉게 물든 단풍나무숲길 산책 (약 1시간)</li>
-                <li>어르신·아이 컨디션에 맞춰 겨레의 집 중심 완만 코스 산책</li>
+                <li><strong>16:00 ~ 16:20:</strong> 천안독립기념관 이동 (소노벨 차 8분)</li>
+                <li><strong>16:20 ~ 17:30:</strong> 독립기념관 단풍나무숲길 둘레길 산책</li>
+                <li>어르신·아이 컨디션에 맞춰 완만한 둘레길 코스 산책</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
                 <a href="https://map.kakao.com/link/search/독립기념관 단풍나무숲길" target="_blank" class="btn-map">📍 길찾기</a>
@@ -1433,17 +1511,38 @@
 
         <!-- Step 6 -->
         <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="time-capsule">⏱️ 17:30 ~ 18:30</span>
+              <span class="step-tag">저녁 식사 🐙</span>
+            </div>
+            <div class="step-title">🐙 저녁: 사월에보리밥과 쭈꾸미 천안점</div>
+            <div class="step-details">
+              <ul>
+                <li><strong>17:30 ~ 17:40:</strong> 식당 이동 (독립기념관에서 차로 약 10분)</li>
+                <li><strong>17:40 ~ 18:30:</strong> 저녁 식사 (충남 천안시 동남구 삼룡동 204)</li>
+                <li>직화 쭈꾸미 볶음, 고르곤졸라 피자, 보리밥 셀프바 정식</li>
+              </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/사월에보리밥과쭈꾸미 천안점" target="_blank" class="btn-map">📍 카카오맵 길찾기</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finish -->
+        <div class="timeline-item">
           <div class="timeline-dot finish"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 18:30 ~</span>
-              <span class="step-tag">저녁 & 휴식</span>
+              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 18:30 ~ 19:00</span>
+              <span class="step-tag">2일차 마무리</span>
             </div>
-            <div class="step-title">🍲 저녁 식사 및 숙소 복귀</div>
+            <div class="step-title">🛏️ 숙소 이동 및 휴식</div>
             <div class="step-details">
               <ul>
-                <li>목천/천안 인근 맛집에서 편안한 가족 저녁 식사</li>
-                <li>소노벨 복귀 후 2일 차 마무리 휴식 🌙</li>
+                <li>소노벨 천안 복귀 후 2일 차 마무리 휴식 🌙</li>
               </ul>
             </div>
           </div>
@@ -1454,8 +1553,8 @@
     <!-- ================= DAY 3 ================= -->
     <div id="day3" class="day-panel">
       <div class="day-header-box">
-        <h2>🚩 10/10 (토) 3일차 : 47층 전망대 뷰 & 귀가</h2>
-        <p>여유로운 체크아웃 ➔ 렌터카 반납 ➔ 47층 천안타운홀 ➔ 기차 탑승</p>
+        <h2>🚩 10/10 (토) 3일차 : 조식뷔페, 태조산 막국수 & 천안타운홀</h2>
+        <p>소노벨 조식뷔페 ➔ 체크아웃 ➔ 태조산시골막국수 ➔ 렌터카 반납 ➔ 47층 천안타운홀 ➔ 기차 탑승</p>
       </div>
 
       <div class="timeline">
@@ -1464,21 +1563,18 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 09:30 ~ 11:00</span>
-              <span class="step-tag">조식 & 체크아웃</span>
+              <span class="time-capsule">⏱️ 09:00 ~ 10:00</span>
+              <span class="step-tag">조식 뷔페 🍽️</span>
             </div>
-            <div class="step-title">☕ 기상 및 체크아웃 준비</div>
+            <div class="step-title">🍽️ 기상 & 아침식사 (소노벨 셰프스키친)</div>
             <div class="step-details">
               <ul>
-                <li>브레드보드 모닝 브런치 & 커피로 여유로운 아침</li>
-                <li><strong>11:00</strong> 3개 객실 짐 챙겨서 체크아웃 완료</li>
+                <li>소노벨 천안 웨스트타워 1층 조식 뷔페 이용</li>
+                <li>다양한 한식, 양식, 쌀국수 코너 등 든든한 아침 식사</li>
+                <li><strong>10:00 ~ 10:30:</strong> 짐정리 및 소노벨 주변 여유 산책</li>
               </ul>
-              <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/브레드보드 천안" target="_blank" class="btn-map">📍 길찾기</a>
-                <a href="https://blog.naver.com/youki42/224385787254" target="_blank" class="btn-map"
-                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">🥐 리뷰 1</a>
-                <a href="https://blog.naver.com/blaz723/224285705106" target="_blank" class="btn-map"
-                  style="background: #fff7ed; border-color: #fdba74; color: #9a3412;">☕ 리뷰 2</a>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/소노벨천안 셰프스키친" target="_blank" class="btn-map">📍 셰프스키친 위치</a>
               </div>
             </div>
           </div>
@@ -1489,15 +1585,20 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 11:00 ~ 11:30</span>
-              <span class="step-tag">이동 & 반납</span>
+              <span class="time-capsule">⏱️ 10:30 ~ 12:00</span>
+              <span class="step-tag">체크아웃 & 점심 🍜</span>
             </div>
-            <div class="step-title">🚗 렌터카 반납 및 천안역 이동</div>
+            <div class="step-title">🍜 체크아웃 및 점심: 태조산시골막국수</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 ➔ 천안역 이동 (차 20분)</li>
-                <li>천안역 렌터카 안전하게 반납 완료</li>
+                <li><strong>10:30 ~ 11:00:</strong> 체크아웃 완료 및 이동 (차 20분)</li>
+                <li><strong>11:00 ~ 12:00:</strong> 점심 식사 (충남 천안시 동남구 태조산길 83)</li>
+                <li>메밀물막국수, 비빔막국수, 석갈비, 메밀전 등 든든한 식사</li>
               </ul>
+              <div class="action-row">
+                <a href="https://map.kakao.com/link/search/태조산시골막국수" target="_blank" class="btn-map">📍 태조산시골막국수 길찾기</a>
+                <a href="tel:041-565-2589" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">📞 041-565-2589</a>
+              </div>
             </div>
           </div>
         </div>
@@ -1507,14 +1608,21 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 11:30 ~ 12:30</span>
-              <span class="step-tag">점심 식사</span>
+              <span class="time-capsule">⏱️ 12:00 ~ 13:30</span>
+              <span class="step-tag">반납 & 전망대 🏙️</span>
             </div>
-            <div class="step-title">🍱 점심 식사</div>
+            <div class="step-title">🏙️ 카페(천안타운홀) 이동 & 렌터카 반납</div>
             <div class="step-details">
               <ul>
-                <li>천안역 인근 맛있는 식당가에서 든든하게 점심 식사</li>
+                <li><strong>12:00 ~ 12:30:</strong> 천안역 이동 및 렌터카 반납 완료</li>
+                <li><strong>12:30 ~ 13:30:</strong> 천안타운홀 47층 카페 스카이라운지 담소</li>
+                <li>탁 트인 47층 도심 파노라마 전경 감상 & 시원한 음료 타임</li>
               </ul>
+              <div class="action-row" style="flex-wrap: wrap;">
+                <a href="https://map.kakao.com/link/search/천안타운홀 카페" target="_blank" class="btn-map">📍 천안타운홀 길찾기</a>
+                <a href="https://blog.naver.com/oct224/224430049893" target="_blank" class="btn-map"
+                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">🏙️ 리뷰</a>
+              </div>
             </div>
           </div>
         </div>
@@ -1524,37 +1632,14 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 12:30 ~ 13:40</span>
-              <span class="step-tag">전망대 뷰 🏙️</span>
-            </div>
-            <div class="step-title">🏙️ 천안타운홀 카페 (47층) 방문</div>
-            <div class="step-details">
-              <ul>
-                <li>천안역 도보 5분 힐스테이트 47층 스카이라운지</li>
-                <li>탁 트인 47층 천안 도심 파노라마 전경 감상!</li>
-                <li>시원한 커피/음료와 함께 여행 마무리 담소 나누기</li>
-              </ul>
-              <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/천안타운홀 카페" target="_blank" class="btn-map">📍 길찾기</a>
-                <a href="https://blog.naver.com/oct224/224430049893" target="_blank" class="btn-map"
-                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">🏙️ 리뷰</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 5 -->
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="step-card">
-            <div class="step-top">
-              <span class="time-capsule">⏱️ 13:40 ~ 14:21</span>
+              <span class="time-capsule">⏱️ 13:40 ~ 14:20</span>
               <span class="step-tag">기차 대기</span>
             </div>
             <div class="step-title">🚉 천안역 이동 및 기차 탑승 준비</div>
             <div class="step-details">
               <ul>
-                <li>천안역 대합실 이동 및 화장실 이용, 승차권 점검</li>
+                <li><strong>13:40 ~ 14:00:</strong> 천안역 도보 이동 및 기차 탑승 준비</li>
+                <li><strong>14:00 ~ 14:20:</strong> 천안역 대합실 대기, 화장실 이용, 승차권 점검</li>
               </ul>
             </div>
           </div>
@@ -1568,10 +1653,10 @@
               <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 14:21 출발</span>
               <span class="step-tag">서울 귀가</span>
             </div>
-            <div class="step-title">🚅 천안역 ➔ 서울행 기차 귀가</div>
+            <div class="step-title">🚅 기차 (천안역 ➔ 서울역)</div>
             <div class="step-details">
               <ul>
-                <li>14:21 천안역 출발 ➔ 15:32 서울역 도착! (71분 소요)</li>
+                <li>14:21 천안역 출발 ➔ 15:32 서울역 도착 (무궁화 1156호, 71분 소요)</li>
                 <li>온 가족 안전하게 귀가 완료! 고생 많으셨습니다 👏</li>
               </ul>
 
