@@ -51,20 +51,29 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 
   <style>
-    /* 스크롤바 커스텀 */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    /* 미니멀 & 슬릭 다크 테마 커스텀 스크롤바 (Thin & Modern) */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #181a22;
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2d313f;
-      border-radius: 3px;
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #475569;
+    ::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.35);
+      border-radius: 9999px;
+      transition: background 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.65);
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent;
     }
 
     /* 본문 마크다운 타이포그래피 */
@@ -399,9 +408,14 @@
       </div>
     </section>
 
-    <!-- 좌우 조절 리사이저 바 (Desktop 드래그 분할선) -->
-    <div id="pane-resizer" class="hidden md:flex items-center justify-center w-2 hover:w-2.5 bg-app-border hover:bg-blue-500 active:bg-blue-600 cursor-col-resize z-20 transition-all duration-150 select-none flex-shrink-0 group" title="드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)">
-      <div class="w-0.5 h-7 bg-slate-500 group-hover:bg-white rounded-full transition-colors pointer-events-none"></div>
+    <!-- 좌우 조절 리사이저 바 (Desktop 드래그 분할선: 1px 선 + 8px 오버레이 히트박스로 레이아웃 밀림 0px 방어) -->
+    <div id="pane-resizer" class="hidden md:flex items-center justify-center w-px relative bg-app-border cursor-col-resize z-20 select-none flex-shrink-0 group" title="드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)">
+      <!-- 실제 마우스 호버/클릭을 잡는 투명 히트박스 (-4px 좌우 오버레이) -->
+      <div class="absolute inset-y-0 -left-1.5 -right-1.5 z-10 cursor-col-resize"></div>
+      <!-- 호버 시 시각적으로 굵어지는 하이라이트 인디케이터 (레이아웃 공간 안 차지함) -->
+      <div class="w-px h-full bg-transparent group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors pointer-events-none"></div>
+      <!-- 중앙 핀 그립 도트 -->
+      <div class="w-1 h-7 bg-slate-500 group-hover:bg-white rounded-full transition-colors pointer-events-none absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"></div>
     </div>
 
     <!-- 드래그 중 예상 위치를 보여주는 고스트 가이드 라인 -->
@@ -927,7 +941,7 @@ flowchart TD
         iconCollapse.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>';
         btnToggleEditor.classList.add('border-blue-500/50', 'text-blue-400');
         if (paneResizer) {
-          paneResizer.classList.add('bg-blue-500/40', 'w-2');
+          paneResizer.classList.add('bg-blue-500/60');
           paneResizer.title = '클릭하거나 우측으로 드래그하여 에디터 펼치기';
         }
       } else {
@@ -941,7 +955,7 @@ flowchart TD
         iconCollapse.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>';
         btnToggleEditor.classList.remove('border-blue-500/50', 'text-blue-400');
         if (paneResizer) {
-          paneResizer.classList.remove('bg-blue-500/40', 'w-2');
+          paneResizer.classList.remove('bg-blue-500/60');
           paneResizer.title = '드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)';
         }
       }
