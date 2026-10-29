@@ -665,7 +665,7 @@
       <!-- 우측: 실시간 렌더링 뷰어 (Preview Pane) -->
       <section
         id="pane-preview"
-        class="hidden md:flex flex-1 min-w-0 max-w-full h-full flex-col bg-app-panel overflow-hidden"
+        class="hidden md:flex flex-1 min-w-0 max-w-full h-full min-h-0 flex-col bg-app-panel overflow-hidden"
       >
         <div
           class="h-9 px-4 flex items-center justify-between border-b border-app-border bg-app-panelAlt text-xs text-slate-400 select-none"
@@ -699,7 +699,8 @@
         <!-- 스크롤 컨테이너 -->
         <div
           id="preview-scroll-container"
-          class="flex-1 min-w-0 max-w-full overflow-y-auto p-1.5 sm:p-3 select-text"
+          class="flex-1 min-w-0 min-h-0 max-w-full overflow-y-auto p-1.5 sm:p-3 select-text"
+          style="-webkit-overflow-scrolling: touch;"
         >
           <!-- 캡처 대상 노드 -->
           <div
@@ -1267,7 +1268,9 @@ flowchart TD
       function setupMobileTabs() {
         mobileTabEditor.addEventListener("click", () => {
           paneEditor.classList.remove("hidden");
+          paneEditor.classList.add("flex");
           panePreview.classList.add("hidden");
+          panePreview.classList.remove("flex");
           mobileTabEditor.classList.add("bg-app-panel", "text-white");
           mobileTabEditor.classList.remove("text-slate-400");
           mobileTabPreview.classList.remove("bg-app-panel", "text-white");
@@ -1276,7 +1279,9 @@ flowchart TD
 
         mobileTabPreview.addEventListener("click", () => {
           panePreview.classList.remove("hidden");
+          panePreview.classList.add("flex");
           paneEditor.classList.add("hidden");
+          paneEditor.classList.remove("flex");
           // 모바일에서 프리뷰 탭 활성화 시 즉시 100% 가용 및 재렌더링
           panePreview.style.width = "100%";
           renderMermaidDiagrams();
