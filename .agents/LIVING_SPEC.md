@@ -1,6 +1,60 @@
-# Living Spec: Trip Guide Web Application (trip/index.html)
+# Living Spec: Markdown Studio & Project Workspace Spec
+
+```mermaid
+flowchart LR
+    subgraph UI_Header ["GNB Actions & Layout Control"]
+        T1["에디터 접기/펼치기"]
+        H1["이력 불러오기 (FIFO 100건)"]
+        B1["샘플 불러오기"]
+        B2["지우기"]
+        B3["클립보드 이미지 복사"]
+        B4["PNG 다운로드 (2x)"]
+    end
+
+    subgraph Split_Layout ["Flexible 2-Pane Split View"]
+        direction LR
+        EP["Editor Pane (width: 20%~80% or Collapsed)"]
+        RS["Resizer Bar (Drag to Resize / DblClick 5:5)"]
+        PP["Preview Pane (flex-1, min-w-0, w-full responsive)"]
+        EP --- RS --- PP
+    end
+
+    subgraph Editor_Engine ["Editor Core"]
+        TA["Textarea Input (13px JetBrains Mono, No Ligatures)"]
+        LS[("LocalStorage (Current / History 100 / Split / Collapse)")]
+        TA -->|300ms Debounce| LS
+        TA -->|1500ms Debounce| LS
+        H1 -->|Select Item & Sync Top| TA
+    end
+
+    subgraph Pipeline ["Processing Pipeline"]
+        MK["marked.js (GFM Custom Renderer)"]
+        HL["highlight.js (Atom One Dark)"]
+        MM["mermaid.js v11 (Official Pipeline 100% Match)"]
+        DP["DOMPurify (HTML/SVG Safe Sanitizer)"]
+        TA -->|Raw Markdown| MK
+        MK -->|Mermaid Block| MM
+        MK -->|Code Block| HL
+        MK -->|Parsed HTML| DP
+    end
+
+    subgraph Preview_Engine ["Preview Core (Clean Document Flow & Seamless Scroll)"]
+        PR["Rendered Markdown DOM (min-w-0, overflow-hidden protection)"]
+        CB["Inject Code Copy Buttons"]
+        EXP["html-to-image (Retina 2x, Full Responsive Node)"]
+        DP -->|Sanitized HTML| PR
+        MM -->|Native Full Width Fit & Vertical Flow| PR
+        PR --> CB
+        PR -->|Export Target| EXP
+    end
+
+    T1 --> EP
+    B3 --> EXP
+    B4 --> EXP
+```
 
 ## 1. 개요 및 목적
+<<<<<<< Updated upstream
 - **목적:** 천안·세종 2박 3일 가족 여행 일정 및 숙소 배정 현황을 안내하는 모바일 최적화 웹 가이드
 - **대상:** 어르신(전영환 어르신 외), 성인, 어린이 포함 온 가족 9명 (야외/이동 중 모바일 시인성 극대화)
 - **경로:** `trip/index.html`
@@ -50,3 +104,60 @@
   - 2일 차: 오전~오후 베어트리파크(관람/점심/카페) -> 소노벨 새 객실 입실(휴식) -> 독립기념관 단풍나무숲길 -> 저녁 식사 코스로 변경
   - 3일 차: 체크아웃 후 렌트카 반납 -> 점심 식사 -> 천안타운홀 47층 전망대 카페 -> 기차 귀가 코스로 변경
   - 프로젝트 루트에 `TRIP_GUIDE.md` 통합 가이드 문서 신규 생성 및 동기화
+=======
+- **목적:** 번들러나 서버 없이 브라우저에서 즉시 실행되는 초경량 모던 다크 테마 실시간 마크다운 뷰어/에디터 (Mermaid 네이티브 다이어그램 통합)
+- **경로:** `preview/index.html`
+- **배포:** Vercel / Netlify / GitHub Pages 정적 호스팅 100% 호환 단일 HTML 구조
+
+## 2. 디자인 시스템 (Linear / Notion Charcoal-Navy Dark Spec)
+- **전체 배경:** `#1a1d24` (메인 셸)
+- **패널 및 카드 표면:** `#1e212b` (미세 딥네이비 차콜)
+- **보더 및 구분선:** `#2d313f` (1px 정돈된 라더)
+- **리사이저 바:** 폭 6px hover/active 시 8px 블루 하이라이트 + 중앙 핀 도트
+- **타이포그래피 및 코드 렌더링:**
+  - 본문 텍스트: `#cfd3dc`, `0.875rem` (14px), line-height: `1.65`
+  - 헤딩: H1 `1.45rem`, H2 `1.25rem`, H3 `1.05rem`, H4 `0.925rem`
+  - **코드 리가처(합자) 원천 차단:** `font-variant-ligatures: none;`, `font-feature-settings: "liga" 0, "calt" 0;` 적용으로 `!==`, `===`, `=>` 등 연산자가 수학 기호로 뭉개지지 않고 작성 원문 그대로 1:1 보존
+  - 인라인 코드: 배경 `#2a2e3d` + 텍스트 `#e5b967` (따뜻한 골드 옐로우) + `0.82em` (본문 대비 축소)
+  - 코드 블록: 배경 `#16181f` + `0.775rem` (약 12.4px) + hover 'Copy Code' 버튼 포함
+  - 불릿/번호 리스트: 좌측 들여쓰기 `1.4rem`, 아이템 간격 `0.4rem`
+- **Mermaid 다이어그램 레이아웃:**
+  - markdownlivepreview.com 공식 오픈소스(tanabe/markdown-live-preview)의 v11 파이프라인 100% 이식
+  - `<pre class="mermaid">` 태그 + `mermaid.render(id, source, element)` + `bindFunctions(element)`
+
+## 3. 핵심 기능 명세
+1. **markdownlivepreview.com 공식 Mermaid v11 파이프라인 동기화:**
+   - `mermaid@11` 최신 엔진 채택 (v10의 서브그래프 가로 찢김 버그 완전 해결)
+   - 공식 CSS 스펙: `.mermaid { overflow-x: auto; padding: 12px 0; }` + `.mermaid svg { max-width: 100%; height: auto; }`
+   - 프리뷰 컨테이너 이중 패딩 축소로 다이어그램의 가로폭 최대 활용
+2. **에디터 접기/펼치기 토글 (Collapse / Expand):**
+   - 상단 GNB 버튼으로 에디터를 완전히 숨기고 프리뷰 전용 전체 화면 모드로 즉시 전환
+   - 상태 `localStorage` 영구 보존
+3. **가변 너비 패널 리사이징 (Drag to Resize):**
+   - 가운데 구분선 드래그로 20%~80% 비율 조절, 더블 클릭 5:5 복귀, 자동 저장
+4. **실시간 파싱 & 고해상도 내보내기:**
+   - `marked.js` + `highlight.js` + `DOMPurify` + `html-to-image` (2x Retina PNG 다운로드 및 클립보드 복사)
+
+---
+
+## Changelog
+### [2026-10-29] 마크다운 이력 관리(FIFO 100건) 및 이력 불러오기 모달 구현
+- **요약:** 로컬스토리지 기반으로 작성/열람한 마크다운을 최대 100건까지 FIFO 큐로 자동 누적 저장하고, 상단 '이력 불러오기' 버튼을 통해 첫 줄 제목 기반 리스트에서 선택 로드 및 최신순 동기화 기능 추가.
+- **주요 변경:**
+  - `md_studio_history_v1` LocalStorage 키 및 최대 100건 FIFO 제어 (101번째 진입 시 가장 오래된 마지막 항목 자동 삭제).
+  - 첫 줄 기반 깔끔한 제목 추출(`extractMarkdownTitle`) 및 1.5초 디바운스 연속 작업 병합(파편화 방지).
+  - 상단 GNB '이력 불러오기' 버튼 및 실시간 보존 건수 배지(`(n/100)`) 제공.
+  - 이력 선택 시 에디터 로드, 실시간 프리뷰 렌더링, 최근 본 md(`md_studio_content_v1`) 및 히스토리 최상단 동기화 완료.
+
+### [2026-10-29] Mermaid 블록 내 코드 복사 버튼 주입 격리 및 문법 파싱 오류 해결
+- **요약:** `pre` 태그에 복사 버튼을 주입할 때 Mermaid 컨테이너(`<pre class="mermaid">`)까지 포함되어 다이어그램 코드 끝에 `Copy` 텍스트가 삽입되던 파싱 버그 해결.
+- **주요 변경:**
+  - `injectCodeCopyButtons`: `pre:not(.mermaid)` 셀렉터 적용 및 내부 `code` 요소 유무 가드 추가.
+
+### [2026-10-29] markdownlivepreview.com 공식 GitHub 소스코드 직접 분석 및 100% 동일 구현 이식
+- **요약:** https://markdownlivepreview.com/ 공식 GitHub 저장소(tanabe/markdown-live-preview)의 `package.json`, `main.js`, `style.css`를 직접 확인 및 분석하여 동일한 Mermaid v11 파이프라인으로 전환.
+- **주요 변경:**
+  - Mermaid 엔진 버전을 공식과 동일한 `mermaid@11` 최신판으로 업데이트 (v10 서브그래프 버그 해결).
+  - 마크다운 파서 및 렌더링 호출을 공식과 동일하게 `<pre class="mermaid">${escapeHtml(code)}</pre>` 및 `mermaid.render(renderId, source, element)` + `bindFunctions(element)`로 전면 일치.
+  - 프리뷰 컨테이너의 겹겹이 쌓인 여백을 최적화하여 다이어그램이 넓은 가로폭을 활용하도록 개선.
+>>>>>>> Stashed changes
