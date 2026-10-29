@@ -1,22 +1,23 @@
+﻿<script>location.replace('/');</script>
 <!doctype html>
 <html lang="ko">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>🍁 2026 천안·세종 가을 여행 (A Warm Autumn Getaway)</title>
+  <title>?뛻 2026 泥쒖븞쨌?몄쥌 媛???ы뻾 (A Warm Autumn Getaway)</title>
 
-  <!-- 오픈그래프 (카카오톡, 문자 공유 썸네일) -->
+  <!-- ?ㅽ뵂洹몃옒??(移댁뭅?ㅽ넚, 臾몄옄 怨듭쑀 ?몃꽕?? -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="🍁 2026 천안·세종 가을 여행 (A Warm Autumn Getaway)" />
-  <meta property="og:description" content="10.8(목)~10.10(토) 온 가족 9명이 함께하는 천안·세종 2박 3일 여행 일정표 및 숙소 배정 안내" />
+  <meta property="og:title" content="?뛻 2026 泥쒖븞쨌?몄쥌 媛???ы뻾 (A Warm Autumn Getaway)" />
+  <meta property="og:description" content="10.8(紐?~10.10(?? ??媛議?9紐낆씠 ?④퍡?섎뒗 泥쒖븞쨌?몄쥌 2諛?3???ы뻾 ?쇱젙??諛??숈냼 諛곗젙 ?덈궡" />
   <meta property="og:image" content="poster.jpg" />
-  <meta property="og:image:alt" content="2026 천안·세종 가을 여행 가족 포스터" />
+  <meta property="og:image:alt" content="2026 泥쒖븞쨌?몄쥌 媛???ы뻾 媛議??ъ뒪?? />
 
-  <!-- 트위터 카드 -->
+  <!-- ?몄쐞??移대뱶 -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="🍁 2026 천안·세종 가을 여행" />
-  <meta name="twitter:description" content="온 가족 9명이 함께하는 천안·세종 2박 3일 여행 가이드" />
+  <meta name="twitter:title" content="?뛻 2026 泥쒖븞쨌?몄쥌 媛???ы뻾" />
+  <meta name="twitter:description" content="??媛議?9紐낆씠 ?④퍡?섎뒗 泥쒖븞쨌?몄쥌 2諛?3???ы뻾 媛?대뱶" />
   <meta name="twitter:image" content="poster.jpg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,37 +27,37 @@
     rel="stylesheet" />
   <style>
     :root {
-      /* 따뜻한 가을 포스터 컬러 팔레트 */
+      /* ?곕쑜??媛???ъ뒪??而щ윭 ?붾젅??*/
       --bg-color: #faf5ed;
       --card-bg: #ffffff;
       --card-border: #eddcc8;
       --card-shadow: 0 4px 18px rgba(138, 75, 23, 0.08);
       --primary: #c2410c;
-      /* 단풍 오렌지 */
+      /* ?⑦뭾 ?ㅻ젋吏 */
       --primary-dark: #9a3412;
-      /* 딥 브라운 오렌지 */
+      /* ??釉뚮씪???ㅻ젋吏 */
       --accent-amber: #d97706;
-      /* 가을 골드 */
+      /* 媛??怨⑤뱶 */
       --accent-emerald: #15803d;
-      /* 수목원 그린 */
+      /* ?섎ぉ??洹몃┛ */
       --badge-time-bg: #3c2415;
-      /* 포스터 속 어두운 시간 캡슐 */
+      /* ?ъ뒪?????대몢???쒓컙 罹≪뒓 */
       --badge-time-text: #fffbeb;
       --text-main: #2b1810;
-      /* 따뜻한 다크 브라운 */
+      /* ?곕쑜???ㅽ겕 釉뚮씪??*/
       --text-body: #4a3528;
       --text-muted: #785a44;
       --radius-lg: 22px;
       --radius-md: 16px;
       --radius-sm: 10px;
 
-      /* 기본 폰트 사이즈 스케일 */
+      /* 湲곕낯 ?고듃 ?ъ씠利??ㅼ???*/
       --font-base: 16px;
       --font-title: 1.25rem;
       --font-h1: 1.85rem;
     }
 
-    /* 어르신을 위한 큰 글씨 모드 (시니어 친화 UI - 가로 여백 극대화 최적화) */
+    /* ?대Ⅴ?좎쓣 ?꾪븳 ??湲??紐⑤뱶 (?쒕땲??移쒗솕 UI - 媛濡??щ갚 洹밸???理쒖쟻?? */
     body.senior-mode {
       --font-base: 18.5px;
       --font-title: 1.35rem;
@@ -65,12 +66,12 @@
 
     body.senior-mode .container {
       padding: 10px 10px 40px;
-      /* 전체 좌우 여백을 줄여 카드 본문 가로폭 대폭 확장 */
+      /* ?꾩껜 醫뚯슦 ?щ갚??以꾩뿬 移대뱶 蹂몃Ц 媛濡쒗룺 ????뺤옣 */
     }
 
     body.senior-mode .timeline {
       padding-left: 18px;
-      /* 타임라인 좌측 선 여백 축소 */
+      /* ??꾨씪??醫뚯륫 ???щ갚 異뺤냼 */
     }
 
     body.senior-mode .timeline::before {
@@ -86,7 +87,7 @@
 
     body.senior-mode .step-card {
       padding: 12px 13px;
-      /* 카드 내부 패딩을 18px -> 13px로 타이트하게 압축 */
+      /* 移대뱶 ?대? ?⑤뵫??18px -> 13px濡???댄듃?섍쾶 ?뺤텞 */
     }
 
     body.senior-mode .step-title {
@@ -97,14 +98,14 @@
 
     body.senior-mode .step-details {
       padding: 10px 11px;
-      /* 세부 박스 패딩 압축 */
+      /* ?몃? 諛뺤뒪 ?⑤뵫 ?뺤텞 */
     }
 
     body.senior-mode .step-details li {
       font-size: 1.08rem;
       line-height: 1.6;
       padding-left: 12px;
-      /* 불릿 왼쪽 여백 축소 */
+      /* 遺덈┸ ?쇱そ ?щ갚 異뺤냼 */
       margin-bottom: 5px;
       letter-spacing: -0.2px;
     }
@@ -142,9 +143,9 @@
         sans-serif;
       -webkit-tap-highlight-color: transparent;
       word-break: keep-all;
-      /* 단어 단위 자연스러운 줄바꿈 */
+      /* ?⑥뼱 ?⑥쐞 ?먯뿰?ㅻ윭??以꾨컮轅?*/
       overflow-wrap: break-word;
-      /* 지나치게 긴 단어만 박스 내 개행 */
+      /* 吏?섏튂寃?湲??⑥뼱留?諛뺤뒪 ??媛쒗뻾 */
     }
 
     body {
@@ -162,10 +163,10 @@
       max-width: 540px;
       margin: 0 auto;
       padding: 12px 10px 40px;
-      /* 작은 글씨 모드에서도 좌우 공간이 넓은 느낌으로 확장 */
+      /* ?묒? 湲??紐⑤뱶?먯꽌??醫뚯슦 怨듦컙???볦? ?먮굦?쇰줈 ?뺤옣 */
     }
 
-    /* 상단 바: 어르신 모드 스위치 & 포스터 보기 */
+    /* ?곷떒 諛? ?대Ⅴ??紐⑤뱶 ?ㅼ쐞移?& ?ъ뒪??蹂닿린 */
     .top-utility-bar {
       display: flex;
       justify-content: space-between;
@@ -213,7 +214,7 @@
       text-decoration: none;
     }
 
-    /* 포스터 감성 헤더 */
+    /* ?ъ뒪??媛먯꽦 ?ㅻ뜑 */
     .header {
       text-align: center;
       padding: 16px 12px 20px;
@@ -227,7 +228,7 @@
     }
 
     .header::before {
-      content: "🍁";
+      content: "?뛻";
       position: absolute;
       top: 8px;
       left: 12px;
@@ -236,7 +237,7 @@
     }
 
     .header::after {
-      content: "🍂";
+      content: "?뛼";
       position: absolute;
       bottom: 8px;
       right: 12px;
@@ -283,7 +284,7 @@
     }
 
 
-    /* 섹션 타이틀 */
+    /* ?뱀뀡 ??댄? */
     .section-title {
       font-size: var(--font-title);
       font-weight: 900;
@@ -294,7 +295,7 @@
       color: #431407;
     }
 
-    /* 숙소 배정 아코디언 카드 */
+    /* ?숈냼 諛곗젙 ?꾩퐫?붿뼵 移대뱶 */
     .room-container {
       background: var(--card-bg);
       border: 1.5px solid var(--card-border);
@@ -366,7 +367,7 @@
       display: block;
     }
 
-    /* 💡 결정이 필요한 사항 (미정 식사 알림 박스) */
+    /* ?뮕 寃곗젙???꾩슂???ы빆 (誘몄젙 ?앹궗 ?뚮┝ 諛뺤뒪) */
     .decision-container {
       background: #fffbeb;
       border: 1.5px solid #fde68a;
@@ -579,7 +580,7 @@
       line-height: 1.5;
     }
 
-    /* 일자별 Sticky 탭 */
+    /* ?쇱옄蹂?Sticky ??*/
     .tab-nav {
       display: flex;
       gap: 8px;
@@ -614,7 +615,7 @@
       box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
     }
 
-    /* 일자별 패널 */
+    /* ?쇱옄蹂??⑤꼸 */
     .day-panel {
       display: none;
       animation: fadeIn 0.3s ease forwards;
@@ -636,7 +637,7 @@
       }
     }
 
-    /* 포스터 감성 리본 일자 헤더 */
+    /* ?ъ뒪??媛먯꽦 由щ낯 ?쇱옄 ?ㅻ뜑 */
     .day-header-box {
       margin-bottom: 20px;
       padding: 16px 18px;
@@ -660,7 +661,7 @@
       font-weight: 600;
     }
 
-    /* 타임라인 레이아웃 (기본 모드에서도 넉넉한 가로폭 확보) */
+    /* ??꾨씪???덉씠?꾩썐 (湲곕낯 紐⑤뱶?먯꽌???됰꼮??媛濡쒗룺 ?뺣낫) */
     .timeline {
       position: relative;
       padding-left: 18px;
@@ -701,7 +702,7 @@
       background: #f0fdf4;
     }
 
-    /* 스텝 카드 */
+    /* ?ㅽ뀦 移대뱶 */
     .step-card {
       background: var(--card-bg);
       border: 1.5px solid var(--card-border);
@@ -719,7 +720,7 @@
       margin-bottom: 8px;
     }
 
-    /* 포스터 속 캡슐 시간 뱃지 */
+    /* ?ъ뒪????罹≪뒓 ?쒓컙 諭껋? */
     .time-capsule {
       display: inline-flex;
       align-items: center;
@@ -779,7 +780,7 @@
     }
 
     .step-details li::before {
-      content: "•";
+      content: "??;
       position: absolute;
       left: 0;
       color: #ea580c;
@@ -792,7 +793,7 @@
       font-weight: 800;
     }
 
-    /* 길찾기 원클릭 버튼 */
+    /* 湲몄갼湲??먰겢由?踰꾪듉 */
     .action-row {
       margin-top: 10px;
       display: flex;
@@ -820,7 +821,7 @@
       background: #fed7aa;
     }
 
-    /* 열차 승차권 UI */
+    /* ?댁감 ?뱀감沅?UI */
     .train-ticket {
       background: #ffffff;
       border: 1.5px solid #fed7aa;
@@ -906,7 +907,7 @@
       font-weight: 700;
     }
 
-    /* 하단 플로팅 액션 */
+    /* ?섎떒 ?뚮줈???≪뀡 */
     .quick-actions {
       display: flex;
       gap: 10px;
@@ -937,7 +938,7 @@
       transform: scale(0.99);
     }
 
-    /* 모달 팝업 (포스터 확대 보기) */
+    /* 紐⑤떖 ?앹뾽 (?ъ뒪???뺣? 蹂닿린) */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -990,185 +991,185 @@
 
 <body>
   <div class="container">
-    <!-- 상단 시니어 모드 & 포스터 버튼 -->
+    <!-- ?곷떒 ?쒕땲??紐⑤뱶 & ?ъ뒪??踰꾪듉 -->
     <div class="top-utility-bar">
       <button class="font-toggle-btn" id="seniorToggleBtn" onclick="toggleSeniorMode()">
-        🔍 큰 글씨로 보기
+        ?뵇 ??湲?⑤줈 蹂닿린
       </button>
       <button class="poster-view-btn" onclick="openPosterModal()">
-        🎨 포스터 보기
+        ?렓 ?ъ뒪??蹂닿린
       </button>
     </div>
 
-    <!-- 헤더 (포스터 폰트 및 감성 반영) -->
+    <!-- ?ㅻ뜑 (?ъ뒪???고듃 諛?媛먯꽦 諛섏쁺) -->
     <header class="header">
-      <div class="header-badge">🍁 온 가족 가을 나들이</div>
-      <h1>2026 천안·세종 가을 여행</h1>
+      <div class="header-badge">?뛻 ??媛議?媛???섎뱾??/div>
+      <h1>2026 泥쒖븞쨌?몄쥌 媛???ы뻾</h1>
       <div class="sub-english">A Warm Autumn Getaway</div>
-      <p class="date-text">2026. 10. 8 (목) ~ 10. 10 (토) · 총 9명</p>
+      <p class="date-text">2026. 10. 8 (紐? ~ 10. 10 (?? 쨌 珥?9紐?/p>
     </header>
 
 
-    <!-- 숙소 배정 현황 (소노벨 천안 - 기본 접힘 아코디언) -->
+    <!-- ?숈냼 諛곗젙 ?꾪솴 (?뚮끂踰?泥쒖븞 - 湲곕낯 ?묓옒 ?꾩퐫?붿뼵) -->
     <div class="room-container" id="roomContainer">
       <div class="room-summary-bar" onclick="toggleRoomContainer()">
         <div class="room-summary-left">
-          <span>🏨</span>
-          <span class="room-summary-title">숙소 배정 (소노벨 천안)</span>
+          <span>?룳</span>
+          <span class="room-summary-title">?숈냼 諛곗젙 (?뚮끂踰?泥쒖븞)</span>
         </div>
         <div class="room-toggle-btn" id="roomToggleBtn">
-          <span>객실 자세히 보기</span>
-          <span class="room-toggle-arrow">▼</span>
+          <span>媛앹떎 ?먯꽭??蹂닿린</span>
+          <span class="room-toggle-arrow">??/span>
         </div>
       </div>
 
       <div class="room-content" id="roomContent">
         <div class="room-header">
-          <span>스위트 객실 현황</span>
-          <span>총 어른 6 / 아이 3</span>
+          <span>?ㅼ쐞??媛앹떎 ?꾪솴</span>
+          <span>珥??대Ⅸ 6 / ?꾩씠 3</span>
         </div>
 
         <div class="room-grid">
           <!-- 1 -->
           <div class="room-card">
             <div class="room-name-row">
-              <span class="room-user">안유엘 가족 (4명) 👨‍👩‍👦‍👦</span>
-              <span class="tag-stay stay">연박 (이동 없음)</span>
+              <span class="room-user">?덉쑀??媛議?(4紐? ?뫅?랅윉⒱랅윉╈랅윉?/span>
+              <span class="tag-stay stay">?곕컯 (?대룞 ?놁쓬)</span>
             </div>
             <div class="room-details">
-              • 10/8 ~ 10/10 : <strong>6862호 (스위트 B)</strong>
+              ??10/8 ~ 10/10 : <strong>6862??(?ㅼ쐞??B)</strong>
             </div>
           </div>
 
           <!-- 2 -->
           <div class="room-card">
             <div class="room-name-row">
-              <span class="room-user">전유나 가족 (3명) 👨‍👩‍👧</span>
-              <span class="tag-stay move">10/9 방 이동</span>
+              <span class="room-user">?꾩쑀??媛議?(3紐? ?뫅?랅윉⒱랅윉?/span>
+              <span class="tag-stay move">10/9 諛??대룞</span>
             </div>
             <div class="room-details">
-              • 10/8(목): <strong>7009호 (스위트 A)</strong> ➔ 10/9(금):
-              <strong>7135호 (B)</strong>
+              ??10/8(紐?: <strong>7009??(?ㅼ쐞??A)</strong> ??10/9(湲?:
+              <strong>7135??(B)</strong>
             </div>
           </div>
 
           <!-- 3 -->
           <div class="room-card">
             <div class="room-name-row">
-              <span class="room-user">부모님 (2명) 👩‍👨</span>
-              <span class="tag-stay move">10/9 방 이동</span>
+              <span class="room-user">遺紐⑤떂 (2紐? ?뫆?랅윉?/span>
+              <span class="tag-stay move">10/9 諛??대룞</span>
             </div>
             <div class="room-details">
-              • 10/8(목): <strong>7005호 (엑세서블 A)</strong> ➔ 10/9(금):
-              <strong>7184호 (B)</strong>
+              ??10/8(紐?: <strong>7005??(?묒꽭?쒕툝 A)</strong> ??10/9(湲?:
+              <strong>7184??(B)</strong>
             </div>
           </div>
         </div>
 
         <div class="room-tip">
-          💡 <strong>2일 차 방 이동 </strong><br /> 9일 외출 전 6862호(유엘
-          방)에 짐 임시 보관 후 출발! (프런트 사전 문의 시 연박 가능 여부 확인
-          권장)
+          ?뮕 <strong>2??李?諛??대룞 </strong><br /> 9???몄텧 ??6862???좎뿕
+          諛???吏??꾩떆 蹂닿? ??異쒕컻! (?꾨윴???ъ쟾 臾몄쓽 ???곕컯 媛???щ? ?뺤씤
+          沅뚯옣)
         </div>
 
         <div class="room-header"
           style="margin-top: 18px; padding-top: 14px; border-top: 1.5px dashed #f1ded0; margin-bottom: 10px;">
-          <span>소노벨 리뷰</span>
-          <span>후기 모음</span>
+          <span>?뚮끂踰?由щ럭</span>
+          <span>?꾧린 紐⑥쓬</span>
         </div>
 
-        <!-- 객실 리뷰 50:50 반반 배치 -->
+        <!-- 媛앹떎 由щ럭 50:50 諛섎컲 諛곗튂 -->
         <div style="margin-top: 0; display: flex; gap: 8px;">
           <a href="https://blog.naver.com/gooddays_/222920018842" target="_blank" class="btn-map"
-            style="flex: 1; background: #f0fdf4; border-color: #86efac; color: #166534;">🏨 스위트 A 리뷰</a>
+            style="flex: 1; background: #f0fdf4; border-color: #86efac; color: #166534;">?룳 ?ㅼ쐞??A 由щ럭</a>
           <a href="https://blog.naver.com/khs25210/223821615002" target="_blank" class="btn-map"
-            style="flex: 1; background: #fefce8; border-color: #fde047; color: #854d0e;">🏨 스위트 B 리뷰</a>
+            style="flex: 1; background: #fefce8; border-color: #fde047; color: #854d0e;">?룳 ?ㅼ쐞??B 由щ럭</a>
         </div>
 
-        <!-- 부대시설 와이드 버튼 -->
+        <!-- 遺??쒖꽕 ??대뱶 踰꾪듉 -->
         <div style="margin-top: 8px; display: flex;">
           <a href="https://m.blog.naver.com/condoking_k/224192299418" target="_blank" class="btn-map"
-            style="background: #fdf4ff; border-color: #f0abfc; color: #86198f;">🎪 소노벨 천안 부대시설 후기 둘러보기</a>
+            style="background: #fdf4ff; border-color: #f0abfc; color: #86198f;">?렕 ?뚮끂踰?泥쒖븞 遺??쒖꽕 ?꾧린 ?섎윭蹂닿린</a>
         </div>
       </div>
     </div>
 
-    <!-- 💡 주요 확정 장소 및 예약 안내 -->
+    <!-- ?뮕 二쇱슂 ?뺤젙 ?μ냼 諛??덉빟 ?덈궡 -->
     <div class="decision-container" id="decisionContainer">
       <div class="decision-summary-bar" onclick="toggleDecisionContainer()">
         <div class="decision-summary-left">
-          <span>✨</span>
-          <span class="decision-summary-title">주요 방문 식당 & 장소 안내</span>
-          <span class="decision-badge" style="background: #15803d; color: #fff;">확정 5곳</span>
+          <span>??/span>
+          <span class="decision-summary-title">二쇱슂 諛⑸Ц ?앸떦 & ?μ냼 ?덈궡</span>
+          <span class="decision-badge" style="background: #15803d; color: #fff;">?뺤젙 5怨?/span>
         </div>
         <div class="decision-toggle-btn" id="decisionToggleBtn">
-          <span>내용 보기</span>
-          <span class="decision-toggle-arrow">▼</span>
+          <span>?댁슜 蹂닿린</span>
+          <span class="decision-toggle-arrow">??/span>
         </div>
       </div>
 
       <div class="decision-content" id="decisionContent">
-        <!-- 항목 1: 달빛에구운고등어 -->
+        <!-- ??ぉ 1: ?щ튆?먭뎄?닿퀬?깆뼱 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🐟 1일 차 점심: 달빛에구운고등어 천안구성점</span>
-            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
+            <span class="decision-item-title">?맅 1??李??먯떖: ?щ튆?먭뎄?닿퀬?깆뼱 泥쒖븞援ъ꽦??/span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">?μ냼 ?뺤젙</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 13:00 ~ 14:00 (렌터카 인수 후 이동)<br>
-            • <strong>주소:</strong> 충남 천안시 동남구 천안대로 500 (📞 041-555-3392)<br>
-            • <strong>메뉴:</strong> 화덕 생선구이 모듬 & 셀프바 반찬 (3대 가족 식사 최적)
+            ??<strong>?쒓컙:</strong> 13:00 ~ 14:00 (?뚰꽣移??몄닔 ???대룞)<br>
+            ??<strong>二쇱냼:</strong> 異⑸궓 泥쒖븞???숇궓援?泥쒖븞?濡?500 (?뱸 041-555-3392)<br>
+            ??<strong>硫붾돱:</strong> ?붾뜒 ?앹꽑援ъ씠 紐⑤벉 & ??꾨컮 諛섏갔 (3? 媛議??앹궗 理쒖쟻)
           </div>
         </div>
 
-        <!-- 항목 2: 알토 -->
+        <!-- ??ぉ 2: ?뚰넗 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🎂 1일 차 저녁: 알토 (ALTO) - 생일 축하 파티</span>
-            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">예약 추천</span>
+            <span class="decision-item-title">?럟 1??李???? ?뚰넗 (ALTO) - ?앹씪 異뺥븯 ?뚰떚</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">?덉빟 異붿쿇</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 17:30 ~ 18:30 (소노벨 휴식 후 이동)<br>
-            • <strong>주소:</strong> 충남 천안시 동남구 청수10길 4-120 (청수동)<br>
-            • <strong>메뉴:</strong> 나폴리 화덕피자, 파스타 이탈리안 디너 & 생일 파티 🎉
+            ??<strong>?쒓컙:</strong> 17:30 ~ 18:30 (?뚮끂踰??댁떇 ???대룞)<br>
+            ??<strong>二쇱냼:</strong> 異⑸궓 泥쒖븞???숇궓援?泥?닔10湲?4-120 (泥?닔??<br>
+            ??<strong>硫붾돱:</strong> ?섑뤃由??붾뜒?쇱옄, ?뚯뒪? ?댄깉由ъ븞 ?붾꼫 & ?앹씪 ?뚰떚 ?럦
           </div>
         </div>
 
-        <!-- 항목 3: 사월에보리밥과 쭈꾸미 -->
+        <!-- ??ぉ 3: ?ъ썡?먮낫由щ갈怨?彛덇씀誘?-->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🐙 2일 차 저녁: 사월에보리밥과 쭈꾸미 천안점</span>
-            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
+            <span class="decision-item-title">?릻 2??李???? ?ъ썡?먮낫由щ갈怨?彛덇씀誘?泥쒖븞??/span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">?μ냼 ?뺤젙</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 17:40 ~ 18:30 (독립기념관 단풍 산책 후 이동)<br>
-            • <strong>주소:</strong> 충남 천안시 동남구 삼룡동 204 (천안삼거리공원 맞은편)<br>
-            • <strong>메뉴:</strong> 불향 쭈꾸미 볶음, 고르곤졸라 피자, 보리밥 셀프바 정식
+            ??<strong>?쒓컙:</strong> 17:40 ~ 18:30 (?낅┰湲곕뀗愿 ?⑦뭾 ?곗콉 ???대룞)<br>
+            ??<strong>二쇱냼:</strong> 異⑸궓 泥쒖븞???숇궓援??쇰！??204 (泥쒖븞?쇨굅由ш났??留욎???<br>
+            ??<strong>硫붾돱:</strong> 遺덊뼢 彛덇씀誘?蹂띠쓬, 怨좊Ⅴ怨ㅼ「???쇱옄, 蹂대━諛???꾨컮 ?뺤떇
           </div>
         </div>
 
-        <!-- 항목 4: 셰프스키친 -->
+        <!-- ??ぉ 4: ?고봽?ㅽ궎移?-->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🍽️ 3일 차 조식: 소노벨 천안 셰프스키친</span>
-            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">조식 뷔페</span>
+            <span class="decision-item-title">?띂截?3??李?議곗떇: ?뚮끂踰?泥쒖븞 ?고봽?ㅽ궎移?/span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">議곗떇 酉뷀럹</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 09:00 ~ 10:00 (웨스트타워 1층)<br>
-            • <strong>참고:</strong> 전일 21시까지 사전 예약 결제 시 투숙객 할인 (09:30 이전 입장 권장)
+            ??<strong>?쒓컙:</strong> 09:00 ~ 10:00 (?⑥뒪?명???1痢?<br>
+            ??<strong>李멸퀬:</strong> ?꾩씪 21?쒓퉴吏 ?ъ쟾 ?덉빟 寃곗젣 ???ъ닕媛??좎씤 (09:30 ?댁쟾 ?낆옣 沅뚯옣)
           </div>
         </div>
 
-        <!-- 항목 5: 태조산시골막국수 -->
+        <!-- ??ぉ 5: ?쒖“?곗떆怨⑤쭑援?닔 -->
         <div class="decision-item">
           <div class="decision-item-head">
-            <span class="decision-item-title">🍜 3일 차 점심: 태조산시골막국수</span>
-            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">장소 확정</span>
+            <span class="decision-item-title">?뜙 3??李??먯떖: ?쒖“?곗떆怨⑤쭑援?닔</span>
+            <span class="decision-status-tag" style="background: #dcfce7; color: #166534; border-color: #86efac;">?μ냼 ?뺤젙</span>
           </div>
           <div class="decision-desc">
-            • <strong>시간:</strong> 11:00 ~ 12:00 (체크아웃 후 이동)<br>
-            • <strong>주소:</strong> 충남 천안시 동남구 태조산길 83 (📞 041-565-2589)<br>
-            • <strong>메뉴:</strong> 메밀물막국수, 비빔막국수, 석갈비, 메밀전
+            ??<strong>?쒓컙:</strong> 11:00 ~ 12:00 (泥댄겕?꾩썐 ???대룞)<br>
+            ??<strong>二쇱냼:</strong> 異⑸궓 泥쒖븞???숇궓援??쒖“?곌만 83 (?뱸 041-565-2589)<br>
+            ??<strong>硫붾돱:</strong> 硫붾?臾쇰쭑援?닔, 鍮꾨퉼留됯뎅?? ?앷컝鍮? 硫붾???
           </div>
         </div>
       </div>
@@ -1177,76 +1178,76 @@
     <!-- Day Selector Sticky Nav -->
     <div class="tab-nav" id="tabNav">
       <button class="tab-btn active" onclick="switchDay(1)">
-        10/8 (목) 1일차
+        10/8 (紐? 1?쇱감
       </button>
       <button class="tab-btn" onclick="switchDay(2)">
-        10/9 (금) 2일차
+        10/9 (湲? 2?쇱감
       </button>
       <button class="tab-btn" onclick="switchDay(3)">
-        10/10 (토) 3일차
+        10/10 (?? 3?쇱감
       </button>
     </div>
 
     <!-- ================= DAY 1 ================= -->
     <div id="day1" class="day-panel active">
       <div class="day-header-box">
-        <h2>🚩 10/8 (목) 1일차 : 천안 도착, 화수목 산책 & 생일 파티</h2>
-        <p>서울역 집결 ➔ 천안역 ➔ 고등어구이 점심 ➔ 화수목 정원 산책 ➔ 숙소 체크인&휴식 ➔ 알토 저녁&생일파티</p>
+        <h2>?슜 10/8 (紐? 1?쇱감 : 泥쒖븞 ?꾩갑, ?붿닔紐??곗콉 & ?앹씪 ?뚰떚</h2>
+        <p>?쒖슱??吏묎껐 ??泥쒖븞????怨좊벑?닿뎄???먯떖 ???붿닔紐??뺤썝 ?곗콉 ???숈냼 泥댄겕???댁떇 ???뚰넗 ????앹씪?뚰떚</p>
       </div>
 
       <div class="timeline">
-        <!-- Step 1: 서울역 집결 -->
+        <!-- Step 1: ?쒖슱??吏묎껐 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 10:00 ~ 10:30</span>
-              <span class="step-tag">서울역 집결</span>
+              <span class="time-capsule">?깍툘 10:00 ~ 10:30</span>
+              <span class="step-tag">?쒖슱??吏묎껐</span>
             </div>
-            <div class="step-title">🚅 서울역 이동 및 가족 만남</div>
+            <div class="step-title">?쉫 ?쒖슱???대룞 諛?媛議?留뚮궓</div>
             <div class="step-details">
               <ul>
-                <li>규식-예찬네 서울역 대합실에서 만나기</li>
-                <li>승차권 확인 및 열차 탑승 준비</li>
+                <li>洹쒖떇-?덉갔???쒖슱????⑹떎?먯꽌 留뚮굹湲?/li>
+                <li>?뱀감沅??뺤씤 諛??댁감 ?묒듅 以鍮?/li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- Step 2: 기차 이동 -->
+        <!-- Step 2: 湲곗감 ?대룞 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 10:48 ~ 11:53</span>
-              <span class="step-tag">서울 ➔ 천안</span>
+              <span class="time-capsule">?깍툘 10:48 ~ 11:53</span>
+              <span class="step-tag">?쒖슱 ??泥쒖븞</span>
             </div>
-            <div class="step-title">🚄 서울역 출발 ➔ 천안역 도착</div>
+            <div class="step-title">?쉪 ?쒖슱??異쒕컻 ??泥쒖븞???꾩갑</div>
             <div class="step-details">
               <ul>
-                <li>기차로 편안하게 천안역 이동 (소요시간 65분)</li>
-                <li>11:53 천안역 도착 후 렌터카 인수 연계</li>
+                <li>湲곗감濡??몄븞?섍쾶 泥쒖븞???대룞 (?뚯슂?쒓컙 65遺?</li>
+                <li>11:53 泥쒖븞???꾩갑 ???뚰꽣移??몄닔 ?곌퀎</li>
               </ul>
 
               <!-- Train Ticket -->
               <div class="train-ticket">
                 <div class="train-ticket-head">
                   <div class="train-badge-group">
-                    <span class="train-name">ITX-마음</span>
-                    <span class="train-code">1011호</span>
+                    <span class="train-name">ITX-留덉쓬</span>
+                    <span class="train-code">1011??/span>
                   </div>
-                  <span class="train-time-badge">65분 소요</span>
+                  <span class="train-time-badge">65遺??뚯슂</span>
                 </div>
                 <div class="train-schedule-row">
                   <div class="station-box">
-                    <span class="st-title">서울역</span>
+                    <span class="st-title">?쒖슱??/span>
                     <span class="st-clock">10:48</span>
                   </div>
                   <div class="schedule-arrow">
-                    <span>➔</span>
+                    <span>??/span>
                   </div>
                   <div class="station-box right">
-                    <span class="st-title">천안역</span>
+                    <span class="st-title">泥쒖븞??/span>
                     <span class="st-clock">11:53</span>
                   </div>
                 </div>
@@ -1255,112 +1256,112 @@
           </div>
         </div>
 
-        <!-- Step 3: 렌터카 인수 -->
+        <!-- Step 3: ?뚰꽣移??몄닔 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 12:10 ~ 12:30</span>
-              <span class="step-tag">렌터카 수령</span>
+              <span class="time-capsule">?깍툘 12:10 ~ 12:30</span>
+              <span class="step-tag">?뚰꽣移??섎졊</span>
             </div>
-            <div class="step-title">🚗 천안역 도착 & 렌터카 인수</div>
+            <div class="step-title">?슅 泥쒖븞???꾩갑 & ?뚰꽣移??몄닔</div>
             <div class="step-details">
               <ul>
-                <li>천안역 렌터카 인수 및 차량 상태 확인</li>
-                <li>가족 짐 트렁크 적재 후 점심 식당으로 이동 준비</li>
+                <li>泥쒖븞???뚰꽣移??몄닔 諛?李⑤웾 ?곹깭 ?뺤씤</li>
+                <li>媛議?吏??몃쟻???곸옱 ???먯떖 ?앸떦?쇰줈 ?대룞 以鍮?/li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- Step 4: 점심 식사 -->
+        <!-- Step 4: ?먯떖 ?앹궗 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 13:00 ~ 14:00</span>
-              <span class="step-tag">점심 식사 🐟</span>
+              <span class="time-capsule">?깍툘 13:00 ~ 14:00</span>
+              <span class="step-tag">?먯떖 ?앹궗 ?맅</span>
             </div>
-            <div class="step-title">🐟 점심: 달빛에구운고등어 천안구성점</div>
+            <div class="step-title">?맅 ?먯떖: ?щ튆?먭뎄?닿퀬?깆뼱 泥쒖븞援ъ꽦??/div>
             <div class="step-details">
               <ul>
-                <li><strong>위치:</strong> 충남 천안시 동남구 천안대로 500 (천안역 차 10~15분)</li>
-                <li><strong>특징:</strong> 화덕 생선구이 전문점, 푸짐한 셀프바 반찬</li>
-                <li>아이들과 어르신 모두 편안하게 드실 수 있는 영양 만점 한식</li>
+                <li><strong>?꾩튂:</strong> 異⑸궓 泥쒖븞???숇궓援?泥쒖븞?濡?500 (泥쒖븞??李?10~15遺?</li>
+                <li><strong>?뱀쭠:</strong> ?붾뜒 ?앹꽑援ъ씠 ?꾨Ц?? ?몄쭚????꾨컮 諛섏갔</li>
+                <li>?꾩씠?ㅺ낵 ?대Ⅴ??紐⑤몢 ?몄븞?섍쾶 ?쒖떎 ???덈뒗 ?곸뼇 留뚯젏 ?쒖떇</li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/달빛에구운고등어 천안구성점" target="_blank" class="btn-map">📍 카카오맵 길찾기</a>
-                <a href="tel:041-555-3392" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">📞 041-555-3392</a>
+                <a href="https://map.kakao.com/link/search/?щ튆?먭뎄?닿퀬?깆뼱 泥쒖븞援ъ꽦?? target="_blank" class="btn-map">?뱧 移댁뭅?ㅻ㏊ 湲몄갼湲?/a>
+                <a href="tel:041-555-3392" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">?뱸 041-555-3392</a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 5: 화수목 정원 산책 -->
+        <!-- Step 5: ?붿닔紐??뺤썝 ?곗콉 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 14:00 ~ 15:30</span>
-              <span class="step-tag">정원 힐링 🌳</span>
+              <span class="time-capsule">?깍툘 14:00 ~ 15:30</span>
+              <span class="step-tag">?뺤썝 ?먮쭅 ?뙰</span>
             </div>
-            <div class="step-title">🌳 아름다운정원 화수목 산책 & 베이커리</div>
+            <div class="step-title">?뙰 ?꾨쫫?ㅼ슫?뺤썝 ?붿닔紐??곗콉 & 踰좎씠而ㅻ━</div>
             <div class="step-details">
               <ul>
-                <li><strong>14:00 ~ 14:20:</strong> 아름다운정원 화수목 이동 (차 15분)</li>
-                <li><strong>14:30 ~ 15:30:</strong> 대한민국 민간정원 1호 야외 정원 산책 & 베이커리 카페</li>
-                <li>완만한 코스로 어르신·아이 산책 및 포토존 가족 사진 📸</li>
+                <li><strong>14:00 ~ 14:20:</strong> ?꾨쫫?ㅼ슫?뺤썝 ?붿닔紐??대룞 (李?15遺?</li>
+                <li><strong>14:30 ~ 15:30:</strong> ??쒕?援?誘쇨컙?뺤썝 1???쇱쇅 ?뺤썝 ?곗콉 & 踰좎씠而ㅻ━ 移댄럹</li>
+                <li>?꾨쭔??肄붿뒪濡??대Ⅴ?졖룹븘???곗콉 諛??ы넗議?媛議??ъ쭊 ?벝</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/아름다운정원 화수목" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://map.kakao.com/link/search/?꾨쫫?ㅼ슫?뺤썝 ?붿닔紐? target="_blank" class="btn-map">?뱧 湲몄갼湲?/a>
                 <a href="https://blog.naver.com/mhcooking/224369987240" target="_blank" class="btn-map"
-                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">📝 리뷰 1</a>
+                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">?뱷 由щ럭 1</a>
                 <a href="https://blog.naver.com/bobmaker/222555600745" target="_blank" class="btn-map"
-                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">☕ 리뷰 2</a>
+                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">??由щ럭 2</a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 6: 숙소 체크인 및 휴식 -->
+        <!-- Step 6: ?숈냼 泥댄겕??諛??댁떇 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 15:40 ~ 16:30</span>
-              <span class="step-tag">숙소 입실 🏨</span>
+              <span class="time-capsule">?깍툘 15:40 ~ 16:30</span>
+              <span class="step-tag">?숈냼 ?낆떎 ?룳</span>
             </div>
-            <div class="step-title">🏨 숙소(소노벨 천안) 체크인 및 휴식</div>
+            <div class="step-title">?룳 ?숈냼(?뚮끂踰?泥쒖븞) 泥댄겕??諛??댁떇</div>
             <div class="step-details">
               <ul>
-                <li><strong>15:40 ~ 16:00:</strong> 소노벨 천안 이동 (차 10~15분)</li>
-                <li><strong>16:00 ~ 16:30:</strong> 1일 차 객실 체크인 (7009호, 7005호, 6862호)</li>
-                <li>각자 객실에 짐 풀고 잠시 편안하게 충전 휴식 ☕</li>
+                <li><strong>15:40 ~ 16:00:</strong> ?뚮끂踰?泥쒖븞 ?대룞 (李?10~15遺?</li>
+                <li><strong>16:00 ~ 16:30:</strong> 1??李?媛앹떎 泥댄겕??(7009?? 7005?? 6862??</li>
+                <li>媛곸옄 媛앹떎??吏??怨??좎떆 ?몄븞?섍쾶 異⑹쟾 ?댁떇 ??/li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/소노벨 천안" target="_blank" class="btn-map">📍 소노벨 천안 길찾기</a>
+                <a href="https://map.kakao.com/link/search/?뚮끂踰?泥쒖븞" target="_blank" class="btn-map">?뱧 ?뚮끂踰?泥쒖븞 湲몄갼湲?/a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 7: 저녁 식사 및 생일파티 -->
+        <!-- Step 7: ????앹궗 諛??앹씪?뚰떚 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 16:30 ~ 18:30</span>
-              <span class="step-tag">생일 축하 파티 🎂</span>
+              <span class="time-capsule">?깍툘 16:30 ~ 18:30</span>
+              <span class="step-tag">?앹씪 異뺥븯 ?뚰떚 ?럟</span>
             </div>
-            <div class="step-title">🎂 저녁: 알토 (ALTO) & 생일파티</div>
+            <div class="step-title">?럟 ??? ?뚰넗 (ALTO) & ?앹씪?뚰떚</div>
             <div class="step-details">
               <ul>
-                <li><strong>16:30 ~ 17:00:</strong> 식당 이동 (충남 천안시 동남구 청수10길 4-120)</li>
-                <li><strong>17:30 ~ 18:30:</strong> 나폴리 화덕피자 & 파스타 이탈리안 디너</li>
-                <li>🎉 <strong>온 가족 함께하는 생일 축하 파티!</strong></li>
+                <li><strong>16:30 ~ 17:00:</strong> ?앸떦 ?대룞 (異⑸궓 泥쒖븞???숇궓援?泥?닔10湲?4-120)</li>
+                <li><strong>17:30 ~ 18:30:</strong> ?섑뤃由??붾뜒?쇱옄 & ?뚯뒪? ?댄깉由ъ븞 ?붾꼫</li>
+                <li>?럦 <strong>??媛議??④퍡?섎뒗 ?앹씪 異뺥븯 ?뚰떚!</strong></li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/알토 천안 청수동" target="_blank" class="btn-map">📍 알토 길찾기</a>
+                <a href="https://map.kakao.com/link/search/?뚰넗 泥쒖븞 泥?닔?? target="_blank" class="btn-map">?뱧 ?뚰넗 湲몄갼湲?/a>
               </div>
             </div>
           </div>
@@ -1371,13 +1372,13 @@
           <div class="timeline-dot finish"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 18:30 ~ 19:00</span>
-              <span class="step-tag">1일차 마무리</span>
+              <span class="time-capsule" style="background: #15803d; color: #fff">?깍툘 18:30 ~ 19:00</span>
+              <span class="step-tag">1?쇱감 留덈Т由?/span>
             </div>
-            <div class="step-title">🛏️ 숙소 복귀 및 휴식</div>
+            <div class="step-title">?썜截??숈냼 蹂듦? 諛??댁떇</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 천안 복귀 후 자유 휴식 및 첫날 일정 마무리 🌙</li>
+                <li>?뚮끂踰?泥쒖븞 蹂듦? ???먯쑀 ?댁떇 諛?泥ル궇 ?쇱젙 留덈Т由??뙔</li>
               </ul>
             </div>
           </div>
@@ -1388,8 +1389,8 @@
     <!-- ================= DAY 2 ================= -->
     <div id="day2" class="day-panel">
       <div class="day-header-box">
-        <h2>🚩 10/9 (금) 2일차 : 곰 관람 & 단풍나무숲길 산책</h2>
-        <p>베어트리파크 ➔ 숙소 복귀 및 휴식 ➔ 독립기념관 단풍나무숲길 ➔ 사월에보리밥 저녁</p>
+        <h2>?슜 10/9 (湲? 2?쇱감 : 怨?愿??& ?⑦뭾?섎Т?꿸만 ?곗콉</h2>
+        <p>踰좎뼱?몃━?뚰겕 ???숈냼 蹂듦? 諛??댁떇 ???낅┰湲곕뀗愿 ?⑦뭾?섎Т?꿸만 ???ъ썡?먮낫由щ갈 ???/p>
       </div>
 
       <div class="timeline">
@@ -1398,22 +1399,22 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 09:30 ~ 10:30</span>
-              <span class="step-tag">조식 & 짐보관</span>
+              <span class="time-capsule">?깍툘 09:30 ~ 10:30</span>
+              <span class="step-tag">議곗떇 & 吏먮낫愿</span>
             </div>
-            <div class="step-title">🥐 기상 & 아침식사 (브레드보드)</div>
+            <div class="step-title">?쪖 湲곗긽 & ?꾩묠?앹궗 (釉뚮젅?쒕낫??</div>
             <div class="step-details">
               <ul>
-                <li>호텔 정문 맞은편 대형 베이커리 카페 (도보 2분)</li>
-                <li>따뜻한 빵과 모닝 커피로 여유로운 조식</li>
-                <li><strong>방 이동 준비:</strong> 이동 객실 짐을 6862호(유엘 방)에 임시 보관</li>
+                <li>?명뀛 ?뺣Ц 留욎??????踰좎씠而ㅻ━ 移댄럹 (?꾨낫 2遺?</li>
+                <li>?곕쑜??鍮듦낵 紐⑤떇 而ㅽ뵾濡??ъ쑀濡쒖슫 議곗떇</li>
+                <li><strong>諛??대룞 以鍮?</strong> ?대룞 媛앹떎 吏먯쓣 6862???좎뿕 諛????꾩떆 蹂닿?</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/브레드보드 천안" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://map.kakao.com/link/search/釉뚮젅?쒕낫??泥쒖븞" target="_blank" class="btn-map">?뱧 湲몄갼湲?/a>
                 <a href="https://blog.naver.com/youki42/224385787254" target="_blank" class="btn-map"
-                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">🥐 리뷰 1</a>
+                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">?쪖 由щ럭 1</a>
                 <a href="https://blog.naver.com/blaz723/224285705106" target="_blank" class="btn-map"
-                  style="background: #fff7ed; border-color: #fdba74; color: #9a3412;">☕ 리뷰 2</a>
+                  style="background: #fff7ed; border-color: #fdba74; color: #9a3412;">??由щ럭 2</a>
               </div>
             </div>
           </div>
@@ -1424,22 +1425,22 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 10:30 ~ 13:30</span>
-              <span class="step-tag">아이들 최고 인기 🐻</span>
+              <span class="time-capsule">?깍툘 10:30 ~ 13:30</span>
+              <span class="step-tag">?꾩씠??理쒓퀬 ?멸린 ?맶</span>
             </div>
-            <div class="step-title">🐻 베어트리파크 관람 (동물 먹이주기)</div>
+            <div class="step-title">?맶 踰좎뼱?몃━?뚰겕 愿??(?숇Ъ 癒뱀씠二쇨린)</div>
             <div class="step-details">
               <ul>
-                <li><strong>10:30 ~ 11:00:</strong> 세종시 전동면 베어트리파크 이동 (차 25~30분)</li>
-                <li><strong>11:00 ~ 13:30:</strong> 반달곰 & 비단잉어 먹이주기 체험</li>
-                <li>아름다운 수목원 정원 관람 & 포토존 힐링</li>
+                <li><strong>10:30 ~ 11:00:</strong> ?몄쥌???꾨룞硫?踰좎뼱?몃━?뚰겕 ?대룞 (李?25~30遺?</li>
+                <li><strong>11:00 ~ 13:30:</strong> 諛섎떖怨?& 鍮꾨떒?됱뼱 癒뱀씠二쇨린 泥댄뿕</li>
+                <li>?꾨쫫?ㅼ슫 ?섎ぉ???뺤썝 愿??& ?ы넗議??먮쭅</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/베어트리파크" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://map.kakao.com/link/search/踰좎뼱?몃━?뚰겕" target="_blank" class="btn-map">?뱧 湲몄갼湲?/a>
                 <a href="https://blog.naver.com/f1y2thesky/224423209561" target="_blank" class="btn-map"
-                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">🐻 리뷰 1</a>
+                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">?맶 由щ럭 1</a>
                 <a href="https://blog.naver.com/bolikeme/224376066974" target="_blank" class="btn-map"
-                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">🌳 리뷰 2</a>
+                  style="background: #fefce8; border-color: #fde047; color: #854d0e;">?뙰 由щ럭 2</a>
               </div>
             </div>
           </div>
@@ -1450,18 +1451,18 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 13:30 ~ 15:00</span>
-              <span class="step-tag">점심 & 카페</span>
+              <span class="time-capsule">?깍툘 13:30 ~ 15:00</span>
+              <span class="step-tag">?먯떖 & 移댄럹</span>
             </div>
-            <div class="step-title">🍲 점심: 웰컴 레스토랑 & 카페</div>
+            <div class="step-title">?뜴 ?먯떖: ?곗뺨 ?덉뒪?좊옉 & 移댄럹</div>
             <div class="step-details">
               <ul>
-                <li><strong>식당: 웰컴 레스토랑</strong> (베어트리파크 내 위치)</li>
-                <li>식사 후 통창 뷰 카페에서 여유로운 커피 타임 & 휴식 ☕</li>
+                <li><strong>?앸떦: ?곗뺨 ?덉뒪?좊옉</strong> (踰좎뼱?몃━?뚰겕 ???꾩튂)</li>
+                <li>?앹궗 ???듭갹 酉?移댄럹?먯꽌 ?ъ쑀濡쒖슫 而ㅽ뵾 ???& ?댁떇 ??/li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
                 <a href="https://blog.naver.com/cafe_ggangfe/224265742394" target="_blank" class="btn-map"
-                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">🍲 리뷰</a>
+                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">?뜴 由щ럭</a>
               </div>
             </div>
           </div>
@@ -1472,14 +1473,14 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 15:00 ~ 16:00</span>
-              <span class="step-tag">체력 충전 꿀휴식</span>
+              <span class="time-capsule">?깍툘 15:00 ~ 16:00</span>
+              <span class="step-tag">泥대젰 異⑹쟾 轅?댁떇</span>
             </div>
-            <div class="step-title">🏨 숙소 복귀 및 휴식</div>
+            <div class="step-title">?룳 ?숈냼 蹂듦? 諛??댁떇</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 복귀 후 새 객실(7135호, 7184호) 입실 및 짐 정리</li>
-                <li>오후 산책 전 객실에서 편안하게 낮잠/휴식 (체력 안배!)</li>
+                <li>?뚮끂踰?蹂듦? ????媛앹떎(7135?? 7184?? ?낆떎 諛?吏??뺣━</li>
+                <li>?ㅽ썑 ?곗콉 ??媛앹떎?먯꽌 ?몄븞?섍쾶 ??옞/?댁떇 (泥대젰 ?덈같!)</li>
               </ul>
             </div>
           </div>
@@ -1490,20 +1491,20 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 16:00 ~ 17:30</span>
-              <span class="step-tag">가을 단풍 힐링 🍁</span>
+              <span class="time-capsule">?깍툘 16:00 ~ 17:30</span>
+              <span class="step-tag">媛???⑦뭾 ?먮쭅 ?뛻</span>
             </div>
-            <div class="step-title">🍁 천안독립기념관 단풍나무숲길 산책</div>
+            <div class="step-title">?뛻 泥쒖븞?낅┰湲곕뀗愿 ?⑦뭾?섎Т?꿸만 ?곗콉</div>
             <div class="step-details">
               <ul>
-                <li><strong>16:00 ~ 16:20:</strong> 천안독립기념관 이동 (소노벨 차 8분)</li>
-                <li><strong>16:20 ~ 17:30:</strong> 독립기념관 단풍나무숲길 둘레길 산책</li>
-                <li>어르신·아이 컨디션에 맞춰 완만한 둘레길 코스 산책</li>
+                <li><strong>16:00 ~ 16:20:</strong> 泥쒖븞?낅┰湲곕뀗愿 ?대룞 (?뚮끂踰?李?8遺?</li>
+                <li><strong>16:20 ~ 17:30:</strong> ?낅┰湲곕뀗愿 ?⑦뭾?섎Т?꿸만 ?섎젅湲??곗콉</li>
+                <li>?대Ⅴ?졖룹븘??而⑤뵒?섏뿉 留욎떠 ?꾨쭔???섎젅湲?肄붿뒪 ?곗콉</li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/독립기념관 단풍나무숲길" target="_blank" class="btn-map">📍 길찾기</a>
+                <a href="https://map.kakao.com/link/search/?낅┰湲곕뀗愿 ?⑦뭾?섎Т?꿸만" target="_blank" class="btn-map">?뱧 湲몄갼湲?/a>
                 <a href="https://blog.naver.com/hyenyang23/224431124592" target="_blank" class="btn-map"
-                  style="background: #fef2f2; border-color: #fca5a5; color: #991b1b;">🍁 리뷰</a>
+                  style="background: #fef2f2; border-color: #fca5a5; color: #991b1b;">?뛻 由щ럭</a>
               </div>
             </div>
           </div>
@@ -1514,18 +1515,18 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 17:30 ~ 18:30</span>
-              <span class="step-tag">저녁 식사 🐙</span>
+              <span class="time-capsule">?깍툘 17:30 ~ 18:30</span>
+              <span class="step-tag">????앹궗 ?릻</span>
             </div>
-            <div class="step-title">🐙 저녁: 사월에보리밥과 쭈꾸미 천안점</div>
+            <div class="step-title">?릻 ??? ?ъ썡?먮낫由щ갈怨?彛덇씀誘?泥쒖븞??/div>
             <div class="step-details">
               <ul>
-                <li><strong>17:30 ~ 17:40:</strong> 식당 이동 (독립기념관에서 차로 약 10분)</li>
-                <li><strong>17:40 ~ 18:30:</strong> 저녁 식사 (충남 천안시 동남구 삼룡동 204)</li>
-                <li>직화 쭈꾸미 볶음, 고르곤졸라 피자, 보리밥 셀프바 정식</li>
+                <li><strong>17:30 ~ 17:40:</strong> ?앸떦 ?대룞 (?낅┰湲곕뀗愿?먯꽌 李⑤줈 ??10遺?</li>
+                <li><strong>17:40 ~ 18:30:</strong> ????앹궗 (異⑸궓 泥쒖븞???숇궓援??쇰！??204)</li>
+                <li>吏곹솕 彛덇씀誘?蹂띠쓬, 怨좊Ⅴ怨ㅼ「???쇱옄, 蹂대━諛???꾨컮 ?뺤떇</li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/사월에보리밥과쭈꾸미 천안점" target="_blank" class="btn-map">📍 카카오맵 길찾기</a>
+                <a href="https://map.kakao.com/link/search/?ъ썡?먮낫由щ갈怨쇱춫袁몃? 泥쒖븞?? target="_blank" class="btn-map">?뱧 移댁뭅?ㅻ㏊ 湲몄갼湲?/a>
               </div>
             </div>
           </div>
@@ -1536,13 +1537,13 @@
           <div class="timeline-dot finish"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 18:30 ~ 19:00</span>
-              <span class="step-tag">2일차 마무리</span>
+              <span class="time-capsule" style="background: #15803d; color: #fff">?깍툘 18:30 ~ 19:00</span>
+              <span class="step-tag">2?쇱감 留덈Т由?/span>
             </div>
-            <div class="step-title">🛏️ 숙소 이동 및 휴식</div>
+            <div class="step-title">?썜截??숈냼 ?대룞 諛??댁떇</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 천안 복귀 후 2일 차 마무리 휴식 🌙</li>
+                <li>?뚮끂踰?泥쒖븞 蹂듦? ??2??李?留덈Т由??댁떇 ?뙔</li>
               </ul>
             </div>
           </div>
@@ -1553,8 +1554,8 @@
     <!-- ================= DAY 3 ================= -->
     <div id="day3" class="day-panel">
       <div class="day-header-box">
-        <h2>🚩 10/10 (토) 3일차 : 조식뷔페, 태조산 막국수 & 천안타운홀</h2>
-        <p>소노벨 조식뷔페 ➔ 체크아웃 ➔ 태조산시골막국수 ➔ 렌터카 반납 ➔ 47층 천안타운홀 ➔ 기차 탑승</p>
+        <h2>?슜 10/10 (?? 3?쇱감 : 議곗떇酉뷀럹, ?쒖“??留됯뎅??& 泥쒖븞??댄?</h2>
+        <p>?뚮끂踰?議곗떇酉뷀럹 ??泥댄겕?꾩썐 ???쒖“?곗떆怨⑤쭑援?닔 ???뚰꽣移?諛섎궔 ??47痢?泥쒖븞??댄? ??湲곗감 ?묒듅</p>
       </div>
 
       <div class="timeline">
@@ -1563,18 +1564,18 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 09:00 ~ 10:00</span>
-              <span class="step-tag">조식 뷔페 🍽️</span>
+              <span class="time-capsule">?깍툘 09:00 ~ 10:00</span>
+              <span class="step-tag">議곗떇 酉뷀럹 ?띂截?/span>
             </div>
-            <div class="step-title">🍽️ 기상 & 아침식사 (소노벨 셰프스키친)</div>
+            <div class="step-title">?띂截?湲곗긽 & ?꾩묠?앹궗 (?뚮끂踰??고봽?ㅽ궎移?</div>
             <div class="step-details">
               <ul>
-                <li>소노벨 천안 웨스트타워 1층 조식 뷔페 이용</li>
-                <li>다양한 한식, 양식, 쌀국수 코너 등 든든한 아침 식사</li>
-                <li><strong>10:00 ~ 10:30:</strong> 짐정리 및 소노벨 주변 여유 산책</li>
+                <li>?뚮끂踰?泥쒖븞 ?⑥뒪?명???1痢?議곗떇 酉뷀럹 ?댁슜</li>
+                <li>?ㅼ뼇???쒖떇, ?묒떇, ?援?닔 肄붾꼫 ???좊뱺???꾩묠 ?앹궗</li>
+                <li><strong>10:00 ~ 10:30:</strong> 吏먯젙由?諛??뚮끂踰?二쇰? ?ъ쑀 ?곗콉</li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/소노벨천안 셰프스키친" target="_blank" class="btn-map">📍 셰프스키친 위치</a>
+                <a href="https://map.kakao.com/link/search/?뚮끂踰⑥쿇???고봽?ㅽ궎移? target="_blank" class="btn-map">?뱧 ?고봽?ㅽ궎移??꾩튂</a>
               </div>
             </div>
           </div>
@@ -1585,19 +1586,19 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 10:30 ~ 12:00</span>
-              <span class="step-tag">체크아웃 & 점심 🍜</span>
+              <span class="time-capsule">?깍툘 10:30 ~ 12:00</span>
+              <span class="step-tag">泥댄겕?꾩썐 & ?먯떖 ?뜙</span>
             </div>
-            <div class="step-title">🍜 체크아웃 및 점심: 태조산시골막국수</div>
+            <div class="step-title">?뜙 泥댄겕?꾩썐 諛??먯떖: ?쒖“?곗떆怨⑤쭑援?닔</div>
             <div class="step-details">
               <ul>
-                <li><strong>10:30 ~ 11:00:</strong> 체크아웃 완료 및 이동 (차 20분)</li>
-                <li><strong>11:00 ~ 12:00:</strong> 점심 식사 (충남 천안시 동남구 태조산길 83)</li>
-                <li>메밀물막국수, 비빔막국수, 석갈비, 메밀전 등 든든한 식사</li>
+                <li><strong>10:30 ~ 11:00:</strong> 泥댄겕?꾩썐 ?꾨즺 諛??대룞 (李?20遺?</li>
+                <li><strong>11:00 ~ 12:00:</strong> ?먯떖 ?앹궗 (異⑸궓 泥쒖븞???숇궓援??쒖“?곌만 83)</li>
+                <li>硫붾?臾쇰쭑援?닔, 鍮꾨퉼留됯뎅?? ?앷컝鍮? 硫붾??????좊뱺???앹궗</li>
               </ul>
               <div class="action-row">
-                <a href="https://map.kakao.com/link/search/태조산시골막국수" target="_blank" class="btn-map">📍 태조산시골막국수 길찾기</a>
-                <a href="tel:041-565-2589" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">📞 041-565-2589</a>
+                <a href="https://map.kakao.com/link/search/?쒖“?곗떆怨⑤쭑援?닔" target="_blank" class="btn-map">?뱧 ?쒖“?곗떆怨⑤쭑援?닔 湲몄갼湲?/a>
+                <a href="tel:041-565-2589" class="btn-map" style="background: #f0fdf4; border-color: #86efac; color: #166534;">?뱸 041-565-2589</a>
               </div>
             </div>
           </div>
@@ -1608,20 +1609,20 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 12:00 ~ 13:30</span>
-              <span class="step-tag">반납 & 전망대 🏙️</span>
+              <span class="time-capsule">?깍툘 12:00 ~ 13:30</span>
+              <span class="step-tag">諛섎궔 & ?꾨쭩? ?룞截?/span>
             </div>
-            <div class="step-title">🏙️ 카페(천안타운홀) 이동 & 렌터카 반납</div>
+            <div class="step-title">?룞截?移댄럹(泥쒖븞??댄?) ?대룞 & ?뚰꽣移?諛섎궔</div>
             <div class="step-details">
               <ul>
-                <li><strong>12:00 ~ 12:30:</strong> 천안역 이동 및 렌터카 반납 완료</li>
-                <li><strong>12:30 ~ 13:30:</strong> 천안타운홀 47층 카페 스카이라운지 담소</li>
-                <li>탁 트인 47층 도심 파노라마 전경 감상 & 시원한 음료 타임</li>
+                <li><strong>12:00 ~ 12:30:</strong> 泥쒖븞???대룞 諛??뚰꽣移?諛섎궔 ?꾨즺</li>
+                <li><strong>12:30 ~ 13:30:</strong> 泥쒖븞??댄? 47痢?移댄럹 ?ㅼ뭅?대씪?댁? ?댁냼</li>
+                <li>???몄씤 47痢??꾩떖 ?뚮끂?쇰쭏 ?꾧꼍 媛먯긽 & ?쒖썝???뚮즺 ???/li>
               </ul>
               <div class="action-row" style="flex-wrap: wrap;">
-                <a href="https://map.kakao.com/link/search/천안타운홀 카페" target="_blank" class="btn-map">📍 천안타운홀 길찾기</a>
+                <a href="https://map.kakao.com/link/search/泥쒖븞??댄? 移댄럹" target="_blank" class="btn-map">?뱧 泥쒖븞??댄? 湲몄갼湲?/a>
                 <a href="https://blog.naver.com/oct224/224430049893" target="_blank" class="btn-map"
-                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">🏙️ 리뷰</a>
+                  style="background: #f0fdf4; border-color: #86efac; color: #166534;">?룞截?由щ럭</a>
               </div>
             </div>
           </div>
@@ -1632,14 +1633,14 @@
           <div class="timeline-dot"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule">⏱️ 13:40 ~ 14:20</span>
-              <span class="step-tag">기차 대기</span>
+              <span class="time-capsule">?깍툘 13:40 ~ 14:20</span>
+              <span class="step-tag">湲곗감 ?湲?/span>
             </div>
-            <div class="step-title">🚉 천안역 이동 및 기차 탑승 준비</div>
+            <div class="step-title">?쉲 泥쒖븞???대룞 諛?湲곗감 ?묒듅 以鍮?/div>
             <div class="step-details">
               <ul>
-                <li><strong>13:40 ~ 14:00:</strong> 천안역 도보 이동 및 기차 탑승 준비</li>
-                <li><strong>14:00 ~ 14:20:</strong> 천안역 대합실 대기, 화장실 이용, 승차권 점검</li>
+                <li><strong>13:40 ~ 14:00:</strong> 泥쒖븞???꾨낫 ?대룞 諛?湲곗감 ?묒듅 以鍮?/li>
+                <li><strong>14:00 ~ 14:20:</strong> 泥쒖븞????⑹떎 ?湲? ?붿옣???댁슜, ?뱀감沅??먭?</li>
               </ul>
             </div>
           </div>
@@ -1650,35 +1651,35 @@
           <div class="timeline-dot finish"></div>
           <div class="step-card">
             <div class="step-top">
-              <span class="time-capsule" style="background: #15803d; color: #fff">⏱️ 14:21 출발</span>
-              <span class="step-tag">서울 귀가</span>
+              <span class="time-capsule" style="background: #15803d; color: #fff">?깍툘 14:21 異쒕컻</span>
+              <span class="step-tag">?쒖슱 洹媛</span>
             </div>
-            <div class="step-title">🚅 기차 (천안역 ➔ 서울역)</div>
+            <div class="step-title">?쉫 湲곗감 (泥쒖븞?????쒖슱??</div>
             <div class="step-details">
               <ul>
-                <li>14:21 천안역 출발 ➔ 15:32 서울역 도착 (무궁화 1156호, 71분 소요)</li>
-                <li>온 가족 안전하게 귀가 완료! 고생 많으셨습니다 👏</li>
+                <li>14:21 泥쒖븞??異쒕컻 ??15:32 ?쒖슱???꾩갑 (臾닿턿??1156?? 71遺??뚯슂)</li>
+                <li>??媛議??덉쟾?섍쾶 洹媛 ?꾨즺! 怨좎깮 留롮쑝?⑥뒿?덈떎 ?몡</li>
               </ul>
 
               <!-- Train Ticket -->
               <div class="train-ticket">
                 <div class="train-ticket-head">
                   <div class="train-badge-group">
-                    <span class="train-name" style="color: #ea580c">무궁화호</span>
-                    <span class="train-code">1156호</span>
+                    <span class="train-name" style="color: #ea580c">臾닿턿?뷀샇</span>
+                    <span class="train-code">1156??/span>
                   </div>
-                  <span class="train-time-badge">71분 소요</span>
+                  <span class="train-time-badge">71遺??뚯슂</span>
                 </div>
                 <div class="train-schedule-row">
                   <div class="station-box">
-                    <span class="st-title">천안역</span>
+                    <span class="st-title">泥쒖븞??/span>
                     <span class="st-clock">14:21</span>
                   </div>
                   <div class="schedule-arrow">
-                    <span>➔</span>
+                    <span>??/span>
                   </div>
                   <div class="station-box right">
-                    <span class="st-title">서울역</span>
+                    <span class="st-title">?쒖슱??/span>
                     <span class="st-clock">15:32</span>
                   </div>
                 </div>
@@ -1689,29 +1690,29 @@
       </div>
     </div>
 
-    <!-- 하단 플로팅 액션 -->
+    <!-- ?섎떒 ?뚮줈???≪뀡 -->
     <div class="quick-actions">
       <button class="btn-action" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
-        ⬆️ 맨 위로 이동
+        燧놅툘 留??꾨줈 ?대룞
       </button>
       <button class="btn-action" onclick="copyUrl()">
-        🔗 일정 링크 복사
+        ?뵕 ?쇱젙 留곹겕 蹂듭궗
       </button>
     </div>
   </div>
 
-  <!-- 포스터 원본 확대 모달 -->
+  <!-- ?ъ뒪???먮낯 ?뺣? 紐⑤떖 -->
   <div class="modal-overlay" id="posterModal" onclick="closePosterModal(event)">
     <div class="modal-content">
       <button class="btn-close-modal" onclick="closePosterModal(event)">
-        ✕
+        ??
       </button>
-      <img src="poster.jpg" alt="가족 가을 여행 포스터 원본" />
+      <img src="poster.jpg" alt="媛議?媛???ы뻾 ?ъ뒪???먮낯" />
     </div>
   </div>
 
   <script>
-    // 어르신 모드 토글 (큰 글씨)
+    // ?대Ⅴ??紐⑤뱶 ?좉? (??湲??
     function toggleSeniorMode() {
       const body = document.body;
       const btn = document.getElementById("seniorToggleBtn");
@@ -1720,15 +1721,15 @@
       localStorage.setItem("senior_font_mode", isSenior ? "true" : "false");
 
       if (isSenior) {
-        btn.textContent = "🔍 보통 글씨로 보기";
+        btn.textContent = "?뵇 蹂댄넻 湲?⑤줈 蹂닿린";
         btn.style.background = "#ffedd5";
       } else {
-        btn.textContent = "🔍 큰 글씨로 보기";
+        btn.textContent = "?뵇 ??湲?⑤줈 蹂닿린";
         btn.style.background = "#ffffff";
       }
     }
 
-    // 숙소 배정 접기/펼치기 아코디언 토글
+    // ?숈냼 諛곗젙 ?묎린/?쇱튂湲??꾩퐫?붿뼵 ?좉?
     function toggleRoomContainer() {
       const container = document.getElementById("roomContainer");
       const btn = document.getElementById("roomToggleBtn");
@@ -1736,15 +1737,15 @@
       const isOpen = container.classList.contains("open");
 
       if (isOpen) {
-        btn.innerHTML = '<span>접기</span> <span class="room-toggle-arrow">▲</span>';
+        btn.innerHTML = '<span>?묎린</span> <span class="room-toggle-arrow">??/span>';
         btn.style.background = "#fed7aa";
       } else {
-        btn.innerHTML = '<span>객실 자세히 보기</span> <span class="room-toggle-arrow">▼</span>';
+        btn.innerHTML = '<span>媛앹떎 ?먯꽭??蹂닿린</span> <span class="room-toggle-arrow">??/span>';
         btn.style.background = "#ffedd5";
       }
     }
 
-    // 결정이 필요한 사항 아코디언 토글
+    // 寃곗젙???꾩슂???ы빆 ?꾩퐫?붿뼵 ?좉?
     function toggleDecisionContainer() {
       const container = document.getElementById("decisionContainer");
       const btn = document.getElementById("decisionToggleBtn");
@@ -1752,22 +1753,22 @@
       const isOpen = container.classList.contains("open");
 
       if (isOpen) {
-        btn.innerHTML = '<span>접기</span> <span class="decision-toggle-arrow">▲</span>';
+        btn.innerHTML = '<span>?묎린</span> <span class="decision-toggle-arrow">??/span>';
         btn.style.background = "#fde68a";
       } else {
-        btn.innerHTML = '<span>내용 보기</span> <span class="decision-toggle-arrow">▼</span>';
+        btn.innerHTML = '<span>?댁슜 蹂닿린</span> <span class="decision-toggle-arrow">??/span>';
         btn.style.background = "#ffffff";
       }
     }
 
-    // 저장된 글씨 크기 설정 복원
+    // ??λ맂 湲???ш린 ?ㅼ젙 蹂듭썝
     window.addEventListener("DOMContentLoaded", () => {
       if (localStorage.getItem("senior_font_mode") === "true") {
         toggleSeniorMode();
       }
     });
 
-    // 일자 탭 전환
+    // ?쇱옄 ???꾪솚
     function switchDay(dayNum) {
       const buttons = document.querySelectorAll(".tab-btn");
       buttons.forEach((btn, idx) => {
@@ -1806,7 +1807,7 @@
       }
     }
 
-    // 포스터 모달
+    // ?ъ뒪??紐⑤떖
     function openPosterModal() {
       document.getElementById("posterModal").classList.add("active");
     }
@@ -1820,21 +1821,21 @@
       }
     }
 
-    // URL 복사
+    // URL 蹂듭궗
     function copyUrl() {
       if (navigator.clipboard) {
         navigator.clipboard
           .writeText(window.location.href)
           .then(() => {
             alert(
-              "여행 일정 페이지 주소가 복사되었습니다. 가족 단톡방에 공유해보세요!",
+              "?ы뻾 ?쇱젙 ?섏씠吏 二쇱냼媛 蹂듭궗?섏뿀?듬땲?? 媛議??⑦넚諛⑹뿉 怨듭쑀?대낫?몄슂!",
             );
           })
           .catch(() => {
-            alert("주소를 복사하지 못했습니다.");
+            alert("二쇱냼瑜?蹂듭궗?섏? 紐삵뻽?듬땲??");
           });
       } else {
-        alert("이 브라우저에서는 클립보드 복사를 지원하지 않습니다.");
+        alert("??釉뚮씪?곗??먯꽌???대┰蹂대뱶 蹂듭궗瑜?吏?먰븯吏 ?딆뒿?덈떎.");
       }
     }
   </script>

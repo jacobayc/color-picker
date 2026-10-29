@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Color Manager</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+        padding: 20px;
+        background: #111;
+        color: #eee;
+      }
+      h2 {
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        padding: 12px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        word-break: break-all;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+      .del {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        cursor: pointer;
+        opacity: 0.6;
+        font-weight: bold;
+        transition: opacity 0.15s;
+      }
+      .del:hover {
+        opacity: 1;
+      }
+      small {
+        display: block;
+        opacity: 0.75;
+        font-size: 11px;
+        margin-top: 4px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        background: #1c1c20;
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 18px;
+        border: 1px solid #2e2e36;
+      }
+      .control-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #282830;
+        padding: 4px 8px;
+        border-radius: 8px;
+      }
+      .control-group label {
+        font-size: 12px;
+        color: #aaa;
+        font-weight: 600;
+      }
+      input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: transparent;
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+      }
+      input[type="text"] {
+        padding: 7px 10px;
+        background: #141418;
+        border: 1px solid #3d3d4a;
+        color: #fff;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+      }
+      input[type="text"]:focus {
+        border-color: #6366f1;
+      }
+      .preview-card {
+        min-width: 140px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+      button {
+        padding: 8px 14px;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: background 0.15s;
+      }
+      #add {
+        background: #4f46e5;
+        color: #fff;
+      }
+      #add:hover {
+        background: #4338ca;
+      }
+      #reset {
+        background: #374151;
+        color: #e5e7eb;
+      }
+      #reset:hover {
+        background: #4b5563;
+      }
+      .badge {
+        font-size: 13px;
+        color: #818cf8;
+        background: #1e1b4b;
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🎨 Color Manager <span class="badge" id="count-badge">0</span></h2>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="bg-picker">배경</label>
+        <input type="color" id="bg-picker" value="#FAFAD2" />
+        <input type="text" id="bg" value="#FAFAD2" placeholder="#FAFAD2" size="7" />
+      </div>
+      <div class="control-group">
+        <label for="color-picker">글자</label>
+        <input type="color" id="color-picker" value="#663399" />
+        <input type="text" id="color" value="#663399" placeholder="#663399" size="7" />
+      </div>
+      <input type="text" id="name" placeholder="색상 이름 (예: 나만의 컬러)" />
+      
+      <div id="preview" class="preview-card" style="background: #FAFAD2; color: #663399;">
+        미리보기
+      </div>
+
+      <button id="add">추가</button>
+      <button id="reset">100종 초기화</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <script>
+      const KEY = "color_items";
+
+      const DEFAULT = [
+        { bg: "#FAFAD2", color: "#663399", name: "레베카 퍼플" },
+        { bg: "#FFFFFF", color: "#000000", name: "화이트/블랙" },
+        { bg: "#000000", color: "#FFFFFF", name: "블랙/화이트" },
+        { bg: "#FF0000", color: "#FFFFFF", name: "레드" },
+        { bg: "#00FF00", color: "#000000", name: "라임" },
+        { bg: "#0000FF", color: "#FFFFFF", name: "블루" },
+        { bg: "#FFFF00", color: "#000000", name: "옐로우" },
+        { bg: "#FFA500", color: "#000000", name: "오렌지" },
+        { bg: "#800080", color: "#FFFFFF", name: "퍼플" },
+        { bg: "#FFC0CB", color: "#000000", name: "핑크" },
+        { bg: "#8B4513", color: "#FFFFFF", name: "브라운" },
+        { bg: "#708090", color: "#FFFFFF", name: "슬레이트그레이" },
+        { bg: "#F5F5F5", color: "#000000", name: "화이트스모크" },
+        { bg: "#D3D3D3", color: "#000000", name: "라이트그레이" },
+        { bg: "#696969", color: "#FFFFFF", name: "다크그레이" },
+        { bg: "#ADD8E6", color: "#000000", name: "라이트블루" },
+        { bg: "#008080", color: "#FFFFFF", name: "틸" },
+        { bg: "#40E0D0", color: "#000000", name: "터콰이즈" },
+        { bg: "#90EE90", color: "#000000", name: "라이트그린" },
+        { bg: "#006400", color: "#FFFFFF", name: "다크그린" },
+        { bg: "#FFD700", color: "#000000", name: "골드" },
+        { bg: "#B22222", color: "#FFFFFF", name: "파이어브릭" },
+        { bg: "#FF69B4", color: "#000000", name: "핫핑크" },
+        { bg: "#CD5C5C", color: "#FFFFFF", name: "인디언레드" },
+        { bg: "#4B0082", color: "#FFFFFF", name: "인디고" },
+        { bg: "#E6E6FA", color: "#000000", name: "라벤더" },
+        { bg: "#FFFACD", color: "#000000", name: "레몬쉬폰" },
+        { bg: "#F08080", color: "#000000", name: "라이트코랄" },
+        { bg: "#20B2AA", color: "#000000", name: "라이트시그린" },
+        { bg: "#87CEFA", color: "#000000", name: "라이트스카이블루" },
+        { bg: "#7B68EE", color: "#FFFFFF", name: "미디엄슬레이트블루" },
+        { bg: "#00FA9A", color: "#000000", name: "미디엄스프링그린" },
+        { bg: "#48D1CC", color: "#000000", name: "미디엄터콰이즈" },
+        { bg: "#C71585", color: "#FFFFFF", name: "미디엄바이올렛레드" },
+        { bg: "#191970", color: "#FFFFFF", name: "미드나잇블루" },
+        { bg: "#FFE4B5", color: "#000000", name: "모카신" },
+        { bg: "#FFDEAD", color: "#000000", name: "나바호화이트" },
+        { bg: "#000080", color: "#FFFFFF", name: "네이비" },
+        { bg: "#FDF5E6", color: "#000000", name: "올드레이스" },
+        { bg: "#6B8E23", color: "#FFFFFF", name: "올리브드랩" },
+        { bg: "#FF4500", color: "#FFFFFF", name: "오렌지레드" },
+        { bg: "#DA70D6", color: "#000000", name: "오키드" },
+        { bg: "#AFEEEE", color: "#000000", name: "페일터콰이즈" },
+        { bg: "#DB7093", color: "#000000", name: "페일바이올렛레드" },
+        { bg: "#FFEFD5", color: "#000000", name: "파파야휩" },
+        { bg: "#FFDAB9", color: "#000000", name: "피치퍼프" },
+        { bg: "#CD853F", color: "#FFFFFF", name: "페루" },
+        { bg: "#DDA0DD", color: "#000000", name: "플럼" },
+        { bg: "#B0E0E6", color: "#000000", name: "파우더블루" },
+        { bg: "#800000", color: "#FFFFFF", name: "마룬" },
+        { bg: "#2AFFCC", color: "#0D1B2A", name: "민트초코" },
+        { bg: "#00F0FF", color: "#050515", name: "네온사이언" },
+        { bg: "#0B0C10", color: "#66FCF1", name: "딥스페이스" },
+        { bg: "#FFE600", color: "#111111", name: "사이버펑크옐로우" },
+        { bg: "#FF1493", color: "#FFFFFF", name: "네온핑크" },
+        { bg: "#BF00FF", color: "#FFFFFF", name: "일렉트릭퍼플" },
+        { bg: "#FF4600", color: "#FFFFFF", name: "모던오렌지" },
+        { bg: "#9CAF88", color: "#1B2E1B", name: "세이지그린" },
+        { bg: "#2D4A3E", color: "#E8F0E6", name: "포레스트모스" },
+        { bg: "#DCE7C8", color: "#2F4324", name: "말차라떼" },
+        { bg: "#556B2F", color: "#F5F5DC", name: "올리브카키" },
+        { bg: "#50C878", color: "#0A2912", name: "에메랄드" },
+        { bg: "#046307", color: "#E5FFDE", name: "딥에메랄드" },
+        { bg: "#A8E6CF", color: "#1D352D", name: "스카이민트" },
+        { bg: "#7FFFD4", color: "#0B3026", name: "아쿠아마린" },
+        { bg: "#003B46", color: "#C4DFE6", name: "오션딥블루" },
+        { bg: "#007BA7", color: "#FFFFFF", name: "세룰리안" },
+        { bg: "#E0F7FA", color: "#006064", name: "아이스블루" },
+        { bg: "#89CFF0", color: "#102A43", name: "베이비블루" },
+        { bg: "#4169E1", color: "#FFFFFF", name: "로얄블루" },
+        { bg: "#2C3E50", color: "#ECF0F1", name: "데님네이비" },
+        { bg: "#0047AB", color: "#FFFFFF", name: "코발트블루" },
+        { bg: "#FEF9C3", color: "#713F12", name: "파스텔옐로우" },
+        { bg: "#F7E7CE", color: "#4A3B2C", name: "샴페인골드" },
+        { bg: "#FFBF00", color: "#2B1700", name: "앰버" },
+        { bg: "#F28500", color: "#FFFFFF", name: "탠저린" },
+        { bg: "#CC5500", color: "#FFFFFF", name: "번트오렌지" },
+        { bg: "#E2725B", color: "#FFFFFF", name: "테라코타" },
+        { bg: "#FF6F61", color: "#FFFFFF", name: "산호레드" },
+        { bg: "#DC143C", color: "#FFFFFF", name: "크림슨" },
+        { bg: "#800020", color: "#FFD1DC", name: "버건디" },
+        { bg: "#58111A", color: "#F8D7DA", name: "와인" },
+        { bg: "#B76E79", color: "#FFFFFF", name: "로즈골드" },
+        { bg: "#FCE4EC", color: "#880E4F", name: "베이비핑크" },
+        { bg: "#EDE7F6", color: "#4A148C", name: "파스텔라일락" },
+        { bg: "#E0B0FF", color: "#3B1E54", name: "모브" },
+        { bg: "#8A2BE2", color: "#FFFFFF", name: "바이올렛" },
+        { bg: "#2E1A47", color: "#E6D7FF", name: "딥아메시스트" },
+        { bg: "#FFF8E7", color: "#3A3226", name: "웜아이보리" },
+        { bg: "#EED9C4", color: "#3E2723", name: "아몬드베이지" },
+        { bg: "#C19A6B", color: "#FFFFFF", name: "카멜" },
+        { bg: "#3D1C02", color: "#FFE6D5", name: "초콜릿" },
+        { bg: "#8B4513", color: "#FFE4E1", name: "웜토프" },
+        { bg: "#212529", color: "#F8F9FA", name: "차콜그레이" },
+        { bg: "#2C3539", color: "#C5D2DB", name: "건메탈" },
+        { bg: "#8C92AC", color: "#0F141C", name: "쿨그레이" },
+        { bg: "#E9ECEF", color: "#212529", name: "실버안개" },
+        { bg: "#1E1E1E", color: "#00FF66", name: "흑연블랙" },
+        { bg: "#121212", color: "#FF6B35", name: "매트블랙/오렌지" },
+        { bg: "#18002E", color: "#CCFF00", name: "딥퍼플/라임" },
+      ];
+
+      // 기존 50개 이하 데이터이거나 미등록 상태면 100종 DEFAULT로 세팅
+      const currentStored = localStorage.getItem(KEY);
+      if (!currentStored || JSON.parse(currentStored).length <= 50) {
+        localStorage.setItem(KEY, JSON.stringify(DEFAULT));
+      }
+
+      function getData() {
+        return JSON.parse(localStorage.getItem(KEY)) || [];
+      }
+
+      function setData(data) {
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+
+      function clear(el) {
+        while (el.firstChild) {
+          el.removeChild(el.firstChild);
+        }
+      }
+
+      const bgPicker = document.getElementById("bg-picker");
+      const bgInput = document.getElementById("bg");
+      const colorPicker = document.getElementById("color-picker");
+      const colorInput = document.getElementById("color");
+      const nameInput = document.getElementById("name");
+      const preview = document.getElementById("preview");
+      const countBadge = document.getElementById("count-badge");
+
+      function updatePreview() {
+        const bgVal = bgInput.value.trim() || bgPicker.value;
+        const colorVal = colorInput.value.trim() || colorPicker.value;
+        const nameVal = nameInput.value.trim() || "미리보기";
+
+        preview.style.background = bgVal;
+        preview.style.color = colorVal;
+        preview.textContent = nameVal;
+      }
+
+      // 컬러 피커와 텍스트 인풋 동기화
+      bgPicker.addEventListener("input", (e) => {
+        bgInput.value = e.target.value.toUpperCase();
+        updatePreview();
+      });
+
+      bgInput.addEventListener("input", (e) => {
+        const val = e.target.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          bgPicker.value = val;
+        }
+        updatePreview();
+      });
+
+      colorPicker.addEventListener("input", (e) => {
+        colorInput.value = e.target.value.toUpperCase();
+        updatePreview();
+      });
+
+      colorInput.addEventListener("input", (e) => {
+        const val = e.target.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          colorPicker.value = val;
+        }
+        updatePreview();
+      });
+
+      nameInput.addEventListener("input", updatePreview);
+
+      function render() {
+        const grid = document.getElementById("grid");
+        clear(grid);
+
+        const data = getData();
+        countBadge.textContent = `${data.length}개`;
+
+        data.forEach((c, i) => {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.style.background = c.bg;
+          div.style.color = c.color;
+
+          const text = `%{background:${c.bg}; color:${c.color}} ${c.name}%`;
+
+          const name = document.createElement("div");
+          name.textContent = c.name;
+
+          const code = document.createElement("small");
+          code.textContent = text;
+
+          const del = document.createElement("span");
+          del.textContent = "✕";
+          del.className = "del";
+
+          del.onclick = (e) => {
+            e.stopPropagation();
+            const curData = getData();
+            curData.splice(i, 1);
+            setData(curData);
+            render();
+          };
+
+          div.onclick = () => {
+            navigator.clipboard.writeText(text);
+            code.textContent = "복사됨!";
+            setTimeout(() => (code.textContent = text), 500);
+          };
+
+          div.appendChild(del);
+          div.appendChild(name);
+          div.appendChild(code);
+          grid.appendChild(div);
+        });
+      }
+
+      document.getElementById("add").onclick = () => {
+        const bg = bgInput.value.trim() || bgPicker.value;
+        const color = colorInput.value.trim() || colorPicker.value;
+        const name = nameInput.value.trim() || "커스텀 색상";
+
+        const data = getData();
+        // 항상 가장 첫 번째(index 0)에 추가
+        data.unshift({ bg, color, name });
+        setData(data);
+        render();
+
+        nameInput.value = "";
+        updatePreview();
+      };
+
+      document.getElementById("reset").onclick = () => {
+        if (confirm("기본 100종 색상 목록으로 초기화할까?")) {
+          localStorage.setItem(KEY, JSON.stringify(DEFAULT));
+          render();
+        }
+      };
+
+      updatePreview();
+      render();
+    </script>
+  </body>
+</html>

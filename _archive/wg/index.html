@@ -1,3 +1,4 @@
+﻿<script>location.replace('/');</script>
 <!doctype html>
 <html lang="ko">
   <head>
@@ -58,11 +59,10 @@
     <canvas id="stars"></canvas>
     <div class="slide">
       <p>
-        주님 너를 항상 인도하시리<br />
-        메마른 땅에서도 너를 만족시키리<br />
-        너는 물댄동산 같겠고 마르지 않는 샘 같으리<br />
-        너는 물댄동산 같겠고 마르지 않는 샘 같으리
-      </p>
+        二쇰떂 ?덈? ??긽 ?몃룄?섏떆由?br />
+        硫붾쭏瑜??낆뿉?쒕룄 ?덈? 留뚯”?쒗궎由?br />
+        ?덈뒗 臾쇰똾?숈궛 媛숆쿋怨?留덈Ⅴ吏 ?딅뒗 ??媛숈쑝由?br />
+        ?덈뒗 臾쇰똾?숈궛 媛숆쿋怨?留덈Ⅴ吏 ?딅뒗 ??媛숈쑝由?      </p>
     </div>
 
     <script>
@@ -102,33 +102,29 @@
         const length = Math.random() * 120 + 80;
 
         switch (direction) {
-          case 0: // 좌상단 → 우하단
-            startX = Math.random() * width * 1.2 - width * 0.1;
+          case 0: // 醫뚯긽?????고븯??            startX = Math.random() * width * 1.2 - width * 0.1;
             startY = -100;
             angle = Math.PI / 4 + (Math.random() - 0.5) * 0.4;
             break;
-          case 1: // 우상단 → 좌하단
-            startX = Math.random() * width * 1.2 - width * 0.1;
+          case 1: // ?곗긽????醫뚰븯??            startX = Math.random() * width * 1.2 - width * 0.1;
             startY = -100;
             angle = (3 * Math.PI) / 4 + (Math.random() - 0.5) * 0.4;
             break;
-          case 2: // 상단 → 하단
+          case 2: // ?곷떒 ???섎떒
             startX = Math.random() * width;
             startY = -100;
             angle = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
             break;
-          case 3: // 하단 → 상단
+          case 3: // ?섎떒 ???곷떒
             startX = Math.random() * width;
             startY = height + 100;
             angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.3;
             break;
-          case 4: // 좌하단 → 우상단
-            startX = -100;
+          case 4: // 醫뚰븯?????곗긽??            startX = -100;
             startY = Math.random() * height * 1.2 - height * 0.1;
             angle = -Math.PI / 4 + (Math.random() - 0.5) * 0.4;
             break;
-          case 5: // 우하단 → 좌상단
-            startX = width + 100;
+          case 5: // ?고븯????醫뚯긽??            startX = width + 100;
             startY = Math.random() * height * 1.2 - height * 0.1;
             angle = (-3 * Math.PI) / 4 + (Math.random() - 0.5) * 0.4;
             break;
@@ -206,3 +202,4 @@
     </script>
   </body>
 </html>
+
