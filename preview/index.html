@@ -51,28 +51,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 
   <style>
-    /* 다크 테마 커스텀 스크롤바 */
-    ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
+    /* 스크롤바 커스텀 */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    ::-webkit-scrollbar-track {
-      background: transparent;
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #181a22;
     }
-    ::-webkit-scrollbar-thumb {
+    .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #2d313f;
-      border-radius: 4px;
+      border-radius: 3px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3e4457;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
     }
 
-    /* 마크다운 렌더링 스타일 상세 스펙 (글씨 크기 2~4px 축소 최적화) */
+    /* 본문 마크다운 타이포그래피 */
     #preview-render {
-      color: #cfd3dc;
+      font-size: 13.5px;
       line-height: 1.65;
-      font-size: 0.875rem; /* 기존 0.975rem -> 0.875rem (14px) */
-      word-break: break-word;
+      color: #cfd3dc;
     }
 
     #preview-render h1,
@@ -87,7 +86,7 @@
     }
 
     #preview-render h1 {
-      font-size: 1.45rem; /* 기존 1.85rem 축소 */
+      font-size: 1.45rem;
       margin-top: 1.6rem;
       margin-bottom: 0.85rem;
       padding-bottom: 0.45rem;
@@ -96,7 +95,7 @@
     #preview-render h1:first-child { margin-top: 0; }
 
     #preview-render h2 {
-      font-size: 1.15rem; /* 약 18.4px (가독성 최적화를 위해 미세 축소) */
+      font-size: 1.15rem;
       margin-top: 1.25rem;
       margin-bottom: 0.55rem;
       padding-bottom: 0.25rem;
@@ -104,13 +103,13 @@
     }
 
     #preview-render h3 {
-      font-size: 0.985rem; /* 약 15.8px (본문과 자연스러운 대비 유지) */
+      font-size: 0.985rem;
       margin-top: 1.05rem;
       margin-bottom: 0.4rem;
     }
 
     #preview-render h4 {
-      font-size: 0.925rem; /* 기존 1.05rem 축소 */
+      font-size: 0.925rem;
       margin-top: 0.9rem;
       margin-bottom: 0.35rem;
     }
@@ -130,22 +129,22 @@
       font-style: italic;
     }
 
-    /* 폰트 리가처(합자) 비활성화: !==, ===, => 등이 기호로 뭉쳐지지 않고 원본 텍스트 그대로 표시 */
+    /* 폰트 리가처(합자) 비활성화 */
     code, pre, #editor-input, #preview-render code {
       font-variant-ligatures: none !important;
       font-feature-settings: "liga" 0, "calt" 0 !important;
     }
 
-    /* 인라인 코드 스타일 (다른 글자보다 조금 더 작게 0.82em 설정) */
+    /* 인라인 코드 스타일 */
     #preview-render :not(pre) > code {
       background-color: #2a2e3d;
       color: #e5b967;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82em; /* 본문 대비 작게 축소 */
-      padding: 0.18em 0.42em;
+      padding: 0.15em 0.35em;
       border-radius: 4px;
-      border: 1px solid rgba(229, 185, 103, 0.15);
-      white-space: break-spaces;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      font-weight: 500;
+      border: 1px solid rgba(229, 185, 103, 0.2);
     }
 
     /* 코드 블록 스타일 */
@@ -164,11 +163,11 @@
       background: transparent !important;
       padding: 0 !important;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.775rem; /* 코드 글자 크기 축소 (약 12.4px) */
+      font-size: 0.775rem;
       line-height: 1.6;
     }
 
-    /* Mermaid 다이어그램: markdownlivepreview 스펙 100% 일치 */
+    /* Mermaid 다이어그램 */
     .mermaid {
       overflow-x: auto;
       padding: 12px 0;
@@ -251,61 +250,60 @@
     }
 
     #preview-render th {
-      background-color: #242834;
+      background-color: #181a22;
       color: #f3f4f6;
       font-weight: 600;
     }
 
     #preview-render tr:nth-child(even) {
-      background-color: rgba(255, 255, 255, 0.02);
+      background-color: rgba(26, 29, 36, 0.4);
     }
 
-    /* 수평 구분선 */
-    #preview-render hr {
-      border: 0;
-      border-top: 1px solid #2d313f;
-      margin: 2rem 0;
+    #preview-render tr:hover {
+      background-color: rgba(37, 41, 54, 0.4);
     }
 
-    /* 링크 */
+    /* 링크 스타일 */
     #preview-render a {
       color: #60a5fa;
       text-decoration: underline;
       text-underline-offset: 3px;
-      transition: color 0.15s ease;
+      transition: color 0.15s;
     }
     #preview-render a:hover {
       color: #93c5fd;
     }
 
-    /* 체크박스 리스트 */
-    #preview-render input[type="checkbox"] {
-      margin-right: 0.5rem;
-      accent-color: #3b82f6;
-      transform: translateY(1px);
+    /* 구분선 스타일 */
+    #preview-render hr {
+      border: 0;
+      border-top: 1px solid #2d313f;
+      margin: 1.8rem 0;
     }
   </style>
 </head>
-<body class="h-full bg-app-main text-app-text font-sans antialiased flex flex-col overflow-hidden select-none">
+<body class="h-full bg-app-main text-app-text flex flex-col font-sans overflow-hidden select-none">
 
-  <!-- 1. GNB 헤더 -->
-  <header class="h-14 bg-app-panel border-b border-app-border flex items-center justify-between px-4 sm:px-6 z-20 flex-shrink-0">
-    <!-- 브랜드 로고 & 타이틀 -->
+  <!-- 1. 상단 글로벌 네비게이션 바 (GNB) -->
+  <header class="h-12 border-b border-app-border bg-app-panel flex items-center justify-between px-3 sm:px-4 z-30 select-none flex-shrink-0">
+    <!-- 브랜드 로고 및 타이틀 -->
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-base shadow-sm">
-        M
-      </div>
-      <div>
-        <h1 class="text-sm sm:text-base font-semibold text-app-heading tracking-tight flex items-center gap-2">
-          Markdown Studio
-          <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-app-border text-slate-400">Live</span>
-        </h1>
-      </div>
+      <a href="../" title="허브 홈으로 이동" class="flex items-center gap-2 group">
+        <div class="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-sm">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+          </svg>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-sm font-bold tracking-tight text-white font-mono group-hover:text-blue-400 transition-colors">Markdown Studio</span>
+          <span class="hidden sm:inline text-[11px] text-slate-500 font-mono">v1.2</span>
+        </div>
+      </a>
     </div>
 
-    <!-- 모바일 전용 탭 전환 버튼 -->
-    <div class="flex md:hidden items-center bg-app-main p-0.5 rounded-lg border border-app-border text-xs font-medium">
-      <button id="mobile-tab-editor" class="px-3 py-1 rounded-md bg-app-panel text-white transition-all shadow-sm">
+    <!-- 모바일 전용 뷰 전환 탭 -->
+    <div class="flex md:hidden bg-app-panelAlt p-0.5 rounded-lg border border-app-border text-xs">
+      <button id="mobile-tab-editor" class="px-3 py-1 rounded-md bg-app-panel text-white font-medium transition-all">
         Editor
       </button>
       <button id="mobile-tab-preview" class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all">
@@ -315,12 +313,13 @@
 
     <!-- 상단 툴바 액션 버튼 그룹 -->
     <div class="flex items-center gap-1.5 sm:gap-2">
-      <!-- 에디터 접기/펼치기 토글 버튼 -->
-      <button id="btn-toggle-editor" title="에디터 패널 접기/펼치기" class="px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-app-main hover:bg-[#252936] border border-app-border rounded-md transition-colors flex items-center gap-1.5">
+      <!-- 에디터 접기/펼치기 토글 버튼 (Ctrl + B) -->
+      <button id="btn-toggle-editor" title="에디터 패널 접기/펼치기 (Ctrl + B)" class="px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-app-main hover:bg-[#252936] border border-app-border rounded-md transition-colors flex items-center gap-1.5">
         <svg id="icon-collapse" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
         </svg>
         <span id="text-toggle-editor" class="hidden sm:inline">에디터 접기</span>
+        <span class="hidden md:inline font-mono text-[10px] text-slate-500 bg-slate-800/80 px-1 py-0.2 rounded border border-slate-700">Ctrl+B</span>
       </button>
 
       <div class="h-4 w-px bg-app-border mx-0.5"></div>
@@ -401,8 +400,15 @@
     </section>
 
     <!-- 좌우 조절 리사이저 바 (Desktop 드래그 분할선) -->
-    <div id="pane-resizer" class="hidden md:flex items-center justify-center w-1.5 hover:w-2 bg-app-border hover:bg-blue-500 active:bg-blue-600 cursor-col-resize z-20 transition-all duration-150 select-none flex-shrink-0 group" title="드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)">
+    <div id="pane-resizer" class="hidden md:flex items-center justify-center w-2 hover:w-2.5 bg-app-border hover:bg-blue-500 active:bg-blue-600 cursor-col-resize z-20 transition-all duration-150 select-none flex-shrink-0 group" title="드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)">
       <div class="w-0.5 h-7 bg-slate-500 group-hover:bg-white rounded-full transition-colors pointer-events-none"></div>
+    </div>
+
+    <!-- 드래그 중 예상 위치를 보여주는 고스트 가이드 라인 -->
+    <div id="resizer-ghost-guide" class="hidden absolute top-0 bottom-0 w-1 bg-blue-500 z-40 pointer-events-none shadow-[0_0_12px_rgba(59,130,246,0.8)] transition-colors">
+      <div id="resizer-ghost-badge" class="absolute top-1/2 -translate-y-1/2 left-3 px-2 py-1 bg-slate-900/90 border border-slate-700 text-[11px] font-mono text-white rounded shadow-lg pointer-events-none whitespace-nowrap">
+        50%
+      </div>
     </div>
 
     <!-- 우측: 실시간 렌더링 뷰어 (Preview Pane) -->
@@ -417,9 +423,9 @@
         </span>
         <span class="font-mono text-[11px] text-slate-500">Rendered with Marked + HLJS</span>
       </div>
-      <!-- 스크롤 컨테이너 (여백을 슬림하게 축소하여 가로폭 최대 확보) -->
+      <!-- 스크롤 컨테이너 -->
       <div id="preview-scroll-container" class="flex-1 min-w-0 max-w-full overflow-y-auto p-1.5 sm:p-3 select-text">
-        <!-- 캡처 대상 노드 (상하좌우 패딩 최적화) -->
+        <!-- 캡처 대상 노드 -->
         <div id="preview-capture-node" class="w-full max-w-full min-w-0 p-2.5 sm:p-4 rounded-lg bg-[#1e212b] border border-app-border shadow-2xl transition-all">
           <div id="preview-render" class="min-w-0 max-w-full"></div>
         </div>
@@ -517,30 +523,23 @@ export async function exportHighResImage(element: HTMLElement, opts: ExportOptio
 
 ---
 
-## 3. 리스트 계층 구조 및 체크리스트
+## 3. 리스트 서식 가이드
 
-다음은 세부 태스크 목록입니다:
-
-- [x] 실시간 마크다운 파싱 (\`marked.js\`)
-- [x] XSS 방지를 위한 살균 필터 (\`DOMPurify\`)
-- [x] 코드 신택스 하이라이팅 (\`highlight.js\`)
-- [x] 양방향/비율 스크롤 동기화 (\`Scroll Sync\`)
-- [ ] 사용자 정의 테마 선택기 (향후 확장 옵션)
-
-### 상세 번호 리스트
-1. **입력:** 좌측 에디터에 마크다운 타이핑
-2. **파싱 & 검증:** AST 파싱 후 위험 스크립트 제거
-3. **내보내기:**
-   - 2x 스케일 PNG 다운로드
-   - 클립보드 직접 복사
+* 프로젝트 아키텍처 수립
+  * 2-Pane 반응형 스플릿 뷰 구성
+  * 픽셀 퍼펙트 드래그 리사이징
+* 실시간 마크다운 파서 및 새니타이즈
+  1. \`marked.js\` 기반 실시간 AST 변환
+  2. \`DOMPurify\`를 통한 안전한 XSS 차단
+  3. \`highlight.js\` 구문 강조 자동 매핑
+* 클립보드 및 이미지 다운로드 파이프라인
 
 ---
 
-## 4. Mermaid 시각적 다이어그램 (흐름도)
-마크다운 내에 \`\`\`mermaid 코드 블록을 작성하면 즉시 미려한 시각적 차트로 렌더링됩니다.
+## 4. Mermaid.js 다이어그램 통합
 
 \`\`\`mermaid
-flowchart LR
+flowchart TD
     A["마크다운 입력"] --> B["marked.js 파싱"]
     B --> C{"다이어그램 여부"}
     C -->|Yes| D["Mermaid.js 엔진"]
@@ -557,7 +556,7 @@ flowchart LR
 | 기능 항목 | 지원 라이브러리 | 상태 | 특징 |
 | :--- | :--- | :---: | :--- |
 | **Parser** | \`marked v12\` | ✅ 완료 | 초경량, 빠른 파싱 속도 |
-| **Diagram** | \`mermaid v10\` | ✅ 완료 | flowchart 등 시각 차트 렌더링 |
+| **Diagram** | \`mermaid v11\` | ✅ 완료 | flowchart 등 시각 차트 렌더링 |
 | **Security** | \`DOMPurify v3\` | ✅ 완료 | 브라우저 기반 XSS 원천 차단 |
 | **Highlight** | \`highlight.js v11\` | ✅ 완료 | Atom One Dark 커스텀 테마 |
 | **Export** | \`html-to-image\` | ✅ 완료 | 2배율 Retina 해상도 캡처 |
@@ -596,7 +595,7 @@ flowchart LR
     const toastMessage = document.getElementById('toast-message');
     let toastTimeout = null;
 
-    // --- Mermaid 다이어그램 초기화 (markdownlivepreview.com 공식 구현 100% 일치) ---
+    // --- Mermaid 다이어그램 초기화 ---
     mermaid.initialize({
       startOnLoad: false,
       securityLevel: 'strict',
@@ -604,7 +603,7 @@ flowchart LR
       suppressErrorRendering: true
     });
 
-    // --- 마크다운 파서 커스텀 (Mermaid 블록 분기: <pre class="mermaid">) ---
+    // --- 마크다운 파서 커스텀 ---
     const customRenderer = new marked.Renderer();
     const defaultCodeRenderer = customRenderer.code.bind(customRenderer);
 
@@ -637,7 +636,7 @@ flowchart LR
       }
     });
 
-    // --- Mermaid 다이어그램 비동기 렌더링 (공식 파이프라인) ---
+    // --- Mermaid 다이어그램 비동기 렌더링 ---
     let mermaidRenderVersion = 0;
     async function renderMermaidDiagrams() {
       const version = ++mermaidRenderVersion;
@@ -690,10 +689,8 @@ flowchart LR
 
     // --- 코드 블록 복사 버튼 동적 주입 ---
     function injectCodeCopyButtons() {
-      // Mermaid 다이어그램 블록(.mermaid)을 제외한 일반 코드 블록만 선택 (Mermaid 문법 파싱 오염 방지)
       const codeBlocks = previewRender.querySelectorAll('pre:not(.mermaid)');
       codeBlocks.forEach(pre => {
-        // 이미 버튼이 있거나 내부에 code 요소가 없으면 스킵
         if (pre.querySelector('.btn-copy-code') || !pre.querySelector('code')) return;
 
         const copyBtn = document.createElement('button');
@@ -701,7 +698,6 @@ flowchart LR
         copyBtn.innerText = 'Copy';
         copyBtn.setAttribute('title', '코드 복사');
 
-        // 호버 시 버튼 표시용 클래스
         pre.classList.add('group');
 
         copyBtn.addEventListener('click', async (e) => {
@@ -780,7 +776,6 @@ flowchart LR
         localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(list));
         updateHistoryBadge(list.length);
       } catch (e) {
-        // QuotaExceededError 발생 시 오래된 하위 항목 삭제 후 재시도
         if (list.length > 20) {
           list.splice(-20);
           try {
@@ -803,10 +798,8 @@ flowchart LR
 
         if (list.length > 0) {
           const top = list[0];
-          // 완전 동일 내용이면 중복 저장 방지
           if (top.content === content) return;
 
-          // 동일 제목으로 3분 이내 연속 편집 중이면 최신본으로 갱신 (파편화 방지)
           if (top.title === title && (now - top.updatedAt) < 3 * 60 * 1000) {
             top.content = content;
             top.length = content.length;
@@ -816,7 +809,6 @@ flowchart LR
           }
         }
 
-        // 신규 문서 혹은 다른 문서일 경우 최상단 추가
         list.unshift({
           id: 'hist_' + now,
           title,
@@ -825,7 +817,6 @@ flowchart LR
           updatedAt: now
         });
 
-        // 최대 100건 유지: 101번째(가장 오래된 마지막 항목) 자동 삭제 (FIFO)
         if (list.length > MAX_HISTORY_ITEMS) {
           list.splice(MAX_HISTORY_ITEMS);
         }
@@ -836,21 +827,17 @@ flowchart LR
 
     function renderMarkdown() {
       const rawMarkdown = editorInput.value;
-      // 1. 파싱 및 새니타이즈
       const parsedHtml = marked.parse(rawMarkdown);
       const cleanHtml = DOMPurify.sanitize(parsedHtml, {
         USE_PROFILES: { html: true }
       });
 
-      // 2. 프리뷰 DOM 업데이트
       previewRender.innerHTML = cleanHtml;
       injectCodeCopyButtons();
       renderMermaidDiagrams();
 
-      // 3. 글자 수 갱신
       charCountEl.textContent = `${rawMarkdown.length.toLocaleString()} chars`;
 
-      // 4. 로컬 스토리지 최신 작업본 저장 (300ms 디바운스)
       clearTimeout(saveDebounceTimer);
       saveDebounceTimer = setTimeout(() => {
         try {
@@ -860,7 +847,6 @@ flowchart LR
         }
       }, 300);
 
-      // 5. 로컬스토리지 최대 100건 히스토리 자동 기록 (1.5초 디바운스)
       recordHistoryAuto(rawMarkdown);
     }
 
@@ -924,65 +910,126 @@ flowchart LR
     const COLLAPSE_STORAGE_KEY = 'md_studio_editor_collapsed_v1';
     let isEditorCollapsed = false;
 
-    function setEditorCollapse(collapsed) {
+    function setEditorCollapse(collapsed, animate = true) {
       isEditorCollapsed = collapsed;
+      if (animate) {
+        paneEditor.style.transition = 'width 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease';
+      } else {
+        paneEditor.style.transition = 'none';
+      }
+
       if (isEditorCollapsed) {
-        paneEditor.classList.add('hidden');
-        paneResizer.classList.add('hidden');
+        paneEditor.style.width = '0px';
+        paneEditor.style.opacity = '0';
+        paneEditor.style.overflow = 'hidden';
         textToggleEditor.textContent = '에디터 펼치기';
-        btnToggleEditor.title = '에디터 패널 펼치기';
+        btnToggleEditor.title = '에디터 패널 펼치기 (Ctrl + B)';
         iconCollapse.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>';
         btnToggleEditor.classList.add('border-blue-500/50', 'text-blue-400');
+        if (paneResizer) {
+          paneResizer.classList.add('bg-blue-500/40', 'w-2');
+          paneResizer.title = '클릭하거나 우측으로 드래그하여 에디터 펼치기';
+        }
       } else {
-        paneEditor.classList.remove('hidden');
-        paneResizer.classList.remove('hidden');
+        const savedRatio = parseFloat(localStorage.getItem(SPLIT_STORAGE_KEY)) || 50;
+        const validRatio = (savedRatio >= 20 && savedRatio <= 80) ? savedRatio : 50;
+        paneEditor.style.width = `${validRatio}%`;
+        paneEditor.style.opacity = '1';
+        paneEditor.style.overflow = '';
         textToggleEditor.textContent = '에디터 접기';
-        btnToggleEditor.title = '에디터 패널 접기';
+        btnToggleEditor.title = '에디터 패널 접기 (Ctrl + B)';
         iconCollapse.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>';
         btnToggleEditor.classList.remove('border-blue-500/50', 'text-blue-400');
+        if (paneResizer) {
+          paneResizer.classList.remove('bg-blue-500/40', 'w-2');
+          paneResizer.title = '드래그하여 좌우 너비 조절 (더블클릭 시 5:5 복귀)';
+        }
       }
       try {
         localStorage.setItem(COLLAPSE_STORAGE_KEY, isEditorCollapsed ? 'true' : 'false');
       } catch (e) {}
     }
 
-    if (btnToggleEditor) {
-      btnToggleEditor.addEventListener('click', () => {
-        setEditorCollapse(!isEditorCollapsed);
-        showToast(isEditorCollapsed ? '에디터를 접었습니다 (프리뷰 전체화면)' : '에디터를 다시 펼쳤습니다.');
-      });
+    function toggleEditorCollapse() {
+      setEditorCollapse(!isEditorCollapsed, true);
+      showToast(isEditorCollapsed ? '에디터를 접었습니다 (프리뷰 전체화면)' : '에디터를 다시 펼쳤습니다.');
     }
 
-    // --- 패널 리사이저 (Drag to Resize) ---
+    if (btnToggleEditor) {
+      btnToggleEditor.addEventListener('click', toggleEditorCollapse);
+    }
+
+    // --- 패널 리사이저 (Drag to Resize / Deferred Ghost Guide Mode) ---
     const paneResizer = document.getElementById('pane-resizer');
+    const ghostGuide = document.getElementById('resizer-ghost-guide');
+    const ghostBadge = document.getElementById('resizer-ghost-badge');
     const SPLIT_STORAGE_KEY = 'md_studio_split_ratio_v1';
     let isResizing = false;
+    let resizeStartX = 0;
+    let resizeMoved = false;
+    let currentGhostOffsetX = 0;
+    let currentGhostPercent = 50;
 
     function setSplitRatio(percent) {
-      const clamped = Math.min(Math.max(percent, 20), 80);
-      paneEditor.style.width = `${clamped}%`;
-      try {
-        localStorage.setItem(SPLIT_STORAGE_KEY, clamped.toFixed(1));
-      } catch (e) {}
+      paneEditor.style.width = `${percent}%`;
+      if (percent >= 15 && percent <= 85) {
+        try {
+          localStorage.setItem(SPLIT_STORAGE_KEY, percent.toFixed(1));
+        } catch (e) {}
+      }
     }
 
     function setupResizer() {
-      if (!paneResizer) return;
+      if (!paneResizer || !ghostGuide) return;
 
       paneResizer.addEventListener('pointerdown', (e) => {
         isResizing = true;
+        resizeMoved = false;
+        resizeStartX = e.clientX;
         paneResizer.setPointerCapture(e.pointerId);
         document.body.classList.add('cursor-col-resize');
-        paneEditor.style.transition = 'none';
+
+        const mainContainer = paneResizer.parentElement;
+        const containerRect = mainContainer.getBoundingClientRect();
+        currentGhostOffsetX = e.clientX - containerRect.left;
+        currentGhostPercent = (currentGhostOffsetX / containerRect.width) * 100;
+
+        // 고스트 라인 초기 위치 표시
+        ghostGuide.style.left = `${currentGhostOffsetX}px`;
+        ghostGuide.classList.remove('hidden');
+        ghostGuide.classList.remove('bg-rose-500', 'shadow-[0_0_12px_rgba(244,63,94,0.8)]');
+        ghostGuide.classList.add('bg-blue-500', 'shadow-[0_0_12px_rgba(59,130,246,0.8)]');
+        ghostBadge.textContent = `${Math.round(currentGhostPercent)}%`;
       });
 
       window.addEventListener('pointermove', (e) => {
         if (!isResizing) return;
+        if (Math.abs(e.clientX - resizeStartX) > 4) {
+          resizeMoved = true;
+        }
+
         const mainContainer = paneResizer.parentElement;
         const containerRect = mainContainer.getBoundingClientRect();
-        const offsetX = e.clientX - containerRect.left;
+        let offsetX = e.clientX - containerRect.left;
+        offsetX = Math.max(0, Math.min(offsetX, containerRect.width));
         const percent = (offsetX / containerRect.width) * 100;
-        setSplitRatio(percent);
+
+        currentGhostOffsetX = offsetX;
+        currentGhostPercent = percent;
+
+        // 고스트 라인 커서 추종
+        ghostGuide.style.left = `${offsetX}px`;
+
+        // 80px 이하 또는 12% 이하로 밀었을 때는 '접힘 예정' 시각적 피드백
+        if (offsetX < 80 || percent < 12) {
+          ghostGuide.classList.remove('bg-blue-500', 'shadow-[0_0_12px_rgba(59,130,246,0.8)]');
+          ghostGuide.classList.add('bg-rose-500', 'shadow-[0_0_12px_rgba(244,63,94,0.8)]');
+          ghostBadge.textContent = '놓으면 접힘';
+        } else {
+          ghostGuide.classList.remove('bg-rose-500', 'shadow-[0_0_12px_rgba(244,63,94,0.8)]');
+          ghostGuide.classList.add('bg-blue-500', 'shadow-[0_0_12px_rgba(59,130,246,0.8)]');
+          ghostBadge.textContent = `${Math.round(Math.min(percent, 80))}%`;
+        }
       });
 
       window.addEventListener('pointerup', (e) => {
@@ -992,17 +1039,48 @@ flowchart LR
           paneResizer.releasePointerCapture(e.pointerId);
         } catch (err) {}
         document.body.classList.remove('cursor-col-resize');
+        ghostGuide.classList.add('hidden'); // 고스트 가이드 숨김
+
+        // 1. 드래그가 발생하지 않은 단순 클릭일 때
+        if (!resizeMoved) {
+          if (isEditorCollapsed) {
+            setEditorCollapse(false, true);
+            showToast('에디터를 다시 펼쳤습니다.');
+          }
+          return;
+        }
+
+        // 2. 드래그를 끝마쳤을 때 (마우스를 놓았을 때 최종 위치 반영)
+        // A. 80px 또는 12% 이하의 좌측 끝에 놓았을 때 -> 부드럽게 접기
+        if (currentGhostOffsetX < 80 || currentGhostPercent < 12) {
+          setEditorCollapse(true, true);
+          showToast('에디터를 접었습니다 (프리뷰 전체화면)');
+          return;
+        }
+
+        // B. 유효한 너비에 놓았을 때 -> 에디터 펼치기 및 너비 확정
+        if (isEditorCollapsed) {
+          setEditorCollapse(false, false); // 애니메이션 튀김 없이 즉시 열림
+        }
+        const finalClamped = Math.min(Math.max(currentGhostPercent, 15), 80);
+        paneEditor.style.transition = 'width 0.18s cubic-bezier(0.16, 1, 0.3, 1)';
+        setSplitRatio(finalClamped);
+        setTimeout(() => { paneEditor.style.transition = 'none'; }, 200);
       });
 
-      // 더블클릭 시 5:5 비율로 초기화
       paneResizer.addEventListener('dblclick', () => {
+        if (isEditorCollapsed) {
+          setEditorCollapse(false, true);
+        }
+        paneEditor.style.transition = 'width 0.2s ease';
         setSplitRatio(50);
+        setTimeout(() => { paneEditor.style.transition = 'none'; }, 220);
         showToast('패널 비율을 5:5로 초기화했습니다.');
       });
 
-      // 저장된 분할 비율 복원
+      // 복원
       const savedRatio = parseFloat(localStorage.getItem(SPLIT_STORAGE_KEY));
-      if (!isNaN(savedRatio) && savedRatio >= 20 && savedRatio <= 80) {
+      if (!isNaN(savedRatio) && savedRatio >= 15 && savedRatio <= 80) {
         setSplitRatio(savedRatio);
       }
     }
@@ -1010,7 +1088,7 @@ flowchart LR
     // --- 이미지 내보내기 공통 옵션 ---
     function getImageExportOptions() {
       return {
-        pixelRatio: 2, // 고해상도 Retina 2x
+        pixelRatio: 2,
         backgroundColor: '#1e212b',
         cacheBust: true,
         style: {
@@ -1137,7 +1215,6 @@ flowchart LR
         `;
       }).join('');
 
-      // 이력 선택 이벤트 바인딩
       historyListContainer.querySelectorAll('.btn-select-history').forEach(el => {
         el.addEventListener('click', (e) => {
           if (e.target.closest('.btn-delete-history')) return;
@@ -1145,7 +1222,6 @@ flowchart LR
         });
       });
 
-      // 개별 이력 삭제 이벤트 바인딩
       historyListContainer.querySelectorAll('.btn-delete-history').forEach(el => {
         el.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1161,11 +1237,9 @@ flowchart LR
 
       const [selected] = list.splice(idx, 1);
       selected.updatedAt = Date.now();
-      // 최상단으로 재이동하여 가장 최근 본 md로 최신화
       list.unshift(selected);
       saveHistoryList(list);
 
-      // 에디터 및 실시간 렌더링 동기화
       editorInput.value = selected.content;
       renderMarkdown();
 
@@ -1185,7 +1259,6 @@ flowchart LR
       showToast('이력 항목을 삭제했습니다.');
     }
 
-    // 모달 이벤트 리스너 설정
     if (btnOpenHistory) btnOpenHistory.addEventListener('click', openHistoryModal);
     if (btnCloseHistory) btnCloseHistory.addEventListener('click', closeHistoryModal);
     if (modalHistory) {
@@ -1193,11 +1266,6 @@ flowchart LR
         if (e.target === modalHistory) closeHistoryModal();
       });
     }
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalHistory && !modalHistory.classList.contains('hidden')) {
-        closeHistoryModal();
-      }
-    });
 
     if (btnClearAllHistory) {
       btnClearAllHistory.addEventListener('click', () => {
@@ -1210,6 +1278,21 @@ flowchart LR
         }
       });
     }
+
+    // --- 전역 단축키 이벤트 바인딩 ---
+    window.addEventListener('keydown', (e) => {
+      // 1. ESC 키: 열려 있는 모달 닫기
+      if (e.key === 'Escape' && modalHistory && !modalHistory.classList.contains('hidden')) {
+        closeHistoryModal();
+        return;
+      }
+
+      // 2. Ctrl + B (Mac: Cmd + B): 에디터 접기/펼치기 토글
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault(); // 브라우저 북마크바 단축키 방지
+        toggleEditorCollapse();
+      }
+    });
 
     // --- 샘플 불러오기 & 지우기 이벤트 ---
     btnLoadSample.addEventListener('click', () => {
@@ -1234,7 +1317,6 @@ flowchart LR
 
     // --- 초기화 로직 ---
     function init() {
-      // 키보드 탭키 입력 편의 (들여쓰기 2스페이스)
       editorInput.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
           e.preventDefault();
@@ -1246,22 +1328,16 @@ flowchart LR
         }
       });
 
-      // 입력 시 실시간 렌더링
       editorInput.addEventListener('input', renderMarkdown);
 
-      // 모바일 탭 초기화
       setupMobileTabs();
-
-      // 패널 리사이저 초기화
       setupResizer();
 
-      // 에디터 접힘 상태 복원
       const savedCollapse = localStorage.getItem(COLLAPSE_STORAGE_KEY);
       if (savedCollapse === 'true' && window.innerWidth >= 768) {
         setEditorCollapse(true);
       }
 
-      // 로컬 스토리지 복원
       const savedContent = localStorage.getItem(STORAGE_KEY);
       if (savedContent !== null && savedContent.length > 0) {
         editorInput.value = savedContent;
@@ -1269,16 +1345,13 @@ flowchart LR
         editorInput.value = SAMPLE_MARKDOWN;
       }
 
-      // 히스토리 배지 카운트 초기 동기화
       const initialHistory = getHistoryList();
       updateHistoryBadge(initialHistory.length);
 
       renderMarkdown();
     }
 
-    // DOM 준비 완료 시 구동
     window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
-
