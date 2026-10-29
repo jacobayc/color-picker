@@ -2,7 +2,10 @@
 <html lang="ko" class="h-full">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Markdown Studio | Realtime Viewer</title>
 
     <!-- 웹폰트: Pretendard & JetBrains Mono -->
@@ -1274,6 +1277,9 @@ flowchart TD
         mobileTabPreview.addEventListener("click", () => {
           panePreview.classList.remove("hidden");
           paneEditor.classList.add("hidden");
+          // 모바일에서 프리뷰 탭 활성화 시 즉시 100% 가용 및 재렌더링
+          panePreview.style.width = "100%";
+          renderMermaidDiagrams();
           mobileTabPreview.classList.add("bg-app-panel", "text-white");
           mobileTabPreview.classList.remove("text-slate-400");
           mobileTabEditor.classList.remove("bg-app-panel", "text-white");
