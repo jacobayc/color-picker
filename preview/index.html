@@ -1653,6 +1653,9 @@ flowchart TD
       });
 
       // --- TTS (음성 읽어주기) 로직 ---
+      // WebKit/Chrome 가비지 컬렉션(GC) 조기 수거 버그 방지용 전역 레퍼런스
+      window.__activeTtsUtterance = null;
+
       const ttsState = {
         isSpeaking: false,
         isPaused: false,
@@ -1666,6 +1669,7 @@ flowchart TD
         ttsState.isPaused = false;
         ttsState.queue = [];
         ttsState.currentIndex = -1;
+        window.__activeTtsUtterance = null;
 
         if (ttsState.activeElement) {
           ttsState.activeElement.classList.remove("tts-active-node");
@@ -1699,8 +1703,14 @@ flowchart TD
         const items = [];
 
         candidates.forEach((el) => {
-          // pre 태그 내부(코드블록)이거나 비어있는 경우 제외
+          // pre 태그 내부(코드블록)이거나 다이어그램 내부인 경우 제외
           if (el.closest("pre") || el.closest(".mermaid")) return;
+
+          // 중복 방지: blockquote 내부의 p 태그이거나, li 내부의 p 태그인 경우 부모에서 이미 커버되므로 제외
+          const tag = el.tagName.toLowerCase();
+          if (tag === "p" && el.parentElement && el.parentElement.tagName.toLowerCase() === "blockquote") return;
+          if (tag === "p" && el.closest("li")) return;
+
           const text = (el.innerText || el.textContent || "").trim();
           if (!text) return;
 
@@ -1716,6 +1726,8 @@ flowchart TD
 
       function playTtsItem(index) {
         if (!("speechSynthesis" in window)) return;
+        if (!ttsState.isSpeaking || ttsState.isPaused) return;
+
         if (index < 0 || index >= ttsState.queue.length) {
           resetTtsUI();
           showToast("문서 읽기가 완료되었습니다.");
@@ -1741,7 +1753,9 @@ flowchart TD
           } catch (e) {}
         }
 
-        const utterance = new SpeechSynthesisUtterance(currentItem.text);
+        // GC 방지를 위해 반드시 window 전역 레퍼런스에 할당
+        window.__activeTtsUtterance = new SpeechSynthesisUtterance(currentItem.text);
+        const utterance = window.__activeTtsUtterance;
         utterance.rate = 1.0; // 표준 속도
         utterance.pitch = 1.0;
 
@@ -1749,22 +1763,31 @@ flowchart TD
         const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(currentItem.text);
         utterance.lang = hasKorean ? "ko-KR" : "en-US";
 
-        const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(
-          (v) => (hasKorean ? v.lang.startsWith("ko") : v.lang.startsWith("en"))
-        );
-        if (preferredVoice) utterance.voice = preferredVoice;
+        try {
+          const voices = window.speechSynthesis.getVoices();
+          const preferredVoice = voices.find(
+            (v) => (hasKorean ? v.lang.startsWith("ko") : v.lang.startsWith("en"))
+          );
+          if (preferredVoice) utterance.voice = preferredVoice;
+        } catch (e) {}
 
-        utterance.onend = () => {
+        let isEnded = false;
+        const proceedNext = () => {
+          if (isEnded) return;
+          isEnded = true;
           if (!ttsState.isSpeaking || ttsState.isPaused) return;
-          // 다음 문단/문장으로 연속 낭독 (15초 크롬 버그 원천 방어)
-          playTtsItem(index + 1);
+          // 다음 문단/문장으로 연속 낭독
+          setTimeout(() => {
+            playTtsItem(index + 1);
+          }, 30);
         };
+
+        utterance.onend = proceedNext;
 
         utterance.onerror = (e) => {
           if (e.error === "canceled" || e.error === "interrupted") return;
           console.warn("TTS 낭독 오류:", e);
-          playTtsItem(index + 1);
+          proceedNext();
         };
 
         window.speechSynthesis.speak(utterance);
@@ -1807,7 +1830,19 @@ flowchart TD
           return;
         }
 
-        stopTts(); // 이전 재생 초기화
+        // 모바일 탭이 Editor 모드일 경우 Preview 탭을 먼저 직접 활성화 (click() 이벤트 핸들러 재귀 트리거 방지)
+        if (window.innerWidth < 768 && panePreview && panePreview.classList.contains("hidden")) {
+          panePreview.classList.remove("hidden");
+          panePreview.classList.add("flex");
+          paneEditor.classList.add("hidden");
+          paneEditor.classList.remove("flex");
+          mobileTabPreview.classList.add("bg-app-panel", "text-white");
+          mobileTabPreview.classList.remove("text-slate-400");
+          mobileTabEditor.classList.remove("bg-app-panel", "text-white");
+          mobileTabEditor.classList.add("text-slate-400");
+        }
+
+        stopTts(); // 이전 재생 큐 정리
         ttsState.isSpeaking = true;
         ttsState.isPaused = false;
         ttsState.queue = items;
@@ -1823,12 +1858,11 @@ flowchart TD
         if (labelTts) labelTts.textContent = "일시정지";
         if (btnTtsStop) btnTtsStop.classList.remove("hidden");
 
-        // 모바일 탭이 Editor 모드일 경우 Preview 탭을 띄워서 하이라이트를 볼 수 있게 편의 배려
-        if (window.innerWidth < 768 && mobileTabPreview && panePreview.classList.contains("hidden")) {
-          mobileTabPreview.click();
-        }
+        // cancel() 비동기 큐 정리 딜레이 확보 후 첫 낭독 시작
+        setTimeout(() => {
+          playTtsItem(0);
+        }, 50);
 
-        playTtsItem(0);
         showToast("음성 읽기를 시작합니다.");
       }
 
