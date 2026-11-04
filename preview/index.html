@@ -632,7 +632,7 @@
       <!-- 좌측: 마크다운 입력창 (Editor Pane) -->
       <section
         id="pane-editor"
-        class="w-full md:w-1/2 h-full flex flex-col bg-app-panel"
+        class="w-full md:w-1/2 h-full min-w-0 flex-shrink-0 flex flex-col bg-app-panel"
       >
         <div
           class="h-9 px-4 flex items-center justify-between border-b border-app-border bg-app-panelAlt text-xs text-slate-400 select-none"
@@ -1387,6 +1387,16 @@ flowchart TD
       let isEditorCollapsed = false;
 
       function setEditorCollapse(collapsed, animate = true) {
+        // 모바일 해상도(<768px)에서는 split collapse 대신 모바일 탭으로 자연스럽게 전환
+        if (window.innerWidth < 768) {
+          if (collapsed) {
+            if (mobileTabPreview) mobileTabPreview.click();
+          } else {
+            if (mobileTabEditor) mobileTabEditor.click();
+          }
+          return;
+        }
+
         isEditorCollapsed = collapsed;
         if (animate) {
           paneEditor.style.transition =
@@ -1397,6 +1407,9 @@ flowchart TD
 
         if (isEditorCollapsed) {
           paneEditor.style.width = "0px";
+          paneEditor.style.minWidth = "0px";
+          paneEditor.style.flex = "0 0 0px";
+          paneEditor.style.pointerEvents = "none";
           paneEditor.style.opacity = "0";
           paneEditor.style.overflow = "hidden";
           textToggleEditor.textContent = "에디터 펼치기";
@@ -1414,6 +1427,9 @@ flowchart TD
           const validRatio =
             savedRatio >= 20 && savedRatio <= 80 ? savedRatio : 50;
           paneEditor.style.width = `${validRatio}%`;
+          paneEditor.style.minWidth = "";
+          paneEditor.style.flex = "";
+          paneEditor.style.pointerEvents = "";
           paneEditor.style.opacity = "1";
           paneEditor.style.overflow = "";
           textToggleEditor.textContent = "에디터 접기";
