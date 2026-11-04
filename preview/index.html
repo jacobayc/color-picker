@@ -637,23 +637,30 @@
         <div
           class="h-9 px-4 flex items-center justify-between border-b border-app-border bg-app-panelAlt text-xs text-slate-400 select-none"
         >
-          <span class="flex items-center gap-2 font-mono font-medium">
-            <svg
-              class="w-3.5 h-3.5 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              ></path>
-            </svg>
-            EDITOR (MARKDOWN)
-          </span>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 min-w-0 flex-1 mr-3">
+            <span class="flex items-center gap-2 font-mono font-medium flex-shrink-0">
+              <svg
+                class="w-3.5 h-3.5 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+              EDITOR (MARKDOWN)
+            </span>
+            <span
+              id="editor-doc-title"
+              class="hidden sm:inline-block text-[11px] text-slate-400/80 font-sans font-normal truncate border-l border-app-border pl-2 min-w-0 max-w-full"
+              title=""
+            ></span>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
             <span id="char-count" class="font-mono text-[11px] text-slate-500"
               >0 chars</span
             >
@@ -716,29 +723,36 @@
         <div
           class="h-9 px-4 flex items-center justify-between border-b border-app-border bg-app-panelAlt text-xs text-slate-400 select-none"
         >
-          <span class="flex items-center gap-2 font-mono font-medium">
-            <svg
-              class="w-3.5 h-3.5 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              ></path>
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              ></path>
-            </svg>
-            PREVIEW
-          </span>
-          <span class="font-mono text-[11px] text-slate-500"
+          <div class="flex items-center gap-2 min-w-0 flex-1 mr-3">
+            <span class="flex items-center gap-2 font-mono font-medium flex-shrink-0">
+              <svg
+                class="w-3.5 h-3.5 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                ></path>
+              </svg>
+              PREVIEW
+            </span>
+            <span
+              id="preview-doc-title"
+              class="inline-block text-[11px] text-slate-300 font-sans font-normal truncate border-l border-app-border pl-2 min-w-0 max-w-full"
+              title=""
+            ></span>
+          </div>
+          <span class="font-mono text-[11px] text-slate-500 flex-shrink-0"
             >Rendered with Marked + HLJS</span
           >
         </div>
@@ -958,6 +972,8 @@ flowchart TD
         "preview-capture-node",
       );
       const charCountEl = document.getElementById("char-count");
+      const editorDocTitle = document.getElementById("editor-doc-title");
+      const previewDocTitle = document.getElementById("preview-doc-title");
 
       const btnClear = document.getElementById("btn-clear");
       const btnTtsToggle = document.getElementById("btn-tts-toggle");
@@ -1261,6 +1277,22 @@ flowchart TD
         previewRender.innerHTML = cleanHtml;
         injectCodeCopyButtons();
         renderMermaidDiagrams();
+
+        // 1번 및 2번 요구사항: 렌더링된 첫번째 h1 태그 내용 추출 (없을 경우 첫 줄 폴백)
+        const firstH1 = previewRender.querySelector("h1");
+        const docTitle = firstH1
+          ? firstH1.textContent.trim()
+          : extractMarkdownTitle(rawMarkdown);
+        const displayTitle = docTitle || "(제목 없음)";
+
+        if (editorDocTitle) {
+          editorDocTitle.textContent = displayTitle;
+          editorDocTitle.title = displayTitle;
+        }
+        if (previewDocTitle) {
+          previewDocTitle.textContent = displayTitle;
+          previewDocTitle.title = displayTitle;
+        }
 
         charCountEl.textContent = `${rawMarkdown.length.toLocaleString()} chars`;
 
