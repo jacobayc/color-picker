@@ -81,6 +81,14 @@ flowchart TD
   - `setEditorCollapse(true)` 시에도 리사이저 바를 좌측 끝에 유지하여 시각적 힌트 제공.
   - 마우스 드래그 임계값 감지(좌측 끝 도달 시 자동 접기, 접힌 상태에서 우측 드래그 시 자동 복귀) 및 단순 클릭 시 5:5 복귀 기능 탑재.
 
+### [2026-11-06] 마크다운 이력 스토리지 IndexedDB 전환 및 보관 용량 확장(최대 1,000건)
+- **요약:** 5MB 용량 한계가 있는 LocalStorage에서 브라우저 내장 IndexedDB 비동기 스토리지(`MarkdownStudioDB`)로 전환하여 최대 1,000건까지 대용량 마크다운 문서를 성능 저하 없이 영구 보관.
+- **주요 변경:**
+  - `openDB()`, `initHistoryStore()`, `saveHistoryList()` 등 초경량 Promise 기반 IndexedDB 래퍼 구현.
+  - 최초 실행 시 기존 `LocalStorage`(`md_studio_history_v1`)에 보관되던 이력을 IndexedDB로 100% 무손실 자동 마이그레이션.
+  - `MAX_HISTORY_ITEMS`를 100건에서 1,000건으로 10배 확장.
+  - UI 툴팁 및 모달 풋터 안내 문구 갱신 (`최대 1,000건 (IndexedDB)`).
+
 ### [2026-11-06] 프리뷰 헤더 문서 제목 타이포그래피 강조 및 2색 랜덤 포인트 컬러 적용
 - **요약:** PREVIEW 헤더의 문서 제목(`#preview-doc-title`) 폰트 크기를 키우고(`text-[13px] font-bold`), 네온 오렌지(`#ff4600`)와 사이언 민트(`#2affcc`) 중 랜덤으로 색상이 부여되도록 시각적 강조 효과 적용.
 - **주요 변경:**
