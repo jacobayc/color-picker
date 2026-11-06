@@ -656,7 +656,7 @@
             </span>
             <span
               id="editor-doc-title"
-              class="hidden sm:inline-block text-[11px] text-slate-400/80 font-sans font-normal truncate border-l border-app-border pl-2 min-w-0 max-w-full"
+              class="hidden sm:inline-block text-[12px] font-semibold text-slate-300 truncate border-l border-app-border pl-2.5 min-w-0 max-w-full"
               title=""
             ></span>
           </div>
@@ -748,7 +748,7 @@
             </span>
             <span
               id="preview-doc-title"
-              class="inline-block text-[11px] text-slate-300 font-sans font-normal truncate border-l border-app-border pl-2 min-w-0 max-w-full"
+              class="inline-block text-[13px] font-bold tracking-tight truncate border-l border-app-border pl-2.5 min-w-0 max-w-full"
               title=""
             ></span>
           </div>
@@ -1290,6 +1290,14 @@ flowchart TD
           editorDocTitle.title = displayTitle;
         }
         if (previewDocTitle) {
+          // 제목이 변경되었을 때만 두 색상(#ff4600, #2affcc) 중 랜덤 적용 (타이핑 시 색상 깜빡임 방지)
+          if (previewDocTitle.dataset.lastTitle !== displayTitle) {
+            const TITLE_COLORS = ["#ff4600", "#2affcc"];
+            const randomColor =
+              TITLE_COLORS[Math.floor(Math.random() * TITLE_COLORS.length)];
+            previewDocTitle.style.color = randomColor;
+            previewDocTitle.dataset.lastTitle = displayTitle;
+          }
           previewDocTitle.textContent = displayTitle;
           previewDocTitle.title = displayTitle;
         }
