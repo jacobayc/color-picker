@@ -1383,9 +1383,16 @@ flowchart TD
           editorDocTitle.title = displayTitle;
         }
         if (previewDocTitle) {
-          // 제목이 변경되었을 때만 두 색상(#ff4600, #2affcc) 중 랜덤 적용 (타이핑 시 색상 깜빡임 방지)
+          // 제목이 변경되었거나 최초 로드 시 30종 고대비 비비드 팔레트에서 랜덤 적용 (타이핑 시 색상 깜빡임 방지)
           if (previewDocTitle.dataset.lastTitle !== displayTitle) {
-            const TITLE_COLORS = ["#ff4600", "#2affcc"];
+            const TITLE_COLORS = [
+              "#2affcc", "#00f0ff", "#38bdf8", "#60a5fa", "#818cf8",
+              "#a78bfa", "#c084fc", "#e879f9", "#f43f5e", "#ff4600",
+              "#fb923c", "#f59e0b", "#fbbf24", "#facc15", "#a3e635",
+              "#4ade80", "#34d399", "#2dd4bf", "#22d3ee", "#7dd3fc",
+              "#f472b6", "#fb7185", "#ff6b6b", "#ffa07a", "#ffd166",
+              "#06d6a0", "#118ab2", "#90e0ef", "#c77dff", "#ff99c8",
+            ];
             const randomColor =
               TITLE_COLORS[Math.floor(Math.random() * TITLE_COLORS.length)];
             previewDocTitle.style.color = randomColor;
