@@ -317,22 +317,33 @@
         margin: 0;
       }
 
-      /* 테이블 스타일 */
-      #preview-render table {
+      /* 테이블 스타일 및 가로 스크롤 컨테이너 */
+      .table-responsive-wrapper {
         width: 100%;
-        border-collapse: collapse;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         margin: 1.25rem 0;
-        font-size: 0.925rem;
         border: 1px solid #2d313f;
-        border-radius: 6px;
-        overflow: hidden;
+        border-radius: 8px;
+        background: #141720;
+      }
+
+      #preview-render table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        font-size: 0.88rem;
+        border: none;
       }
 
       #preview-render th,
       #preview-render td {
         border: 1px solid #2d313f;
-        padding: 0.6rem 0.85rem;
+        padding: 0.65rem 1rem;
         text-align: left;
+        white-space: nowrap; /* 셀 내용이 좁아서 부자연스럽게 줄바꿈되는 현상 방지 -> 시원하게 가로 스크롤 */
       }
 
       #preview-render th {
@@ -382,17 +393,17 @@
   >
     <!-- 1. 상단 글로벌 네비게이션 바 (GNB) -->
     <header
-      class="h-12 border-b border-app-border bg-app-panel flex items-center justify-between px-3 sm:px-4 z-30 select-none flex-shrink-0"
+      class="h-12 border-b border-app-border bg-app-panel flex items-center justify-between px-2 sm:px-4 z-30 select-none flex-shrink-0"
     >
       <!-- 브랜드 로고 및 타이틀 -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <a
           href="../"
           title="허브 홈으로 이동"
           class="flex items-center gap-2 group"
         >
           <div
-            class="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-sm"
+            class="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-sm flex-shrink-0"
           >
             <svg
               class="w-3.5 h-3.5 text-white"
@@ -410,10 +421,14 @@
           </div>
           <div class="flex items-baseline gap-1.5">
             <span
-              class="text-sm font-bold tracking-tight text-white font-mono group-hover:text-blue-400 transition-colors"
+              class="hidden sm:inline text-sm font-bold tracking-tight text-white font-mono group-hover:text-blue-400 transition-colors"
               >Markdown Studio</span
             >
-            <span class="hidden sm:inline text-[11px] text-slate-500 font-mono"
+            <span
+              class="sm:hidden text-xs font-bold tracking-tight text-white font-mono group-hover:text-blue-400 transition-colors"
+              >Studio</span
+            >
+            <span class="hidden md:inline text-[11px] text-slate-500 font-mono"
               >v1.2</span
             >
           </div>
@@ -422,17 +437,17 @@
 
       <!-- 모바일 전용 뷰 전환 탭 -->
       <div
-        class="flex md:hidden bg-app-panelAlt p-0.5 rounded-lg border border-app-border text-xs"
+        class="flex md:hidden bg-app-panelAlt p-0.5 rounded-lg border border-app-border text-xs flex-shrink-0"
       >
         <button
           id="mobile-tab-editor"
-          class="px-3 py-1 rounded-md bg-app-panel text-white font-medium transition-all"
+          class="px-2.5 sm:px-3 py-1 rounded-md bg-app-panel text-white font-medium transition-all"
         >
           Editor
         </button>
         <button
           id="mobile-tab-preview"
-          class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all"
+          class="px-2.5 sm:px-3 py-1 rounded-md text-slate-400 hover:text-white transition-all"
         >
           Preview
         </button>
@@ -440,11 +455,11 @@
 
       <!-- 상단 툴바 액션 버튼 그룹 -->
       <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-        <!-- 에디터 접기/펼치기 토글 버튼 (Ctrl + B) -->
+        <!-- 에디터 접기/펼치기 토글 버튼 (Ctrl + B) : 데스크톱에서만 노출 -->
         <button
           id="btn-toggle-editor"
           title="에디터 패널 접기/펼치기 (Ctrl + B)"
-          class="px-2 sm:px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-app-main hover:bg-[#252936] border border-app-border rounded-md transition-colors flex items-center gap-1.5"
+          class="hidden md:flex px-2 sm:px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-app-main hover:bg-[#252936] border border-app-border rounded-md transition-colors items-center gap-1.5"
         >
           <svg
             id="icon-collapse"
@@ -469,7 +484,29 @@
           >
         </button>
 
-        <div class="h-4 w-px bg-app-border mx-0.5"></div>
+        <div class="hidden md:block h-4 w-px bg-app-border mx-0.5"></div>
+
+        <!-- 새 문서 작성 버튼 (+) -->
+        <button
+          id="btn-new-doc"
+          title="새 문서 작성 (+)"
+          class="px-2 sm:px-2.5 py-1.5 text-xs font-medium text-emerald-300 hover:text-white bg-app-main hover:bg-emerald-950/30 border border-emerald-500/30 hover:border-emerald-500/60 rounded-md transition-all flex items-center gap-1"
+        >
+          <svg
+            class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.2"
+              d="M12 4v16m8-8H4"
+            ></path>
+          </svg>
+          <span class="hidden md:inline whitespace-nowrap">새 문서</span>
+        </button>
 
         <!-- 마크다운 이력 불러오기 -->
         <button
@@ -607,7 +644,7 @@
         <button
           id="btn-download-png"
           title="고해상도 PNG 파일로 저장"
-          class="px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
+          class="px-2 sm:px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
         >
           <svg
             class="w-3.5 h-3.5 flex-shrink-0"
@@ -976,6 +1013,7 @@ flowchart TD
       const previewDocTitle = document.getElementById("preview-doc-title");
 
       const btnClear = document.getElementById("btn-clear");
+      const btnNewDoc = document.getElementById("btn-new-doc");
       const btnTtsToggle = document.getElementById("btn-tts-toggle");
       const btnTtsStop = document.getElementById("btn-tts-stop");
       const iconTts = document.getElementById("icon-tts");
@@ -1370,6 +1408,17 @@ flowchart TD
         previewRender.innerHTML = cleanHtml;
         injectCodeCopyButtons();
         renderMermaidDiagrams();
+
+        // 테이블 요소들을 반응형 가로 스크롤 래퍼로 래핑하여 모바일/좁은 화면에서 잘림 방지
+        const tables = previewRender.querySelectorAll("table");
+        tables.forEach((table) => {
+          if (!table.parentElement.classList.contains("table-responsive-wrapper")) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "table-responsive-wrapper";
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+          }
+        });
 
         // 1번 및 2번 요구사항: 렌더링된 첫번째 h1 태그 내용 추출 (없을 경우 첫 줄 폴백)
         const firstH1 = previewRender.querySelector("h1");
@@ -2249,6 +2298,48 @@ flowchart TD
           toggleEditorCollapse();
         }
       });
+
+      // --- 새 문서 작성 (+) 이벤트 ---
+      if (btnNewDoc) {
+        btnNewDoc.addEventListener("click", async () => {
+          const currentContent = editorInput.value.trim();
+
+          // 기존 작성 중이던 내용이 있다면 이력에 즉시 안전 보존
+          if (currentContent.length > 0) {
+            const list = [...getHistoryList()];
+            const title = extractMarkdownTitle(currentContent);
+            const now = Date.now();
+
+            const isDuplicate = list.length > 0 && list[0].content === currentContent;
+            if (!isDuplicate) {
+              list.unshift({
+                id: "hist_" + now,
+                title,
+                content: currentContent,
+                length: currentContent.length,
+                updatedAt: now,
+              });
+              if (list.length > MAX_HISTORY_ITEMS) list.splice(MAX_HISTORY_ITEMS);
+              await saveHistoryList(list);
+            }
+          }
+
+          // 에디터 비우기 및 렌더링 초기화
+          editorInput.value = "";
+          renderMarkdown();
+          try {
+            localStorage.setItem(STORAGE_KEY, "");
+          } catch (e) {}
+
+          // 모바일 화면인 경우 에디터 탭으로 자동 전환하여 바로 붙여넣을 수 있게 처리
+          if (window.innerWidth < 768 && mobileTabEditor) {
+            mobileTabEditor.click();
+          }
+
+          editorInput.focus();
+          showToast("새 문서를 시작합니다. (기존 내용은 이력에 보관됨)");
+        });
+      }
 
       // --- 지우기 이벤트 ---
       btnClear.addEventListener("click", () => {
