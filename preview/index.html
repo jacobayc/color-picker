@@ -1405,20 +1405,20 @@ flowchart TD
           return `%%MD_CODE_HOLD_${codeVault.length - 1}%%`;
         });
 
-        // 2. ** 내부 양 끝 공백 교정 (CommonMark Flanking rule 위반 완화)
-        //    예: '** 텍스트 **' 또는 '**텍스트 **' -> '**텍스트**'
+        // 2. 한 줄(\r\n 제외) 단위로 ** ... ** 짝을 찾아 내부 공백을 완벽히 trim
+        //    예: '** 텍스트 **', '**텍스트 **', '** 텍스트**' -> '**텍스트**'
         let fixed = masked.replace(/\*\*([^\*\r\n]+?)\*\*/g, (match, inner) => {
           const trimmed = inner.trim();
           return trimmed ? `**${trimmed}**` : match;
         });
 
-        // 3. **닫는태그** 바로 뒤에 한글/영문/숫자가 붙은 경우 공백 분리
+        // 3. **닫는태그** 바로 뒤에 한글/영문/숫자가 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
         //    예: '**단어**조사' -> '**단어** 조사'
-        fixed = fixed.replace(/(\*\*[^\*\s][^\*]*?\*\*)([가-힣a-zA-Z0-9])/g, (match, p1, p2) => `${p1} ${p2}`);
+        fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)([가-힣a-zA-Z0-9])/g, (match, p1, p2) => `${p1} ${p2}`);
 
-        // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리
+        // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
         //    예: '단어**단어**' -> '단어 **단어**'
-        fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s][^\*]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
+        fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
 
         // 5. 보호된 코드 블록 복원
         return fixed.replace(/%%MD_CODE_HOLD_(\d+)%%/g, (_, idx) => codeVault[Number(idx)]);
