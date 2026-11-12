@@ -1398,30 +1398,35 @@ flowchart TD
       // 한국어 마크다운 볼드 문법 자동 교정 (Flanking whitespace 및 조사 결합 제약 완화)
       function preprocessMarkdownEmphasis(md) {
         if (!md) return "";
-        // 1. 코드 블록(```)과 인라인 코드(`)를 임시 플레이스홀더로 보호
-        const codeVault = [];
-        const masked = md.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
-          codeVault.push(match);
-          return `%%MD_CODE_HOLD_${codeVault.length - 1}%%`;
-        });
+        try {
+          // 1. 코드 블록(```)과 인라인 코드(`)를 임시 플레이스홀더로 보호
+          const codeVault = [];
+          const masked = md.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
+            codeVault.push(match);
+            return `%%MD_CODE_HOLD_${codeVault.length - 1}%%`;
+          });
 
-        // 2. 한 줄(\r\n 제외) 단위로 ** ... ** 짝을 찾아 내부 공백을 완벽히 trim
-        //    예: '** 텍스트 **', '**텍스트 **', '** 텍스트**' -> '**텍스트**'
-        let fixed = masked.replace(/\*\*([^\*\r\n]+?)\*\*/g, (match, inner) => {
-          const trimmed = inner.trim();
-          return trimmed ? `**${trimmed}**` : match;
-        });
+          // 2. 한 줄(\r\n 제외) 단위로 ** ... ** 짝을 찾아 내부 공백을 완벽히 trim
+          //    예: '** 텍스트 **', '**텍스트 **', '** 텍스트**' -> '**텍스트**'
+          let fixed = masked.replace(/\*\*([^\*\r\n]+?)\*\*/g, (match, inner) => {
+            const trimmed = inner.trim();
+            return trimmed ? `**${trimmed}**` : match;
+          });
 
-        // 3. **닫는태그** 바로 뒤에 한글/영문/숫자가 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
-        //    예: '**단어**조사' -> '**단어** 조사'
-        fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)([가-힣a-zA-Z0-9])/g, (match, p1, p2) => `${p1} ${p2}`);
+          // 3. **닫는태그** 바로 뒤에 한글 조사가 붙은 경우 공백 분리
+          //    예: '**단어**조사' -> '**단어** 조사'
+          fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)([가-힣])/g, (match, p1, p2) => `${p1} ${p2}`);
 
-        // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
-        //    예: '단어**단어**' -> '단어 **단어**'
-        fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
+          // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
+          //    예: '단어**단어**' -> '단어 **단어**'
+          fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
 
-        // 5. 보호된 코드 블록 복원
-        return fixed.replace(/%%MD_CODE_HOLD_(\d+)%%/g, (_, idx) => codeVault[Number(idx)]);
+          // 5. 보호된 코드 블록 복원
+          return fixed.replace(/%%MD_CODE_HOLD_(\d+)%%/g, (_, idx) => codeVault[Number(idx)]);
+        } catch (e) {
+          console.error("전처리 오류 발생 (원본으로 폴백):", e);
+          return md;
+        }
       }
 
       function renderMarkdown() {
