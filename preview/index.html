@@ -1395,12 +1395,34 @@ flowchart TD
         }, 1500);
       }
 
+      // 한국어 마크다운 볼드/이탤릭 문법 보정 (단어 뒤 조사가 붙어 볼드가 풀리는 CommonMark 제약 해결)
+      function preprocessMarkdownEmphasis(md) {
+        if (!md) return "";
+        // 1. 코드 블록(```)과 인라인 코드(`)를 임시 플레이스홀더로 보호
+        const codeVault = [];
+        const masked = md.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
+          codeVault.push(match);
+          return `%%MD_CODE_HOLD_${codeVault.length - 1}%%`;
+        });
+
+        // 2. **볼드** 뒤에 한글(가-힣) 조사가 바로 이어지는 경우 한 칸 공백을 삽입하여
+        //    marked 파서가 정상적으로 볼드(strong) 태그로 인식하도록 보정
+        let fixed = masked.replace(/(\*\*[^\*\s][^\*]*?\*\*)([가-힣])/g, "$1 $2");
+
+        // 3. 앞 단어 뒤에 바로 여는 **가 붙은 경우도 한 칸 분리 (예: 단어**볼드** -> 단어 **볼드**)
+        fixed = fixed.replace(/([가-힣])(\*\*[^\*\s])/g, "$1 $2");
+
+        // 4. 보호된 코드 블록 복원
+        return fixed.replace(/%%MD_CODE_HOLD_(\d+)%%/g, (_, idx) => codeVault[Number(idx)]);
+      }
+
       function renderMarkdown() {
         if (ttsState.isSpeaking) {
           stopTts();
         }
         const rawMarkdown = editorInput.value;
-        const parsedHtml = marked.parse(rawMarkdown);
+        const normalizedMarkdown = preprocessMarkdownEmphasis(rawMarkdown);
+        const parsedHtml = marked.parse(normalizedMarkdown);
         const cleanHtml = DOMPurify.sanitize(parsedHtml, {
           USE_PROFILES: { html: true },
         });
