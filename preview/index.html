@@ -1395,7 +1395,7 @@ flowchart TD
         }, 1500);
       }
 
-      // 한국어 마크다운 볼드/이탤릭 문법 보정 (단어 뒤 조사가 붙어 볼드가 풀리는 CommonMark 제약 해결)
+      // 한국어 마크다운 볼드 문법 자동 교정 (Flanking whitespace 및 조사 결합 제약 완화)
       function preprocessMarkdownEmphasis(md) {
         if (!md) return "";
         // 1. 코드 블록(```)과 인라인 코드(`)를 임시 플레이스홀더로 보호
@@ -1405,14 +1405,22 @@ flowchart TD
           return `%%MD_CODE_HOLD_${codeVault.length - 1}%%`;
         });
 
-        // 2. **볼드** 뒤에 한글(가-힣) 조사가 바로 이어지는 경우 한 칸 공백을 삽입하여
-        //    marked 파서가 정상적으로 볼드(strong) 태그로 인식하도록 보정
-        let fixed = masked.replace(/(\*\*[^\*\s][^\*]*?\*\*)([가-힣])/g, "$1 $2");
+        // 2. ** 내부 양 끝 공백 교정 (CommonMark Flanking rule 위반 완화)
+        //    예: '** 텍스트 **' 또는 '**텍스트 **' -> '**텍스트**'
+        let fixed = masked.replace(/\*\*([^\*\r\n]+?)\*\*/g, (match, inner) => {
+          const trimmed = inner.trim();
+          return trimmed ? `**${trimmed}**` : match;
+        });
 
-        // 3. 앞 단어 뒤에 바로 여는 **가 붙은 경우도 한 칸 분리 (예: 단어**볼드** -> 단어 **볼드**)
-        fixed = fixed.replace(/([가-힣])(\*\*[^\*\s])/g, "$1 $2");
+        // 3. **닫는태그** 바로 뒤에 한글/영문/숫자가 붙은 경우 공백 분리
+        //    예: '**단어**조사' -> '**단어** 조사'
+        fixed = fixed.replace(/(\*\*[^\*\s][^\*]*?\*\*)([가-힣a-zA-Z0-9])/g, (match, p1, p2) => `${p1} ${p2}`);
 
-        // 4. 보호된 코드 블록 복원
+        // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리
+        //    예: '단어**단어**' -> '단어 **단어**'
+        fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s][^\*]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
+
+        // 5. 보호된 코드 블록 복원
         return fixed.replace(/%%MD_CODE_HOLD_(\d+)%%/g, (_, idx) => codeVault[Number(idx)]);
       }
 
