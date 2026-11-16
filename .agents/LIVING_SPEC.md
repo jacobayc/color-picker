@@ -49,7 +49,7 @@ flowchart TD
 ### ① Markdown Preview (`preview/index.html`)
 
 - **2-Pane Split View:** 좌우 드래그 리사이저(20%~80%) 및 에디터 접기/펼치기 토글 (단축키 `Ctrl + B` 지원)
-- **공식 Mermaid v11 파이프라인:** markdownlivepreview.com 공식 스펙과 100% 일치하는 `<pre class="mermaid">` 및 비동기 렌더링, 클릭 시 전체화면 인스펙터 팝업 모달(20%~500% 마우스 휠 줌, 드래그 팬, 화면 맞춤 단축키 지원)
+- **공식 Mermaid v11 파이프라인:** markdownlivepreview.com 공식 스펙과 100% 일치하는 `<pre class="mermaid">` 및 비동기 렌더링, 클릭 시 전체화면 인스펙터 팝업 모달(5%~3,000% 마우스 휠 줌, 드래그 팬, 화면 맞춤 단축키 지원)
 - **로컬 이력 관리:** 최대 100건 FIFO 큐, 첫 줄 제목 기반 모달 목록 로드 및 최신순 동기화
 - **고해상도 캡처:** 2x Retina PNG 다운로드 및 클립보드 복사
 - **코드 리가처 차단:** `!==`, `===` 등 프로그래밍 연산자 원본 1:1 보존
@@ -66,6 +66,19 @@ flowchart TD
 ---
 
 ## 4. Changelog
+
+### [2026-11-16] Mermaid 확대 뷰어 모달 SVG 0×0 붕괴 버그 수정 및 초장형 다이어그램 배율 최적화
+- **요약:** Mermaid v11이 `width="100%"` + `viewBox`만 생성하는 SVG가 확대 모달의 Flexbox(`#mermaid-viewer-stage`) 안에서 CSS `width: auto !important; height: auto !important;`와 충돌해 `0px × 0px`로 붕괴하던 문제를 해결하고, 가로/세로로 매우 긴 다이어그램도 한눈에 맞춰지고 자유롭게 확대/축소되도록 최소 줌 하한을 `5%`로 완화.
+- **주요 변경:**
+  - `#mermaid-viewer-stage svg`에서 `width: auto !important; height: auto !important;` 제거 및 스테이지에 `shrink-0` 적용.
+  - `getMermaidSvgSize()` 헬퍼 도입: `viewBox` → 픽셀 속성 → 원본 `getBoundingClientRect()` → `getBBox()` 순으로 원본 크기를 안전하게 추출해 `openMermaidViewer()`에서 인라인 픽셀 `width`/`height` 명시.
+  - `setMermaidZoom()` 및 `fitMermaidToScreen()` 최소 배율 하한을 `0.05`(5%)로 낮추고, `Math.floor(fitScale * 100) / 100`으로 잘림 없는 화면맞춤 계산 적용.
+```diff
+- #mermaid-viewer-stage svg { height: auto !important; width: auto !important; }
++ /* openMermaidViewer()에서 viewBox 기반 픽셀 width/height 직접 주입 + stage shrink-0 */
+- const clampedZoom = Math.min(Math.max(nextZoom, 0.2), 30.0);
++ const clampedZoom = Math.min(Math.max(nextZoom, 0.05), 30.0);
+```
 
 ### [2026-11-12] Mermaid 다이어그램 원클릭 전체화면 줌/팬(Inspector) 모달 도입
 - **요약:** 다이어그램이 복잡하거나 가로로 길어서 글씨를 읽기 어려운 경우, 다이어그램을 클릭하면 즉시 전체화면 인스펙터 팝업 모달이 열려 최대 3,000%(30배)까지 원하는 특정 영역을 초고배율로 확대하고 마우스 커서 위치를 기준으로 직관적으로 줌/팬(Pan)할 수 있는 대화형 뷰어 기능 추가.

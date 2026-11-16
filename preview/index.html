@@ -279,8 +279,6 @@
         display: block !important;
         max-width: none !important;
         max-height: none !important;
-        height: auto !important;
-        width: auto !important;
       }
       .mermaid .mermaid-zoom-hint {
         position: absolute;
@@ -1009,7 +1007,7 @@
       >
         <div
           id="mermaid-viewer-stage"
-          class="transform-gpu origin-center transition-transform duration-75 select-none will-change-transform"
+          class="shrink-0 transform-gpu origin-center transition-transform duration-75 select-none will-change-transform"
         >
           <!-- 선택된 SVG가 이 안에 주입됨 -->
         </div>
@@ -1273,7 +1271,7 @@ flowchart TD
               if (e.target.closest("a") || e.target.closest("button")) return;
               const svgEl = element.querySelector("svg");
               if (svgEl) {
-                openMermaidViewer(svgEl.cloneNode(true));
+                openMermaidViewer(svgEl);
               }
             };
           } catch (error) {
@@ -1309,9 +1307,43 @@ flowchart TD
         }
       }
 
+      function getMermaidSvgSize(svg, fallbackEl) {
+        const vb = svg && svg.viewBox && svg.viewBox.baseVal;
+        if (vb && vb.width > 0 && vb.height > 0) {
+          return { width: vb.width, height: vb.height };
+        }
+
+        const rawW = svg ? svg.getAttribute("width") : null;
+        const rawH = svg ? svg.getAttribute("height") : null;
+        const attrW = rawW && !rawW.includes("%") ? parseFloat(rawW) : 0;
+        const attrH = rawH && !rawH.includes("%") ? parseFloat(rawH) : 0;
+        if (attrW > 0 && attrH > 0) {
+          return { width: attrW, height: attrH };
+        }
+
+        const rectTarget = fallbackEl || svg;
+        if (rectTarget) {
+          const rect = rectTarget.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            return { width: rect.width, height: rect.height };
+          }
+        }
+
+        if (svg && typeof svg.getBBox === "function") {
+          try {
+            const bbox = svg.getBBox();
+            if (bbox.width > 0 && bbox.height > 0) {
+              return { width: bbox.width, height: bbox.height };
+            }
+          } catch (e) {}
+        }
+
+        return { width: 800, height: 600 };
+      }
+
       function setMermaidZoom(nextZoom, cursorClientX, cursorClientY) {
-        // 배율 0.2배 (20%) ~ 30.0배 (3000%) - 매우 거대한 다이어그램도 글자 단위로 초고배율 확대 가능
-        const clampedZoom = Math.min(Math.max(nextZoom, 0.2), 30.0);
+        // 배율 0.05배 (5%) ~ 30.0배 (3000%) - 가로/세로로 매우 긴 다이어그램도 전체 맞춤 및 초고배율 확대 가능
+        const clampedZoom = Math.min(Math.max(nextZoom, 0.05), 30.0);
         if (clampedZoom === mermaidZoom) return;
 
         // 마우스 커서 위치를 기준으로 줌 (Zoom toward cursor)
@@ -1342,32 +1374,31 @@ flowchart TD
         if (!svg) return;
 
         const viewportRect = mermaidViewerViewport.getBoundingClientRect();
-        // SVG 고유 크기 확인
-        let svgW = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal.width : svg.clientWidth;
-        let svgH = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal.height : svg.clientHeight;
-
-        if (!svgW || !svgH) {
-          const bbox = svg.getBBox ? svg.getBBox() : { width: 800, height: 600 };
-          svgW = bbox.width;
-          svgH = bbox.height;
-        }
+        const { width: svgW, height: svgH } = getMermaidSvgSize(svg);
 
         const availW = Math.max(viewportRect.width - 80, 200);
         const availH = Math.max(viewportRect.height - 80, 200);
         const fitScale = Math.min(availW / svgW, availH / svgH, 2.5);
 
-        mermaidZoom = Math.max(Math.round(fitScale * 10) / 10, 0.4);
+        mermaidZoom = Math.max(Math.floor(fitScale * 100) / 100, 0.05);
         mermaidPanX = 0;
         mermaidPanY = 0;
         updateMermaidTransform();
       }
 
-      function openMermaidViewer(clonedSvg) {
-        if (!modalMermaidViewer || !mermaidViewerStage) return;
+      function openMermaidViewer(sourceSvg) {
+        if (!modalMermaidViewer || !mermaidViewerStage || !sourceSvg) return;
+
+        const clonedSvg = sourceSvg.cloneNode(true);
+        const { width: svgW, height: svgH } = getMermaidSvgSize(clonedSvg, sourceSvg);
 
         mermaidViewerStage.innerHTML = "";
+        clonedSvg.removeAttribute("width");
+        clonedSvg.removeAttribute("height");
+        clonedSvg.style.width = `${svgW}px`;
+        clonedSvg.style.height = `${svgH}px`;
         clonedSvg.style.maxWidth = "none";
-        clonedSvg.style.height = "auto";
+        clonedSvg.style.maxHeight = "none";
         clonedSvg.style.overflow = "visible";
         clonedSvg.classList.remove("mermaid-error");
         mermaidViewerStage.appendChild(clonedSvg);
