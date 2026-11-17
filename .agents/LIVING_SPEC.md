@@ -67,6 +67,20 @@ flowchart TD
 
 ## 4. Changelog
 
+### [2026-11-17] 볼드 닫는 기호(`**`) 직후 콜론(`:`) 결합 시 프리뷰 볼드 풀림 버그 수정
+- **요약:** `**선택 취소 불가**:`처럼 볼드 닫는 기호(`**`) 바로 뒤에 콜론(`:`)이 붙어 `marked` 파서에서 볼드가 해제되던 문제를, 전처리 임시 접합 토큰 치환 및 파싱 직후 원복 파이프라인으로 해결하여 프리뷰에 불필요한 공백 없이 원본 표기 그대로 볼드 렌더링되도록 개선.
+- **주요 변경:**
+  - `preprocessMarkdownEmphasis(md, colonJoinToken)`에 `3-1` 규칙 추가: `**...**:` 패턴을 `**...** %%MDCOLONJOIN%%:` 형태로 임시 분리.
+  - `renderMarkdown()`에서 입력 본문과 충돌하지 않는 `colonJoinToken`을 생성해 전달하고, `marked.parse()` 직후 `</strong> ${colonJoinToken}:` → `</strong>:`(및 미소비 토큰 ` ${colonJoinToken}:` → `:`)로 복원.
+```diff
+- const normalizedMarkdown = preprocessMarkdownEmphasis(rawMarkdown);
+- const parsedHtml = marked.parse(normalizedMarkdown);
++ fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*):/g, (match, p1) => `${p1} ${colonJoinToken}:`);
++ const parsedHtml = marked.parse(normalizedMarkdown)
++   .replaceAll(`</strong> ${colonJoinToken}:`, "</strong>:")
++   .replaceAll(` ${colonJoinToken}:`, ":");
+```
+
 ### [2026-11-16] Mermaid 확대 뷰어 모달 SVG 0×0 붕괴 버그 수정 및 초장형 다이어그램 배율 최적화
 - **요약:** Mermaid v11이 `width="100%"` + `viewBox`만 생성하는 SVG가 확대 모달의 Flexbox(`#mermaid-viewer-stage`) 안에서 CSS `width: auto !important; height: auto !important;`와 충돌해 `0px × 0px`로 붕괴하던 문제를 해결하고, 가로/세로로 매우 긴 다이어그램도 한눈에 맞춰지고 자유롭게 확대/축소되도록 최소 줌 하한을 `5%`로 완화.
 - **주요 변경:**

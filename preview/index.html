@@ -1727,8 +1727,8 @@ flowchart TD
         }, 1500);
       }
 
-      // 한국어 마크다운 볼드 문법 자동 교정 (Flanking whitespace 및 조사 결합 제약 완화)
-      function preprocessMarkdownEmphasis(md) {
+      // 한국어 마크다운 볼드 문법 자동 교정 (Flanking whitespace 및 조사·콜론 결합 제약 완화)
+      function preprocessMarkdownEmphasis(md, colonJoinToken = "%%MDCOLONJOIN%%") {
         if (!md) return "";
         try {
           // 1. 코드 블록(```)과 인라인 코드(`)를 임시 플레이스홀더로 보호
@@ -1749,6 +1749,10 @@ flowchart TD
           //    예: '**단어**조사' -> '**단어** 조사'
           fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)([가-힣])/g, (match, p1, p2) => `${p1} ${p2}`);
 
+          // 3-1. **닫는태그** 바로 뒤에 콜론(:)이 붙은 경우 임시 접합 토큰으로 공백 분리
+          //      예: '**선택 취소 불가**:' -> '**선택 취소 불가** %%MDCOLONJOIN%%:' (파싱 후 </strong>:로 복원)
+          fixed = fixed.replace(/(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*):/g, (match, p1) => `${p1} ${colonJoinToken}:`);
+
           // 4. 여는 **앞에 한글/영문/숫자가 바로 붙은 경우 공백 분리 (단, 같은 줄 내에서만)
           //    예: '단어**단어**' -> '단어 **단어**'
           fixed = fixed.replace(/([가-힣a-zA-Z0-9])(\*\*[^\*\s\r\n][^\*\r\n]*?\*\*)/g, (match, p1, p2) => `${p1} ${p2}`);
@@ -1766,8 +1770,15 @@ flowchart TD
           stopTts();
         }
         const rawMarkdown = editorInput.value;
-        const normalizedMarkdown = preprocessMarkdownEmphasis(rawMarkdown);
-        const parsedHtml = marked.parse(normalizedMarkdown);
+        let colonJoinToken = "%%MDCOLONJOIN%%";
+        while (rawMarkdown.includes(colonJoinToken)) {
+          colonJoinToken += "X";
+        }
+        const normalizedMarkdown = preprocessMarkdownEmphasis(rawMarkdown, colonJoinToken);
+        const parsedHtml = marked
+          .parse(normalizedMarkdown)
+          .replaceAll(`</strong> ${colonJoinToken}:`, "</strong>:")
+          .replaceAll(` ${colonJoinToken}:`, ":");
         const cleanHtml = DOMPurify.sanitize(parsedHtml, {
           USE_PROFILES: { html: true },
         });
