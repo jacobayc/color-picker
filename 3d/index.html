@@ -42,6 +42,7 @@
   <!-- Three.js r147 UMD + OrbitControls (file:/// 100% 호환) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="./drive.js"></script>
 
   <style>
     * {
@@ -176,6 +177,11 @@
         </svg>
         <span>실행</span>
       </button>
+
+      <button id="btn-start-drive" title="코드 스펙대로 테스트 세트장에서 직접 시승하기"
+              class="flex items-center gap-1.5 h-7 px-3 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors shadow-sm">
+        <span>🏁 시승하기</span>
+      </button>
     </div>
   </header>
 
@@ -223,8 +229,90 @@
       <!-- Three.js 캔버스 컨테이너 -->
       <div id="canvas-container" class="flex-1 relative w-full h-full overflow-hidden">
 
+        <!-- 주행 테스트 HUD 오버레이 (시승 모드 시 활성화) -->
+        <div id="drive-hud" class="hidden absolute inset-0 z-20 pointer-events-none select-none flex flex-col justify-between p-3 sm:p-4">
+
+          <!-- 상단 HUD 바 -->
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <!-- 좌측: 복귀 & 트랙 컨트롤 -->
+            <div class="pointer-events-auto flex flex-wrap items-center gap-1.5 p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-xs">
+              <button id="btn-exit-drive" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-600/80 text-white font-medium transition-colors">
+                ← 쇼케이스로 (ESC)
+              </button>
+              <span id="drive-track-badge" class="px-2 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-mono text-[11px]">🛣️ 아스팔트</span>
+              <button id="btn-drive-reset" title="차량 위치 원점 초기화 (R)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">🔄 리셋(R)</button>
+              <button id="btn-drive-cam" title="시점 전환 (C)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">📷 체이스(C)</button>
+              <button id="btn-drive-night" title="주간/야간 조명 (L)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 transition-colors">☀️ 주간(L)</button>
+              <button id="btn-drive-mute" title="주행 사운드 음소거" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">🔊</button>
+              <button id="btn-drive-pad-toggle" title="가상 패드 표시 전환" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">📱 패드</button>
+            </div>
+
+            <!-- 우측: 실시간 속도계 & 스펙 인디케이터 -->
+            <div class="flex flex-col items-end gap-1.5">
+              <div class="px-3.5 py-2 rounded-xl bg-app-panel/90 backdrop-blur-md border border-app-border shadow-xl text-right min-w-[148px]">
+                <div id="drive-vehicle-label" class="text-[11px] text-app-muted font-medium truncate">🛻 사이버트럭</div>
+                <div class="flex items-baseline justify-end gap-1 mt-0.5">
+                  <span id="drive-speed-num" class="text-3xl font-bold font-mono text-white tracking-tight">0</span>
+                  <span class="text-xs font-mono text-app-muted">km/h</span>
+                </div>
+                <div class="flex items-center justify-end gap-1.5 mt-1 text-[10px] font-mono">
+                  <span id="drive-state-pill" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">IDLE</span>
+                  <span id="drive-spec-limit" class="text-app-muted">80 / 155</span>
+                </div>
+              </div>
+              <div class="hidden md:block px-2.5 py-1 rounded-md bg-black/55 border border-app-border/70 text-[10px] font-mono text-slate-300">
+                ↑↓←→ 주행 · Shift 부스트 · Space 브레이크 · B 경적
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단: 모바일 / 터치 가상 조이스틱 + A/B 컨트롤 버튼 -->
+          <div id="drive-touch-controls" class="hidden items-end justify-between gap-4 pb-1" style="touch-action: none;">
+            <!-- 좌측: 가상 조이스틱 -->
+            <div class="pointer-events-auto flex flex-col items-center gap-1.5">
+              <div id="drive-joy-label" class="px-2 py-0.5 rounded bg-black/60 text-[10px] font-mono text-cyan-300">A안: 전후·좌우 스틱</div>
+              <div id="drive-joystick-base"
+                   class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-slate-900/70 border-2 border-slate-600/70 backdrop-blur-md flex items-center justify-center shadow-xl"
+                   style="touch-action: none;">
+                <div id="drive-joystick-rail" class="hidden absolute inset-x-3 h-1 rounded-full bg-cyan-500/35"></div>
+                <div id="drive-joystick-knob"
+                     class="w-14 h-14 rounded-full bg-cyan-500/85 border-2 border-white/70 shadow-lg pointer-events-none transition-transform duration-75"></div>
+              </div>
+            </div>
+
+            <!-- 우측: 액션 버튼 (A안 / B안 동적 구성) -->
+            <div class="pointer-events-auto flex flex-col items-end gap-2" style="touch-action: none;">
+              <div class="flex items-center gap-2">
+                <button id="touch-btn-horn"
+                        class="w-14 h-14 rounded-full bg-amber-500/25 active:bg-amber-500/60 border-2 border-amber-400/60 text-amber-200 font-semibold text-xs shadow-lg flex flex-col items-center justify-center"
+                        style="touch-action: none;">
+                  <span>📢</span><span>경적</span>
+                </button>
+                <button id="touch-btn-boost"
+                        class="w-16 h-16 rounded-full bg-cyan-500/25 active:bg-cyan-500/65 border-2 border-cyan-400/70 text-cyan-200 font-semibold text-xs shadow-lg flex flex-col items-center justify-center"
+                        style="touch-action: none;">
+                  <span>⚡</span><span>부스트</span>
+                </button>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="touch-btn-brake"
+                        class="w-20 h-14 rounded-2xl bg-rose-500/25 active:bg-rose-500/65 border-2 border-rose-400/70 text-rose-200 font-semibold text-xs shadow-lg flex flex-col items-center justify-center"
+                        style="touch-action: none;">
+                  <span>🛑</span><span id="touch-brake-label">브레이크</span>
+                </button>
+                <button id="touch-btn-accel"
+                        class="hidden w-20 h-20 rounded-2xl bg-emerald-500/30 active:bg-emerald-500/70 border-2 border-emerald-400/80 text-emerald-100 font-bold text-xs shadow-lg flex-col items-center justify-center"
+                        style="touch-action: none;">
+                  <span class="text-base">▲</span><span>엑셀</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         <!-- 상단 좌측: 6방향 + Iso 카메라 프리셋 바 -->
-        <div class="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1 p-1 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg">
+        <div id="showcase-cam-bar" class="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1 p-1 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg">
           <button data-view="iso" class="cam-btn px-2 py-1 rounded text-[11px] font-mono font-medium bg-cyan-600/80 text-white transition-colors">Iso</button>
           <button data-view="front" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Front (+Z)</button>
           <button data-view="back" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Back (-Z)</button>
@@ -237,7 +325,7 @@
         </div>
 
         <!-- 상단 우측: 모델 치수 & Rig 검증 HUD -->
-        <div class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none select-none">
+        <div id="showcase-metrics-hud" class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none select-none">
           <div class="px-2.5 py-1.5 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg text-[11px] font-mono space-y-1">
             <div class="flex items-center justify-end gap-2 text-app-text">
               <span class="text-app-muted">Size (W×H×D)</span>
@@ -258,7 +346,7 @@
         </div>
 
         <!-- 하단 통합 쇼케이스 & Rig 테스트 컨트롤 독 -->
-        <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 pointer-events-none">
+        <div id="showcase-bottom-dock" class="absolute bottom-3 left-3 right-3 z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 pointer-events-none">
 
           <!-- 환경 / 뷰포트 옵션 -->
           <div class="pointer-events-auto flex flex-wrap items-center gap-1 p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px]">
@@ -316,6 +404,86 @@
       </div>
 
       <div id="history-list-container" class="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start"></div>
+    </div>
+  </div>
+
+  <!-- 시승 테스트 사전 설정 모달 (트랙 & 모바일 조작 A/B안 선택) -->
+  <div id="modal-drive-setup" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-app-panel border border-app-border rounded-xl shadow-2xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-app-border bg-app-panelAlt flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🏁</span>
+          <span class="text-sm font-semibold text-white">시승 테스트 세트장 설정</span>
+        </div>
+        <button id="btn-close-drive-setup" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 hover:text-white">닫기</button>
+      </div>
+
+      <div class="p-4 space-y-4 text-xs">
+        <!-- 코드 스펙 파싱 결과 -->
+        <div class="p-3 rounded-lg bg-app-main border border-app-border flex items-center justify-between gap-2">
+          <div>
+            <div id="setup-spec-name" class="text-sm font-semibold text-white">🛻 사이버트럭</div>
+            <div id="setup-spec-detail" class="text-[11px] font-mono text-app-muted mt-0.5">크루즈 80 km/h · 부스트 155 km/h · 사운드 ev</div>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[10px]">스펙 연동</span>
+        </div>
+
+        <!-- 1. 테스트 세트장 선택 -->
+        <div class="space-y-1.5">
+          <div class="font-semibold text-slate-200">1. 테스트 세트장 (주행 환경)</div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="drive-track" value="asphalt" checked class="peer sr-only">
+              <div class="p-3 rounded-lg border border-app-border bg-app-main peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 transition-all">
+                <div class="font-semibold text-white">🛣️ 아스팔트 트랙</div>
+                <div class="text-[11px] text-app-muted mt-0.5">직선 고속도로 · 차선 · 슬라럼 콘</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="drive-track" value="offroad" class="peer sr-only">
+              <div class="p-3 rounded-lg border border-app-border bg-app-main peer-checked:border-amber-500 peer-checked:bg-amber-500/10 transition-all">
+                <div class="font-semibold text-white">🏜️ 오프로드 코스</div>
+                <div class="text-[11px] text-app-muted mt-0.5">비포장/잔디 · 요철 · 점프 램프 2종</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. 모바일 조작 방식 선택 (A안 vs B안) -->
+        <div class="space-y-1.5">
+          <div class="font-semibold text-slate-200">2. 모바일 / 가상 패드 조작 방식</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="drive-mobile-mode" value="A" checked class="peer sr-only">
+              <div class="p-3 rounded-lg border border-app-border bg-app-main peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 transition-all h-full">
+                <div class="font-semibold text-white">A안 · 통합 스틱형</div>
+                <div class="text-[11px] text-app-muted mt-0.5">조이스틱(상하 전후진 + 좌우 조향)<br/>우측: 부스트(Shift) · 브레이크 · 경적</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="drive-mobile-mode" value="B" class="peer sr-only">
+              <div class="p-3 rounded-lg border border-app-border bg-app-main peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 transition-all h-full">
+                <div class="font-semibold text-white">B안 · 레이싱 패드형</div>
+                <div class="text-[11px] text-app-muted mt-0.5">조이스틱(좌우 조향 전용)<br/>우측: 엑셀(전진) · 부스트 · 브레이크/후진 · 경적</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 옵션 -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-app-text">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="chk-drive-force-pad" type="checkbox" class="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-0">
+            <span>PC 화면에서도 가상 패드 표시 (테스트용)</span>
+          </label>
+          <span class="font-mono text-[10px] text-app-muted">PC: 방향키 · Shift · Space · B</span>
+        </div>
+      </div>
+
+      <div class="px-4 py-3 border-t border-app-border bg-app-panelAlt flex justify-end gap-2">
+        <button id="btn-cancel-drive-setup" class="h-8 px-3 rounded-md bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">취소</button>
+        <button id="btn-launch-drive" class="h-8 px-4 rounded-md bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white shadow">🏁 주행 시작</button>
+      </div>
     </div>
   </div>
 
@@ -1712,6 +1880,7 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       if (w > 0 && h > 0) {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        if (driveSession) driveSession.setAspect(w / h);
         renderer.setSize(w, h);
       }
     }
@@ -1772,9 +1941,18 @@ export function createCustomVehicle3D(): CustomVehicleRig {
 
     // 렌더 루프
     const clock = new THREE.Clock();
+    let driveSession = null;
+
     function animate() {
       requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.1);
+
+      if (driveSession) {
+        const telemetry = driveSession.step(dt);
+        updateDriveHudTelemetry(telemetry);
+        renderer.render(driveSession.arena.scene, driveSession.camera);
+        return;
+      }
 
       // 카메라 프리셋 부드러운 보간
       if (camTween) {
@@ -2112,6 +2290,308 @@ export function createCustomVehicle3D(): CustomVehicleRig {
           showToast(`불러옴: ${item.title}`);
         }
       }
+    });
+
+    // =========================================================================
+    // 9. 시승 테스트 세트장 연동 & 모바일 가상 패드(A/B안) 바인딩
+    // =========================================================================
+    const DRIVE_PREF_KEY = 'ws_suite_3d_drive_pref_v1';
+    const modalDriveSetup = document.getElementById('modal-drive-setup');
+    const driveHud = document.getElementById('drive-hud');
+    const driveTouchControls = document.getElementById('drive-touch-controls');
+    const headerEl = document.querySelector('header');
+    let driveAudioMuted = false;
+
+    function loadDrivePrefs() {
+      try {
+        return JSON.parse(localStorage.getItem(DRIVE_PREF_KEY) || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function openDriveSetupModal() {
+      if (!currentRig || !lastRenderOk) {
+        showToast('먼저 오류가 없는 3D 모델을 렌더링해 주세요');
+        return;
+      }
+      const spec = RigDriveArena.parseVehicleSpec(editorEl.value);
+      document.getElementById('setup-spec-name').textContent = `${spec.emoji} ${spec.name}`;
+      document.getElementById('setup-spec-detail').textContent =
+        `크루즈 ${spec.cruiseKmh} km/h · 부스트 ${spec.boostKmh} km/h · 사운드 ${spec.soundType}`;
+
+      const prefs = loadDrivePrefs();
+      if (prefs.track) {
+        const r = document.querySelector(`input[name="drive-track"][value="${prefs.track}"]`);
+        if (r) r.checked = true;
+      }
+      if (prefs.mobileMode) {
+        const r = document.querySelector(`input[name="drive-mobile-mode"][value="${prefs.mobileMode}"]`);
+        if (r) r.checked = true;
+      }
+      if (typeof prefs.forcePad === 'boolean') {
+        document.getElementById('chk-drive-force-pad').checked = prefs.forcePad;
+      }
+      modalDriveSetup.classList.remove('hidden');
+    }
+
+    function closeDriveSetupModal() {
+      modalDriveSetup.classList.add('hidden');
+    }
+
+    function configureTouchPadUI(mobileMode, visible) {
+      const accelBtn = document.getElementById('touch-btn-accel');
+      const brakeLabel = document.getElementById('touch-brake-label');
+      const joyLabel = document.getElementById('drive-joy-label');
+      const joyRail = document.getElementById('drive-joystick-rail');
+
+      if (mobileMode === 'A') {
+        accelBtn.classList.add('hidden');
+        accelBtn.classList.remove('flex');
+        brakeLabel.textContent = '브레이크';
+        joyLabel.textContent = 'A안: 전후·좌우 스틱';
+        joyRail.classList.add('hidden');
+      } else {
+        accelBtn.classList.remove('hidden');
+        accelBtn.classList.add('flex');
+        brakeLabel.textContent = '브레이크/후진';
+        joyLabel.textContent = 'B안: 좌우 조향 스틱';
+        joyRail.classList.remove('hidden');
+      }
+
+      if (visible) {
+        driveTouchControls.classList.remove('hidden');
+        driveTouchControls.classList.add('flex');
+      } else {
+        driveTouchControls.classList.add('hidden');
+        driveTouchControls.classList.remove('flex');
+      }
+    }
+
+    function startDriveMode() {
+      if (!currentRig || !lastRenderOk) return;
+      const trackType = document.querySelector('input[name="drive-track"]:checked')?.value || 'asphalt';
+      const mobileMode = document.querySelector('input[name="drive-mobile-mode"]:checked')?.value || 'A';
+      const forcePad = document.getElementById('chk-drive-force-pad').checked;
+      localStorage.setItem(DRIVE_PREF_KEY, JSON.stringify({ track: trackType, mobileMode, forcePad }));
+
+      closeDriveSetupModal();
+
+      const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || window.innerWidth < 768;
+      const showPad = isTouchDevice || forcePad;
+
+      // 쇼케이스 UI 숨기고 전체화면 뷰포트 확장
+      headerEl.classList.add('hidden');
+      paneEditor.classList.add('hidden');
+      resizer.classList.add('hidden');
+      paneViewport.classList.remove('hidden');
+      paneViewport.classList.add('flex');
+
+      document.getElementById('showcase-cam-bar').classList.add('hidden');
+      document.getElementById('showcase-metrics-hud').classList.add('hidden');
+      document.getElementById('showcase-bottom-dock').classList.add('hidden');
+      driveHud.classList.remove('hidden');
+      controls.enabled = false;
+
+      // currentRig.group을 driveScene으로 이동
+      scene.remove(currentRig.group);
+      applyWireframe(currentRig.group, false);
+
+      const spec = RigDriveArena.parseVehicleSpec(editorEl.value);
+      document.getElementById('drive-vehicle-label').textContent = `${spec.emoji} ${spec.name}`;
+      document.getElementById('drive-spec-limit').textContent = `${spec.cruiseKmh} / ${spec.boostKmh}`;
+      document.getElementById('drive-track-badge').textContent = trackType === 'offroad' ? '🏜️ 오프로드' : '🛣️ 아스팔트';
+
+      driveSession = new RigDriveArena.DriveSession({
+        THREE,
+        rig: currentRig,
+        spec,
+        trackType,
+        mobileMode,
+        isNight: state.isNight,
+        showTouchPad: showPad,
+        aspect: container.clientWidth / Math.max(1, container.clientHeight),
+        onExit: exitDriveMode,
+      });
+
+      driveAudioMuted = false;
+      document.getElementById('btn-drive-mute').textContent = '🔊';
+      document.getElementById('btn-drive-night').textContent = state.isNight ? '🌙 야간(L)' : '☀️ 주간(L)';
+      document.getElementById('btn-drive-cam').textContent = '📷 체이스(C)';
+      configureTouchPadUI(mobileMode, showPad);
+      handleResize();
+    }
+
+    function exitDriveMode() {
+      if (!driveSession) return;
+      const session = driveSession;
+      driveSession = null;
+      session.destroy();
+
+      // 쇼케이스 씬으로 Rig 복원
+      scene.add(currentRig.group);
+      if (state.wireframe) applyWireframe(currentRig.group, true);
+      applySteer(state.steerDeg);
+      updateLightsAndMaterials();
+
+      // 쇼케이스 UI 복원
+      driveHud.classList.add('hidden');
+      document.getElementById('showcase-cam-bar').classList.remove('hidden');
+      document.getElementById('showcase-metrics-hud').classList.remove('hidden');
+      document.getElementById('showcase-bottom-dock').classList.remove('hidden');
+
+      headerEl.classList.remove('hidden');
+      paneEditor.classList.remove('hidden');
+      resizer.classList.remove('hidden');
+      if (editorCollapsed) {
+        paneEditor.classList.add('md:hidden');
+        resizer.classList.add('md:hidden');
+      }
+      // 모바일 뷰 상태 정리 (Code 탭 복원)
+      if (window.innerWidth < 768) {
+        paneViewport.classList.add('hidden');
+        paneViewport.classList.remove('flex');
+        btnMobEd.className = 'px-2.5 py-1 rounded text-white bg-slate-700/80 font-medium';
+        btnMobView.className = 'px-2.5 py-1 rounded text-app-muted hover:text-white font-medium';
+      }
+
+      controls.enabled = true;
+      handleResize();
+    }
+
+    function updateDriveHudTelemetry(t) {
+      document.getElementById('drive-speed-num').textContent = t.kmh;
+      const pill = document.getElementById('drive-state-pill');
+      if (t.isBrake) {
+        pill.textContent = 'BRAKE';
+        pill.className = 'px-1.5 py-0.5 rounded bg-rose-500/25 text-rose-300 border border-rose-500/40';
+      } else if (t.reverse) {
+        pill.textContent = 'REV';
+        pill.className = 'px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-300 border border-amber-500/40';
+      } else if (t.isBoost) {
+        pill.textContent = 'BOOST';
+        pill.className = 'px-1.5 py-0.5 rounded bg-cyan-500/25 text-cyan-300 border border-cyan-500/40';
+      } else if (t.kmh > 0) {
+        pill.textContent = 'CRUISE';
+        pill.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+      } else {
+        pill.textContent = 'IDLE';
+        pill.className = 'px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+      }
+    }
+
+    // 멀티터치 가상 조이스틱 & 버튼 바인딩
+    (function setupTouchControls() {
+      const base = document.getElementById('drive-joystick-base');
+      const knob = document.getElementById('drive-joystick-knob');
+      let joyPointerId = null;
+
+      function updateJoystick(clientX, clientY) {
+        if (!driveSession) return;
+        const rect = base.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const maxR = rect.width * 0.36;
+
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        if (driveSession.mobileMode === 'B') dy = 0; // B안: 좌우 조향 전용
+
+        const dist = Math.hypot(dx, dy);
+        if (dist > maxR) {
+          dx = (dx / dist) * maxR;
+          dy = (dy / dist) * maxR;
+        }
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
+        // 화면 왼쪽(dx < 0) = +X(+1), 화면 위쪽(dy < 0) = 전진(+1)
+        driveSession.touchState.joyX = -dx / maxR;
+        driveSession.touchState.joyY = -dy / maxR;
+      }
+
+      function resetJoystick() {
+        joyPointerId = null;
+        knob.style.transform = 'translate(0px, 0px)';
+        if (driveSession) {
+          driveSession.touchState.joyX = 0;
+          driveSession.touchState.joyY = 0;
+        }
+      }
+
+      base.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        joyPointerId = e.pointerId;
+        base.setPointerCapture(e.pointerId);
+        updateJoystick(e.clientX, e.clientY);
+      });
+      base.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== joyPointerId) return;
+        e.preventDefault();
+        updateJoystick(e.clientX, e.clientY);
+      });
+      base.addEventListener('pointerup', (e) => {
+        if (e.pointerId === joyPointerId) resetJoystick();
+      });
+      base.addEventListener('pointercancel', (e) => {
+        if (e.pointerId === joyPointerId) resetJoystick();
+      });
+
+      function bindHoldButton(elId, propName) {
+        const el = document.getElementById(elId);
+        let activeId = null;
+        el.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          activeId = e.pointerId;
+          el.setPointerCapture(e.pointerId);
+          if (driveSession) driveSession.touchState[propName] = true;
+        });
+        const release = (e) => {
+          if (e.pointerId !== activeId) return;
+          activeId = null;
+          if (driveSession) driveSession.touchState[propName] = false;
+        };
+        el.addEventListener('pointerup', release);
+        el.addEventListener('pointercancel', release);
+      }
+
+      bindHoldButton('touch-btn-accel', 'accel');
+      bindHoldButton('touch-btn-boost', 'boost');
+      bindHoldButton('touch-btn-brake', 'brake');
+      bindHoldButton('touch-btn-horn', 'horn');
+    })();
+
+    document.getElementById('btn-start-drive').addEventListener('click', openDriveSetupModal);
+    document.getElementById('btn-close-drive-setup').addEventListener('click', closeDriveSetupModal);
+    document.getElementById('btn-cancel-drive-setup').addEventListener('click', closeDriveSetupModal);
+    modalDriveSetup.addEventListener('click', (e) => {
+      if (e.target === modalDriveSetup) closeDriveSetupModal();
+    });
+    document.getElementById('btn-launch-drive').addEventListener('click', startDriveMode);
+
+    document.getElementById('btn-exit-drive').addEventListener('click', exitDriveMode);
+    document.getElementById('btn-drive-reset').addEventListener('click', () => {
+      if (driveSession) driveSession.resetVehicle();
+    });
+    document.getElementById('btn-drive-cam').addEventListener('click', (e) => {
+      if (!driveSession) return;
+      driveSession.camMode = (driveSession.camMode + 1) % 3;
+      const labels = ['📷 체이스(C)', '📷 휠캠(C)', '📷 탑다운(C)'];
+      e.currentTarget.textContent = labels[driveSession.camMode];
+    });
+    document.getElementById('btn-drive-night').addEventListener('click', (e) => {
+      if (!driveSession) return;
+      const night = driveSession.toggleNight();
+      e.currentTarget.textContent = night ? '🌙 야간(L)' : '☀️ 주간(L)';
+    });
+    document.getElementById('btn-drive-mute').addEventListener('click', (e) => {
+      if (!driveSession) return;
+      driveAudioMuted = !driveAudioMuted;
+      driveSession.audio.setMuted(driveAudioMuted);
+      e.currentTarget.textContent = driveAudioMuted ? '🔇' : '🔊';
+    });
+    document.getElementById('btn-drive-pad-toggle').addEventListener('click', () => {
+      if (!driveSession) return;
+      const visible = driveTouchControls.classList.contains('hidden');
+      configureTouchPadUI(driveSession.mobileMode, visible);
     });
 
     // 초기 실행 & IndexedDB 이력 로드

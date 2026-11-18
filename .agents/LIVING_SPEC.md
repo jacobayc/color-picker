@@ -84,10 +84,23 @@ flowchart TD
 - **6방향 + Iso 카메라 & 규약 HUD:** `OrbitControls` 회전, `Front(+Z)`/`Back(-Z)`/`Left`/`Right`/`Top`/`Bottom`/`Iso` 전환, 치수(`W×H×D`), 바닥 접촉(`y=0`) 오차 검사, 폴리곤 수 표시
 - **Rig 라이브 테스터:** `wheels` 구름 회전, `frontSteerPivots` 조향 슬라이더(`-35°~+35°`), `headlightMat`/`taillightMat` 점등·브레이크 테스트, 주간/야간 조명, 턴테이블, PNG 캡처
 - **IndexedDB 모델 이력 (최대 1,000건):** 렌더링 성공 코드 자동 누적(3분 내 동일 제목 병합) 및 `💾 저장` 수동 스냅샷, `240×150` JPEG 썸네일 미리보기·검색·원클릭 복원 모달 지원
+- **시승 테스트 세트장 (`3d/drive.js`):** 코드 주석 스펙(크루즈/부스트 km/h, `ev`/`sport`/`car` 사운드) 파싱 연동, 시작 전 트랙(`아스팔트` / `오프로드` 램프·요철) 및 모바일 가상 패드(`A안` 통합 스틱 / `B안` 레이싱 패드) 사전 선택, PC(`방향키`·`Shift`·`Space`·`B`) 및 멀티터치 주행·바퀴 구름·조향·제동등 실시간 검증
 
 ---
 
 ## 4. Changelog
+
+### [2026-11-18] 3D Rig Showcase 시승 테스트 세트장(`🏁 시승하기`) 구축
+
+- **요약:** `3d/drive.js`를 추가해 렌더링된 3D 모델과 주석 스펙(속도·사운드) 그대로 아스팔트/오프로드 세트장에서 직접 주행·점프·경적 테스트를 수행할 수 있도록 확장.
+- **주요 변경:**
+  - `3d/drive.js` 신규 생성: `parseVehicleSpec`, Web Audio 합성기(`ev`/`sport`/`car` + 경적), `아스팔트`(차선·슬라럼 콘) / `오프로드`(잔디·요철·점프 램프 2개) 씬 및 차량 물리·체이스/휠/탑다운 카메라 구현.
+  - `3d/index.html`: 상단 `🏁 시승하기` 버튼, 사전 설정 모달(`#modal-drive-setup`: 트랙·모바일 A/B안 선택), 주행 HUD 속도계 및 멀티터치 가상 조이스틱/버튼 바인딩 추가.
+
+```diff
++ 3d/drive.js: DriveSession, 아스팔트/오프로드 세트장, Web Audio 합성기, 스펙 파서
+~ 3d/index.html: #modal-drive-setup, #drive-hud, 모바일 A/B안 가상 조이스틱·버튼 연동
+```
 
 ### [2026-11-18] 3D Rig Showcase 기본 사이버트럭 프리셋 고도화
 
