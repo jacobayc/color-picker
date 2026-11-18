@@ -8,6 +8,7 @@ flowchart TD
         PICKER["Color Picker (/picker/)<br/>100+ Palettes & Color Manager"]
         CLIP["Image Clip (/clip/)<br/>Capture, Crop & Image Editor"]
         PREVIEW["Markdown Preview (/preview/)<br/>2-Pane, Mermaid v11, 100 FIFO History"]
+        JWT["JWT Inspector (/JWT/)<br/>Decode, Expiry, HMAC Verify, Base64/Epoch"]
     end
 
     subgraph Archived ["Archived / Disabled (URL Access Blocked)"]
@@ -18,6 +19,7 @@ flowchart TD
     ROOT -->|단축키 1 / Click| PICKER
     ROOT -->|단축키 2 / Click| CLIP
     ROOT -->|단축키 3 / Click| PREVIEW
+    ROOT -->|단축키 4 / Click| JWT
 ```
 
 ---
@@ -27,11 +29,12 @@ flowchart TD
 - **목적:** 번들러나 백엔드 서버 없이 브라우저에서 즉시 실행되는 경량 모던 웹 개발 유틸리티 스위트
 - **배포:** Vercel, Netlify, GitHub Pages, 로컬 `file:///` 100% 호환 단일 정적 웹 구조
 - **진입 경로:**
-  1. `index.html` ➔ 통합 런처 대시보드 (Color Picker, Image Clip, Markdown Preview 3대 도구 안내 및 키보드 단축키 1~3 바로가기)
+  1. `index.html` ➔ 통합 런처 대시보드 (4대 도구 안내 및 키보드 단축키 1~4 바로가기)
   2. `picker/index.html` ➔ 100개 이상의 체계적인 컬러 팔레트 관리자
   3. `clip/index.html` ➔ 웹 기반 이미지 크롭 & 클리핑 도구
   4. `preview/index.html` ➔ Linear/Notion 스타일 실시간 마크다운 & Mermaid v11 뷰어
-  5. `_archive/` ➔ 비활성화된 기존 프로젝트(`trip`, `wg`)를 안전하게 격리 보관 (URL 직접 접근 시 리다이렉트 및 404 차단)
+  5. `JWT/index.html` ➔ 100% 로컬 JWT 디코더, 만료 시각 계산, HMAC 서명 검증 및 Base64/Epoch 보조 변환기
+  6. `_archive/` ➔ 비활성화된 기존 프로젝트(`trip`, `wg`)를 안전하게 격리 보관 (URL 직접 접근 시 리다이렉트 및 404 차단)
 
 ---
 
@@ -63,15 +66,37 @@ flowchart TD
 
 - 브라우저 기반 이미지 자르기, 영역 캡처 및 편집 최적화
 
+### ④ JWT Inspector (`JWT/index.html`)
+
+- `Bearer ` 접두사 자동 제거 및 Header/Payload/Signature 3-Part 색상 분리
+- UTF-8(한글 클레임) 안전 Base64URL 디코딩, JSON 하이라이팅 및 표준 클레임 설명
+- `iat`/`exp`/`nbf` 로컬 시각(KST) 자동 변환 및 실시간 만료 카운트다운
+- Web Crypto API 기반 로컬 HMAC(`HS256`/`HS384`/`HS512`) 서명 검증
+- 보조 탭: `Base64 / URL` 인코더·디코더, `Epoch Time` 변환기
+
 ---
 
 ## 4. Changelog
 
+### [2026-11-18] 4번 유틸리티 `JWT Inspector` (`/JWT/`) 신규 구축 및 런처 단축키 `4` 연동
+
+- **요약:** 100% 로컬 브라우저 환경에서 외부 통신 없이 JWT 토큰을 즉시 해부(Header/Payload/만료 시각/HMAC 서명 검증)하고 Base64·URL·Epoch 시간 변환까지 지원하는 `JWT/index.html` 추가 및 루트 `index.html` 런처 연동.
+- **주요 변경:**
+  - `JWT/index.html` 신규 생성 (Option A: JWT 집중형 2-Pane UI + Base64/URL, Epoch Time 보조 탭).
+  - `index.html` 카드 그리드를 4열(`lg:grid-cols-4`)로 확장하고 단축키 `4` ➔ `./JWT/` 연결.
+
+```diff
++ JWT/index.html (JWT Inspector + Web Crypto HMAC Verify + Base64/URL + Epoch)
++ index.html: <a href="./JWT/"> (단축키 [4])
+```
+
 ### [2026-11-17] 볼드 닫는 기호(`**`) 직후 콜론(`:`) 결합 시 프리뷰 볼드 풀림 버그 수정
+
 - **요약:** `**선택 취소 불가**:`처럼 볼드 닫는 기호(`**`) 바로 뒤에 콜론(`:`)이 붙어 `marked` 파서에서 볼드가 해제되던 문제를, 전처리 임시 접합 토큰 치환 및 파싱 직후 원복 파이프라인으로 해결하여 프리뷰에 불필요한 공백 없이 원본 표기 그대로 볼드 렌더링되도록 개선.
 - **주요 변경:**
   - `preprocessMarkdownEmphasis(md, colonJoinToken)`에 `3-1` 규칙 추가: `**...**:` 패턴을 `**...** %%MDCOLONJOIN%%:` 형태로 임시 분리.
   - `renderMarkdown()`에서 입력 본문과 충돌하지 않는 `colonJoinToken`을 생성해 전달하고, `marked.parse()` 직후 `</strong> ${colonJoinToken}:` → `</strong>:`(및 미소비 토큰 ` ${colonJoinToken}:` → `:`)로 복원.
+
 ```diff
 - const normalizedMarkdown = preprocessMarkdownEmphasis(rawMarkdown);
 - const parsedHtml = marked.parse(normalizedMarkdown);
@@ -82,11 +107,13 @@ flowchart TD
 ```
 
 ### [2026-11-16] Mermaid 확대 뷰어 모달 SVG 0×0 붕괴 버그 수정 및 초장형 다이어그램 배율 최적화
+
 - **요약:** Mermaid v11이 `width="100%"` + `viewBox`만 생성하는 SVG가 확대 모달의 Flexbox(`#mermaid-viewer-stage`) 안에서 CSS `width: auto !important; height: auto !important;`와 충돌해 `0px × 0px`로 붕괴하던 문제를 해결하고, 가로/세로로 매우 긴 다이어그램도 한눈에 맞춰지고 자유롭게 확대/축소되도록 최소 줌 하한을 `5%`로 완화.
 - **주요 변경:**
   - `#mermaid-viewer-stage svg`에서 `width: auto !important; height: auto !important;` 제거 및 스테이지에 `shrink-0` 적용.
   - `getMermaidSvgSize()` 헬퍼 도입: `viewBox` → 픽셀 속성 → 원본 `getBoundingClientRect()` → `getBBox()` 순으로 원본 크기를 안전하게 추출해 `openMermaidViewer()`에서 인라인 픽셀 `width`/`height` 명시.
   - `setMermaidZoom()` 및 `fitMermaidToScreen()` 최소 배율 하한을 `0.05`(5%)로 낮추고, `Math.floor(fitScale * 100) / 100`으로 잘림 없는 화면맞춤 계산 적용.
+
 ```diff
 - #mermaid-viewer-stage svg { height: auto !important; width: auto !important; }
 + /* openMermaidViewer()에서 viewBox 기반 픽셀 width/height 직접 주입 + stage shrink-0 */
@@ -95,6 +122,7 @@ flowchart TD
 ```
 
 ### [2026-11-12] Mermaid 다이어그램 원클릭 전체화면 줌/팬(Inspector) 모달 도입
+
 - **요약:** 다이어그램이 복잡하거나 가로로 길어서 글씨를 읽기 어려운 경우, 다이어그램을 클릭하면 즉시 전체화면 인스펙터 팝업 모달이 열려 최대 3,000%(30배)까지 원하는 특정 영역을 초고배율로 확대하고 마우스 커서 위치를 기준으로 직관적으로 줌/팬(Pan)할 수 있는 대화형 뷰어 기능 추가.
 - **주요 변경:**
   - `#modal-mermaid-viewer` 전체화면 팝업 추가: 마우스 커서 중심 휠 줌(20%~3,000%), 드래그 팬, 100% 원본 리셋, 화면 맞춤(Fit to screen), ESC 및 단축키(+/-) 바인딩.
@@ -103,6 +131,7 @@ flowchart TD
   - SVG 내부 링크/버튼과 충돌하지 않도록 인터랙션 격리 처리.
 
 ### [2026-11-12] 한국어 마크다운 강조(Intra-word emphasis 및 Flanking 공백) 자동 교정 파이프라인 추가
+
 - **요약:** CommonMark 명세로 인해 `**텍스트**조사` 형태로 붙거나 `** 텍스트 **`, `**텍스트 **`처럼 볼드 기호 안쪽에 공백이 포함되어 볼드가 풀리던 문제를 해결하기 위해, `marked.parse()` 직전에 코드 블록을 안전하게 보호하고 강조 태그 내부 공백 트림 및 단어 경계 공백을 자동 보정하는 전처리 함수(`preprocessMarkdownEmphasis`) 도입.
 - **주요 변경:**
   - `preview/index.html` 내 `renderMarkdown` 진입 시 `preprocessMarkdownEmphasis` 호출.
@@ -111,6 +140,7 @@ flowchart TD
   - 코드 블록(```) 및 인라인 코드(`)를 임시 토큰으로 보관 후 복원하여 코드 내 기호 왜곡 방지.
 
 ### [2026-11-11] 새 문서(+) 원클릭 작성 버튼 및 모바일 헤더 겹침·표(Table) 가로 스크롤 최적화
+
 - **요약:** 현재 작업본을 IndexedDB에 즉시 보관하고 빈 에디터로 전환하는 `+ 새 문서` 버튼 추가, 모바일 화면에서 상단 툴바가 2줄로 꺾여 아래 서브헤더를 덮치던 버그 수정, 그리고 프리뷰 내 테이블이 화면 폭보다 넓을 때 자연스럽게 넘겨볼 수 있는 가로 스크롤 래퍼 및 가독성 최적화 적용.
 - **주요 변경:**
   - 상단 툴바에 `#btn-new-doc` 추가 (클릭 시 기존 문서 이력 저장 -> 에디터 초기화 -> 모바일 탭 Editor 자동 전환 -> 포커스).

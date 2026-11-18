@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JWT Inspector | Workspace Suite</title>
+
+  <!-- 웹폰트: Pretendard & JetBrains Mono -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              main: '#1a1d24',
+              panel: '#1e212b',
+              panelAlt: '#181a22',
+              border: '#2d313f',
+              borderHover: '#3e4456',
+              text: '#cfd3dc',
+              heading: '#f3f4f6',
+              muted: '#7e8697'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(71, 85, 105, 0.45) transparent;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.65); }
+
+    body {
+      background-color: #1a1d24;
+      color: #cfd3dc;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    /* JSON Syntax Highlighting */
+    .json-key { color: #e06c75; }
+    .json-string { color: #98c379; }
+    .json-number { color: #d19a66; }
+    .json-boolean { color: #56b6c2; }
+    .json-null { color: #c678dd; }
+
+    /* JWT 3-Part Color Highlight */
+    .jwt-part-header { color: #fb7185; }
+    .jwt-part-payload { color: #c084fc; }
+    .jwt-part-sig { color: #38bdf8; }
+  </style>
+</head>
+<body class="h-full flex flex-col antialiased selection:bg-violet-500/30 selection:text-white">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="w-full border-b border-app-border bg-app-panel/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+    <div class="max-w-7xl mx-auto px-4 h-13 min-h-[52px] flex items-center justify-between gap-3">
+      <!-- 좌측: 홈 & 타이틀 -->
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="../" title="Workspace Suite 홈으로" class="flex items-center justify-center w-8 h-8 rounded-lg bg-app-main border border-app-border hover:border-app-borderHover hover:text-white text-app-muted transition-colors shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+        </a>
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-md bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
+          </div>
+          <span class="text-sm font-semibold text-white tracking-tight truncate">JWT Inspector</span>
+        </div>
+
+        <!-- 모드 전환 탭 -->
+        <nav class="hidden sm:flex items-center ml-2 p-0.5 rounded-lg bg-app-main border border-app-border" aria-label="도구 모드">
+          <button type="button" data-tab="jwt" class="tab-btn px-3 py-1 rounded-md text-xs font-medium transition-colors bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            JWT 분석
+          </button>
+          <button type="button" data-tab="codec" class="tab-btn px-3 py-1 rounded-md text-xs font-medium transition-colors text-app-muted hover:text-white border border-transparent">
+            Base64 / URL
+          </button>
+          <button type="button" data-tab="epoch" class="tab-btn px-3 py-1 rounded-md text-xs font-medium transition-colors text-app-muted hover:text-white border border-transparent">
+            Epoch Time
+          </button>
+        </nav>
+      </div>
+
+      <!-- 우측: 로컬 보안 뱃지 & 액션 -->
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          100% Local &bull; No Network
+        </span>
+        <button id="btn-sample" type="button" class="px-2.5 py-1.5 rounded-lg bg-app-main hover:bg-[#252936] border border-app-border text-xs text-app-text hover:text-white transition-colors">
+          샘플 토큰
+        </button>
+        <button id="btn-clear" type="button" class="px-2.5 py-1.5 rounded-lg bg-app-main hover:bg-rose-500/10 border border-app-border hover:border-rose-500/30 text-xs text-app-muted hover:text-rose-300 transition-colors">
+          초기화
+        </button>
+      </div>
+    </div>
+
+    <!-- 모바일 전용 탭 바 -->
+    <div class="flex sm:hidden border-t border-app-border bg-app-panelAlt px-3 py-1.5 gap-1.5">
+      <button type="button" data-tab="jwt" class="tab-btn flex-1 py-1 rounded-md text-xs font-medium text-center bg-violet-500/20 text-violet-300 border border-violet-500/30">
+        JWT 분석
+      </button>
+      <button type="button" data-tab="codec" class="tab-btn flex-1 py-1 rounded-md text-xs font-medium text-center text-app-muted border border-transparent">
+        Base64 / URL
+      </button>
+      <button type="button" data-tab="epoch" class="tab-btn flex-1 py-1 rounded-md text-xs font-medium text-center text-app-muted border border-transparent">
+        Epoch Time
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== TAB 1: JWT INSPECTOR ==================== -->
+  <main id="panel-jwt" class="tab-panel flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
+
+    <!-- 좌측: 토큰 입력 영역 (5 cols) -->
+    <section class="lg:col-span-5 flex flex-col bg-app-panel border border-app-border rounded-xl overflow-hidden min-h-[280px] lg:min-h-0">
+      <div class="px-4 py-2.5 border-b border-app-border bg-app-panelAlt flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-white uppercase tracking-wider font-mono">Encoded Token</span>
+          <span id="jwt-prefix-badge" class="hidden text-[10px] font-mono px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30">Bearer 자동 제거됨</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="btn-paste-jwt" type="button" class="px-2 py-1 rounded bg-app-main hover:bg-[#252936] border border-app-border text-[11px] text-app-text hover:text-white transition-colors">
+            붙여넣기
+          </button>
+          <button id="btn-copy-raw" type="button" class="px-2 py-1 rounded bg-app-main hover:bg-[#252936] border border-app-border text-[11px] text-app-text hover:text-white transition-colors">
+            복사
+          </button>
+        </div>
+      </div>
+
+      <!-- 입력창 -->
+      <div class="flex-1 flex flex-col p-3 gap-3 min-h-0">
+        <textarea
+          id="jwt-input"
+          spellcheck="false"
+          placeholder="여기에 JWT 토큰을 붙여넣으세요.&#10;(예: eyJhbGciOiJIUzI1Ni... 또는 Bearer eyJ...)"
+          class="w-full flex-1 min-h-[160px] bg-app-main border border-app-border focus:border-violet-500/60 focus:outline-none rounded-lg p-3 font-mono text-xs leading-relaxed text-slate-200 placeholder-app-muted/60 resize-none break-all"
+        ></textarea>
+
+        <!-- 3-Part 색상 분리 미리보기 -->
+        <div class="bg-app-main border border-app-border rounded-lg p-3 shrink-0">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-mono text-app-muted">구조 분리 (Header . Payload . Signature)</span>
+            <span id="jwt-length" class="text-[11px] font-mono text-app-muted">0 chars</span>
+          </div>
+          <div id="jwt-colored-preview" class="font-mono text-[11px] leading-relaxed break-all max-h-28 overflow-y-auto text-app-muted/70">
+            토큰을 입력하면 3개 영역이 색상별로 구분됩니다.
+          </div>
+        </div>
+
+        <!-- 에러 알림 배너 -->
+        <div id="jwt-error-box" class="hidden rounded-lg bg-rose-500/10 border border-rose-500/30 px-3 py-2 text-xs text-rose-300 font-mono"></div>
+      </div>
+    </section>
+
+    <!-- 우측: 실시간 디코딩 결과 (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col gap-4 overflow-y-auto pr-0.5">
+
+      <!-- 1. 상태 요약 배지 바 -->
+      <div class="bg-app-panel border border-app-border rounded-xl p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span id="status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-800 text-app-muted border border-app-border">
+              대기 중
+            </span>
+            <span id="status-countdown" class="text-xs font-mono text-app-muted"></span>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span id="meta-alg" class="px-2 py-0.5 rounded bg-app-main border border-app-border text-app-muted">alg: -</span>
+            <span id="meta-typ" class="px-2 py-0.5 rounded bg-app-main border border-app-border text-app-muted">typ: -</span>
+          </div>
+        </div>
+
+        <!-- 시간 클레임 자동 변환 (iat, exp, nbf 등) -->
+        <div id="time-claims-grid" class="hidden mt-3 pt-3 border-t border-app-border/70 grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+      </div>
+
+      <!-- 2. Header & Payload (JSON) -->
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Header Card -->
+        <div class="bg-app-panel border border-app-border rounded-xl overflow-hidden">
+          <div class="px-4 py-2 border-b border-app-border bg-app-panelAlt flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+              <span class="text-xs font-semibold text-white font-mono">HEADER</span>
+              <span class="text-[11px] text-app-muted">알고리즘 & 토큰 타입</span>
+            </div>
+            <button id="btn-copy-header" type="button" class="px-2 py-0.5 rounded bg-app-main hover:bg-[#252936] border border-app-border text-[11px] text-app-text hover:text-white transition-colors">
+              JSON 복사
+            </button>
+          </div>
+          <pre id="jwt-header-out" class="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-app-muted">{}</pre>
+        </div>
+
+        <!-- Payload Card -->
+        <div class="bg-app-panel border border-app-border rounded-xl overflow-hidden">
+          <div class="px-4 py-2 border-b border-app-border bg-app-panelAlt flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+              <span class="text-xs font-semibold text-white font-mono">PAYLOAD</span>
+              <span class="text-[11px] text-app-muted">클레임 & 데이터</span>
+            </div>
+            <button id="btn-copy-payload" type="button" class="px-2 py-0.5 rounded bg-app-main hover:bg-[#252936] border border-app-border text-[11px] text-app-text hover:text-white transition-colors">
+              JSON 복사
+            </button>
+          </div>
+          <pre id="jwt-payload-out" class="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-app-muted">{}</pre>
+          <!-- 표준 클레임 요약 설명 -->
+          <div id="claims-summary" class="hidden border-t border-app-border/70 bg-app-panelAlt/60 px-4 py-3 space-y-1.5"></div>
+        </div>
+
+        <!-- Signature Verification Card -->
+        <div class="bg-app-panel border border-app-border rounded-xl overflow-hidden">
+          <div class="px-4 py-2 border-b border-app-border bg-app-panelAlt flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span class="text-xs font-semibold text-white font-mono">VERIFY SIGNATURE</span>
+              <span class="text-[11px] text-app-muted">선택적 로컬 검증 (HS256/384/512)</span>
+            </div>
+            <span id="sig-verify-badge" class="text-[11px] font-mono text-app-muted">미검증</span>
+          </div>
+          <div class="p-4 space-y-2.5">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input
+                id="jwt-secret-input"
+                type="text"
+                spellcheck="false"
+                placeholder="HMAC Secret 키를 입력하면 로컬 Web Crypto로 서명을 검증합니다"
+                class="flex-1 bg-app-main border border-app-border focus:border-sky-500/60 focus:outline-none rounded-lg px-3 py-1.5 font-mono text-xs text-slate-200 placeholder-app-muted/60"
+              />
+              <label class="inline-flex items-center gap-1.5 text-xs text-app-muted cursor-pointer select-none px-1">
+                <input id="jwt-secret-b64" type="checkbox" class="rounded border-app-border bg-app-main text-sky-500 focus:ring-0">
+                <span>Base64 인코딩된 키</span>
+              </label>
+            </div>
+            <div id="jwt-sig-note" class="text-[11px] font-mono text-app-muted/80 break-all"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ==================== TAB 2: BASE64 / URL CODEC ==================== -->
+  <main id="panel-codec" class="tab-panel hidden flex-1 max-w-5xl w-full mx-auto p-4 flex-col gap-4">
+    <div class="bg-app-panel border border-app-border rounded-xl p-4 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-sm font-semibold text-white">Base64 &amp; URL 인코더 / 디코더</h2>
+          <p class="text-xs text-app-muted">UTF-8(한글 포함) 문자열을 안전하게 변환합니다.</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" data-codec="b64-enc" class="codec-btn px-2.5 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-xs text-violet-200">Base64 인코딩</button>
+          <button type="button" data-codec="b64-dec" class="codec-btn px-2.5 py-1.5 rounded-lg bg-app-main hover:bg-[#252936] border border-app-border text-xs text-app-text">Base64 디코딩</button>
+          <button type="button" data-codec="url-enc" class="codec-btn px-2.5 py-1.5 rounded-lg bg-app-main hover:bg-[#252936] border border-app-border text-xs text-app-text">URL 인코딩</button>
+          <button type="button" data-codec="url-dec" class="codec-btn px-2.5 py-1.5 rounded-lg bg-app-main hover:bg-[#252936] border border-app-border text-xs text-app-text">URL 디코딩</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="codec-input" class="text-xs font-mono text-app-muted">INPUT</label>
+          <textarea id="codec-input" spellcheck="false" rows="10" placeholder="변환할 텍스트를 입력하세요..." class="w-full bg-app-main border border-app-border focus:border-violet-500/60 focus:outline-none rounded-lg p-3 font-mono text-xs text-slate-200 resize-y"></textarea>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <label for="codec-output" class="text-xs font-mono text-app-muted">OUTPUT</label>
+            <button id="btn-copy-codec" type="button" class="text-[11px] font-mono text-violet-400 hover:underline">결과 복사</button>
+          </div>
+          <textarea id="codec-output" readonly spellcheck="false" rows="10" placeholder="결과가 여기에 표시됩니다." class="w-full bg-app-main border border-app-border rounded-lg p-3 font-mono text-xs text-emerald-300 resize-y focus:outline-none"></textarea>
+        </div>
+      </div>
+      <div id="codec-error" class="hidden text-xs font-mono text-rose-400"></div>
+    </div>
+  </main>
+
+  <!-- ==================== TAB 3: EPOCH TIME CONVERTER ==================== -->
+  <main id="panel-epoch" class="tab-panel hidden flex-1 max-w-4xl w-full mx-auto p-4 flex-col gap-4">
+    <!-- 현재 시각 실시간 바 -->
+    <div class="bg-app-panel border border-app-border rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-xs text-app-muted mb-0.5">현재 Unix Timestamp (초)</div>
+        <div id="epoch-now" class="text-2xl font-mono font-semibold text-white">-</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-copy-epoch-now" type="button" class="px-3 py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-xs text-violet-200">현재 값 복사</button>
+        <button id="btn-use-epoch-now" type="button" class="px-3 py-1.5 rounded-lg bg-app-main hover:bg-[#252936] border border-app-border text-xs text-app-text">아래에 대입</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Timestamp -> Date -->
+      <div class="bg-app-panel border border-app-border rounded-xl p-4 space-y-3">
+        <h3 class="text-xs font-semibold text-white font-mono uppercase">Timestamp &rarr; 날짜 변환</h3>
+        <input id="epoch-ts-input" type="text" placeholder="예: 1795000000 또는 1795000000000" class="w-full bg-app-main border border-app-border focus:border-violet-500/60 focus:outline-none rounded-lg px-3 py-2 font-mono text-xs text-slate-200">
+        <div id="epoch-ts-result" class="bg-app-main border border-app-border rounded-lg p-3 font-mono text-xs space-y-1.5 text-app-muted">
+          숫자를 입력하면 자동 변환됩니다. (초/밀리초 자동 감지)
+        </div>
+      </div>
+
+      <!-- Date -> Timestamp -->
+      <div class="bg-app-panel border border-app-border rounded-xl p-4 space-y-3">
+        <h3 class="text-xs font-semibold text-white font-mono uppercase">날짜 &rarr; Timestamp 변환</h3>
+        <input id="epoch-date-input" type="datetime-local" step="1" class="w-full bg-app-main border border-app-border focus:border-violet-500/60 focus:outline-none rounded-lg px-3 py-2 font-mono text-xs text-slate-200 [color-scheme:dark]">
+        <div id="epoch-date-result" class="bg-app-main border border-app-border rounded-lg p-3 font-mono text-xs space-y-1.5 text-app-muted">
+          날짜/시간을 선택하면 Unix Timestamp를 계산합니다.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 토스트 알림 -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 px-3.5 py-2 rounded-lg bg-slate-800 border border-app-border text-xs font-medium text-white shadow-lg">
+    복사되었습니다.
+  </div>
+
+  <script>
+    (() => {
+      // ---------- 공통 유틸 ----------
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => document.querySelectorAll(sel);
+
+      function showToast(msg) {
+        const toast = $('#toast');
+        toast.textContent = msg;
+        toast.classList.remove('opacity-0', 'translate-y-2');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-2');
+        }, 1800);
+      }
+
+      async function copyText(text, label = '복사되었습니다.') {
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast(label);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          showToast(label);
+        }
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function highlightJson(obj) {
+        const json = JSON.stringify(obj, null, 2);
+        const escaped = escapeHtml(json);
+        return escaped.replace(
+          /(&quot;(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\&])*?&quot;(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          (match) => {
+            let cls = 'json-number';
+            if (/^&quot;/.test(match)) {
+              cls = /:$/.test(match) ? 'json-key' : 'json-string';
+            } else if (/true|false/.test(match)) {
+              cls = 'json-boolean';
+            } else if (/null/.test(match)) {
+              cls = 'json-null';
+            }
+            return `<span class="${cls}">${match}</span>`;
+          }
+        );
+      }
+
+      // Base64URL <-> Uint8Array (UTF-8 안전)
+      function base64UrlToBytes(b64url) {
+        let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+        while (b64.length % 4 !== 0) b64 += '=';
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes;
+      }
+
+      function bytesToBase64Url(bytes) {
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function decodeBase64UrlJson(segment) {
+        const bytes = base64UrlToBytes(segment);
+        const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        return JSON.parse(text);
+      }
+
+      // ---------- 시간 포맷 ----------
+      function toMs(ts) {
+        return ts > 1e12 ? ts : ts * 1000;
+      }
+
+      function formatLocalDate(ms) {
+        const d = new Date(ms);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+
+      function formatRelative(diffMs) {
+        const abs = Math.abs(diffMs);
+        const sec = Math.floor(abs / 1000);
+        const min = Math.floor(sec / 60);
+        const hr = Math.floor(min / 60);
+        const day = Math.floor(hr / 24);
+
+        let str;
+        if (day > 0) str = `${day}일 ${hr % 24}시간`;
+        else if (hr > 0) str = `${hr}시간 ${min % 60}분`;
+        else if (min > 0) str = `${min}분 ${sec % 60}초`;
+        else str = `${sec}초`;
+
+        return diffMs >= 0 ? `${str} 남음` : `${str} 전`;
+      }
+
+      // ---------- 탭 전환 ----------
+      $$('.tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.tab;
+          $$('.tab-panel').forEach((p) => p.classList.add('hidden'));
+          const panel = $(`#panel-${target}`);
+          panel.classList.remove('hidden');
+          if (target !== 'jwt') panel.classList.add('flex');
+
+          $$('.tab-btn').forEach((b) => {
+            const active = b.dataset.tab === target;
+            b.className = b.className
+              .replace(/bg-violet-500\/20 text-violet-300 border-violet-500\/30/g, '')
+              .replace(/text-app-muted hover:text-white border-transparent/g, '')
+              .trim();
+            b.classList.add(...(active
+              ? ['bg-violet-500/20', 'text-violet-300', 'border-violet-500/30']
+              : ['text-app-muted', 'hover:text-white', 'border-transparent']));
+          });
+        });
+      });
+
+      // ---------- JWT INSPECTOR ----------
+      const CLAIM_DESC = {
+        iss: 'Issuer (발급자)',
+        sub: 'Subject (주체 / 사용자 ID)',
+        aud: 'Audience (대상 수신자)',
+        exp: 'Expiration Time (만료 시각)',
+        nbf: 'Not Before (활성화 시작 시각)',
+        iat: 'Issued At (발급 시각)',
+        jti: 'JWT ID (고유 식별자)'
+      };
+
+      const TIME_CLAIMS = [
+        { key: 'iat', label: '발급 시각 (iat)' },
+        { key: 'exp', label: '만료 시각 (exp)' },
+        { key: 'nbf', label: '유효 시작 (nbf)' },
+        { key: 'auth_time', label: '인증 시각 (auth_time)' }
+      ];
+
+      let currentDecoded = null;
+      let countdownTimer = null;
+
+      function normalizeJwtInput(raw) {
+        let trimmed = raw.trim();
+        let hadBearer = false;
+        if (/^Bearer\s+/i.test(trimmed)) {
+          trimmed = trimmed.replace(/^Bearer\s+/i, '').trim();
+          hadBearer = true;
+        }
+        // 공백/개행 제거
+        trimmed = trimmed.replace(/\s+/g, '');
+        return { token: trimmed, hadBearer };
+      }
+
+      function updateExpiryBadge(payload) {
+        const badge = $('#status-badge');
+        const countdown = $('#status-countdown');
+
+        if (!payload || typeof payload.exp !== 'number') {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-800 text-app-muted border border-app-border';
+          badge.textContent = payload ? '만료 정보 없음 (exp 미포함)' : '대기 중';
+          countdown.textContent = '';
+          return;
+        }
+
+        const expMs = toMs(payload.exp);
+        const diff = expMs - Date.now();
+        if (diff > 0) {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>유효함';
+          countdown.className = 'text-xs font-mono text-emerald-300/90';
+          countdown.textContent = formatRelative(diff);
+        } else {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>만료됨';
+          countdown.className = 'text-xs font-mono text-rose-300/90';
+          countdown.textContent = formatRelative(diff);
+        }
+      }
+
+      async function verifyHmacSignature() {
+        const badge = $('#sig-verify-badge');
+        const note = $('#jwt-sig-note');
+        if (!currentDecoded) {
+          badge.className = 'text-[11px] font-mono text-app-muted';
+          badge.textContent = '미검증';
+          note.textContent = '';
+          return;
+        }
+
+        const { header, parts } = currentDecoded;
+        const alg = header.alg || '';
+        const secret = $('#jwt-secret-input').value;
+
+        if (!secret) {
+          badge.className = 'text-[11px] font-mono text-app-muted';
+          badge.textContent = 'Secret 미입력';
+          note.textContent = `Signature: ${parts[2] || '(없음)'}`;
+          return;
+        }
+
+        const hashMap = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
+        if (!hashMap[alg]) {
+          badge.className = 'text-[11px] font-mono text-amber-300';
+          badge.textContent = `${alg || '알 수 없음'}은 브라우저 대칭키 검증 미지원`;
+          return;
+        }
+
+        if (!window.crypto || !window.crypto.subtle) {
+          badge.className = 'text-[11px] font-mono text-amber-300';
+          badge.textContent = 'Web Crypto API 미지원 환경';
+          return;
+        }
+
+        try {
+          let keyBytes;
+          if ($('#jwt-secret-b64').checked) {
+            keyBytes = base64UrlToBytes(secret.trim());
+          } else {
+            keyBytes = new TextEncoder().encode(secret);
+          }
+
+          const cryptoKey = await crypto.subtle.importKey(
+            'raw',
+            keyBytes,
+            { name: 'HMAC', hash: hashMap[alg] },
+            false,
+            ['verify']
+          );
+
+          const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
+          const sigBytes = base64UrlToBytes(parts[2]);
+          const isValid = await crypto.subtle.verify('HMAC', cryptoKey, sigBytes, data);
+
+          if (isValid) {
+            badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+            badge.textContent = '서명 일치 (Signature Verified)';
+          } else {
+            badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30';
+            badge.textContent = '서명 불일치 (Invalid Signature)';
+          }
+        } catch (err) {
+          badge.className = 'text-[11px] font-mono text-rose-300';
+          badge.textContent = `검증 오류: ${err.message}`;
+        }
+      }
+
+      function renderJwt() {
+        const raw = $('#jwt-input').value;
+        const { token, hadBearer } = normalizeJwtInput(raw);
+
+        $('#jwt-prefix-badge').classList.toggle('hidden', !hadBearer);
+        $('#jwt-length').textContent = `${token.length} chars`;
+        clearInterval(countdownTimer);
+
+        const errBox = $('#jwt-error-box');
+        errBox.classList.add('hidden');
+        errBox.textContent = '';
+
+        if (!token) {
+          currentDecoded = null;
+          $('#jwt-colored-preview').innerHTML = '<span class="text-app-muted/70">토큰을 입력하면 3개 영역이 색상별로 구분됩니다.</span>';
+          $('#jwt-header-out').textContent = '{}';
+          $('#jwt-payload-out').textContent = '{}';
+          $('#meta-alg').textContent = 'alg: -';
+          $('#meta-typ').textContent = 'typ: -';
+          $('#time-claims-grid').classList.add('hidden');
+          $('#claims-summary').classList.add('hidden');
+          updateExpiryBadge(null);
+          verifyHmacSignature();
+          return;
+        }
+
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          currentDecoded = null;
+          $('#jwt-colored-preview').textContent = token;
+          errBox.textContent = `올바른 JWT 형식이 아닙니다. (Header.Payload.Signature 3개 파트 필요, 현재 ${parts.length}개)`;
+          errBox.classList.remove('hidden');
+          updateExpiryBadge(null);
+          verifyHmacSignature();
+          return;
+        }
+
+        // 3-Part 색상 하이라이팅
+        $('#jwt-colored-preview').innerHTML =
+          `<span class="jwt-part-header">${escapeHtml(parts[0])}</span>` +
+          `<span class="text-slate-500">.</span>` +
+          `<span class="jwt-part-payload">${escapeHtml(parts[1])}</span>` +
+          `<span class="text-slate-500">.</span>` +
+          `<span class="jwt-part-sig">${escapeHtml(parts[2])}</span>`;
+
+        try {
+          const header = decodeBase64UrlJson(parts[0]);
+          const payload = decodeBase64UrlJson(parts[1]);
+          currentDecoded = { header, payload, parts };
+
+          $('#meta-alg').textContent = `alg: ${header.alg || '-'}`;
+          $('#meta-typ').textContent = `typ: ${header.typ || '-'}`;
+          $('#jwt-header-out').innerHTML = highlightJson(header);
+          $('#jwt-payload-out').innerHTML = highlightJson(payload);
+
+          // 시간 클레임 자동 변환
+          const timeGrid = $('#time-claims-grid');
+          const foundTimes = TIME_CLAIMS.filter((t) => typeof payload[t.key] === 'number');
+          if (foundTimes.length > 0) {
+            timeGrid.innerHTML = foundTimes.map((t) => {
+              const ms = toMs(payload[t.key]);
+              return `
+                <div class="bg-app-main border border-app-border rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                  <span class="text-[11px] text-app-muted font-mono">${t.label}</span>
+                  <span class="text-xs text-slate-200 font-mono">${formatLocalDate(ms)}</span>
+                </div>
+              `;
+            }).join('');
+            timeGrid.classList.remove('hidden');
+          } else {
+            timeGrid.classList.add('hidden');
+          }
+
+          // 표준 클레임 설명 요약
+          const summaryBox = $('#claims-summary');
+          const stdKeys = Object.keys(payload).filter((k) => CLAIM_DESC[k]);
+          if (stdKeys.length > 0) {
+            summaryBox.innerHTML = stdKeys.map((k) => `
+              <div class="flex items-baseline gap-2 text-[11px]">
+                <span class="font-mono text-purple-300 w-10 shrink-0">${escapeHtml(k)}</span>
+                <span class="text-app-muted">${CLAIM_DESC[k]}</span>
+              </div>
+            `).join('');
+            summaryBox.classList.remove('hidden');
+          } else {
+            summaryBox.classList.add('hidden');
+          }
+
+          updateExpiryBadge(payload);
+          if (typeof payload.exp === 'number') {
+            countdownTimer = setInterval(() => updateExpiryBadge(payload), 1000);
+          }
+
+          verifyHmacSignature();
+        } catch (err) {
+          currentDecoded = null;
+          errBox.textContent = `디코딩 실패: ${err.message}`;
+          errBox.classList.remove('hidden');
+          updateExpiryBadge(null);
+          verifyHmacSignature();
+        }
+      }
+
+      $('#jwt-input').addEventListener('input', renderJwt);
+      $('#jwt-secret-input').addEventListener('input', verifyHmacSignature);
+      $('#jwt-secret-b64').addEventListener('change', verifyHmacSignature);
+
+      $('#btn-paste-jwt').addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            $('#jwt-input').value = text;
+            renderJwt();
+            showToast('클립보드에서 토큰을 불러왔습니다.');
+          }
+        } catch {
+          showToast('클립보드 권한이 없습니다. Ctrl+V로 붙여넣어 주세요.');
+        }
+      });
+
+      $('#btn-copy-raw').addEventListener('click', () => {
+        const { token } = normalizeJwtInput($('#jwt-input').value);
+        copyText(token, '원본 토큰을 복사했습니다.');
+      });
+
+      $('#btn-copy-header').addEventListener('click', () => {
+        if (currentDecoded) copyText(JSON.stringify(currentDecoded.header, null, 2), 'Header JSON을 복사했습니다.');
+      });
+
+      $('#btn-copy-payload').addEventListener('click', () => {
+        if (currentDecoded) copyText(JSON.stringify(currentDecoded.payload, null, 2), 'Payload JSON을 복사했습니다.');
+      });
+
+      $('#btn-clear').addEventListener('click', () => {
+        $('#jwt-input').value = '';
+        $('#jwt-secret-input').value = '';
+        renderJwt();
+        $('#jwt-input').focus();
+      });
+
+      // 샘플 JWT 생성 (현재 시각 기준 유효한 HS256 토큰 실시간 서명)
+      $('#btn-sample').addEventListener('click', async () => {
+        const now = Math.floor(Date.now() / 1000);
+        const header = { alg: 'HS256', typ: 'JWT' };
+        const payload = {
+          sub: 'usr_904218',
+          name: '김개발',
+          role: 'admin',
+          iss: 'workspace-suite.local',
+          iat: now,
+          exp: now + 3600
+        };
+        const enc = new TextEncoder();
+        const hSeg = bytesToBase64Url(enc.encode(JSON.stringify(header)));
+        const pSeg = bytesToBase64Url(enc.encode(JSON.stringify(payload)));
+        const secret = 'my-local-dev-secret';
+
+        let sigSeg = 'demo_signature';
+        if (window.crypto && window.crypto.subtle) {
+          const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+          const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${hSeg}.${pSeg}`));
+          sigSeg = bytesToBase64Url(new Uint8Array(sig));
+        }
+
+        $('#jwt-input').value = `${hSeg}.${pSeg}.${sigSeg}`;
+        $('#jwt-secret-input').value = secret;
+        $('#jwt-secret-b64').checked = false;
+        renderJwt();
+        showToast('테스트용 샘플 JWT를 생성했습니다.');
+      });
+
+      // ---------- BASE64 / URL CODEC ----------
+      $$('.codec-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.codec;
+          const val = $('#codec-input').value;
+          const errEl = $('#codec-error');
+          errEl.classList.add('hidden');
+
+          try {
+            let out = '';
+            if (mode === 'b64-enc') {
+              const bytes = new TextEncoder().encode(val);
+              let bin = '';
+              for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+              out = btoa(bin);
+            } else if (mode === 'b64-dec') {
+              const bytes = base64UrlToBytes(val.trim());
+              out = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+            } else if (mode === 'url-enc') {
+              out = encodeURIComponent(val);
+            } else if (mode === 'url-dec') {
+              out = decodeURIComponent(val);
+            }
+            $('#codec-output').value = out;
+          } catch (err) {
+            errEl.textContent = `변환 오류: ${err.message}`;
+            errEl.classList.remove('hidden');
+          }
+        });
+      });
+
+      $('#btn-copy-codec').addEventListener('click', () => {
+        copyText($('#codec-output').value, '변환 결과를 복사했습니다.');
+      });
+
+      // ---------- EPOCH TIME ----------
+      function tickEpoch() {
+        $('#epoch-now').textContent = Math.floor(Date.now() / 1000);
+      }
+      tickEpoch();
+      setInterval(tickEpoch, 1000);
+
+      $('#btn-copy-epoch-now').addEventListener('click', () => {
+        copyText($('#epoch-now').textContent, '현재 Timestamp를 복사했습니다.');
+      });
+
+      $('#btn-use-epoch-now').addEventListener('click', () => {
+        $('#epoch-ts-input').value = $('#epoch-now').textContent;
+        $('#epoch-ts-input').dispatchEvent(new Event('input'));
+      });
+
+      $('#epoch-ts-input').addEventListener('input', (e) => {
+        const raw = e.target.value.trim();
+        const res = $('#epoch-ts-result');
+        if (!raw || isNaN(Number(raw))) {
+          res.textContent = '유효한 숫자 Timestamp를 입력하세요.';
+          return;
+        }
+        const num = Number(raw);
+        const ms = toMs(num);
+        const d = new Date(ms);
+        res.innerHTML = `
+          <div class="text-slate-200"><span class="text-app-muted">로컬(KST):</span> ${formatLocalDate(ms)}</div>
+          <div class="text-slate-200"><span class="text-app-muted">UTC(ISO):</span> ${d.toISOString()}</div>
+          <div class="text-violet-300"><span class="text-app-muted">상대 시간:</span> ${formatRelative(ms - Date.now())}</div>
+        `;
+      });
+
+      $('#epoch-date-input').addEventListener('input', (e) => {
+        const val = e.target.value;
+        const res = $('#epoch-date-result');
+        if (!val) return;
+        const ms = new Date(val).getTime();
+        const sec = Math.floor(ms / 1000);
+        res.innerHTML = `
+          <div class="text-slate-200"><span class="text-app-muted">초 (Seconds):</span> ${sec}</div>
+          <div class="text-slate-200"><span class="text-app-muted">밀리초 (ms):</span> ${ms}</div>
+        `;
+      });
+    })();
+  </script>
+</body>
+</html>
