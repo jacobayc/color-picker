@@ -9,6 +9,7 @@ flowchart TD
         CLIP["Image Clip (/clip/)<br/>Capture, Crop & Image Editor"]
         PREVIEW["Markdown Preview (/preview/)<br/>2-Pane, Mermaid v11, 100 FIFO History"]
         JWT["JWT Inspector (/JWT/)<br/>Decode, Expiry, HMAC Verify, Base64/Epoch"]
+        SHOWCASE3D["3D Rig Showcase (/3d/)<br/>Three.js Factory Live View & Rig Tester"]
     end
 
     subgraph Archived ["Archived / Disabled (URL Access Blocked)"]
@@ -20,6 +21,7 @@ flowchart TD
     ROOT -->|단축키 2 / Click| CLIP
     ROOT -->|단축키 3 / Click| PREVIEW
     ROOT -->|단축키 4 / Click| JWT
+    ROOT -->|단축키 5 / Click| SHOWCASE3D
 ```
 
 ---
@@ -29,12 +31,13 @@ flowchart TD
 - **목적:** 번들러나 백엔드 서버 없이 브라우저에서 즉시 실행되는 경량 모던 웹 개발 유틸리티 스위트
 - **배포:** Vercel, Netlify, GitHub Pages, 로컬 `file:///` 100% 호환 단일 정적 웹 구조
 - **진입 경로:**
-  1. `index.html` ➔ 통합 런처 대시보드 (4대 도구 안내 및 키보드 단축키 1~4 바로가기)
+  1. `index.html` ➔ 통합 런처 대시보드 (5대 도구 안내 및 키보드 단축키 1~5 바로가기)
   2. `picker/index.html` ➔ 100개 이상의 체계적인 컬러 팔레트 관리자
   3. `clip/index.html` ➔ 웹 기반 이미지 크롭 & 클리핑 도구
   4. `preview/index.html` ➔ Linear/Notion 스타일 실시간 마크다운 & Mermaid v11 뷰어
   5. `JWT/index.html` ➔ 100% 로컬 JWT 디코더, 만료 시각 계산, HMAC 서명 검증 및 Base64/Epoch 보조 변환기
-  6. `_archive/` ➔ 비활성화된 기존 프로젝트(`trip`, `wg`)를 안전하게 격리 보관 (URL 직접 접근 시 리다이렉트 및 404 차단)
+  6. `3d/index.html` ➔ `CustomVehicleRig` 협업 규약 기반 Three.js 3D 모델 라이브 쇼케이스 & 동작 검증기
+  7. `_archive/` ➔ 비활성화된 기존 프로젝트(`trip`, `wg`)를 안전하게 격리 보관 (URL 직접 접근 시 리다이렉트 및 404 차단)
 
 ---
 
@@ -74,11 +77,40 @@ flowchart TD
 - Web Crypto API 기반 로컬 HMAC(`HS256`/`HS384`/`HS512`) 서명 검증
 - 보조 탭: `Base64 / URL` 인코더·디코더, `Epoch Time` 변환기
 
+### ⑤ 3D Rig Showcase (`3d/index.html`)
+
+- **2-Pane Split View:** 좌측 `createXxx3D()` 에디터(20%~80% 리사이저, `Ctrl+B` 접기/펼치기) + 우측 Three.js r147 UMD 쇼케이스 뷰포트 (`file:///` 100% 호환)
+- **경량 TS→JS 전처리기:** `import`/`export`/`interface`/변수·파라미터·리턴 타입 어노테이션을 스트리핑해 무빌드 환경에서 `CustomVehicleRig` TS 코드 즉시 실행
+- **6방향 + Iso 카메라 & 규약 HUD:** `OrbitControls` 회전, `Front(+Z)`/`Back(-Z)`/`Left`/`Right`/`Top`/`Bottom`/`Iso` 전환, 치수(`W×H×D`), 바닥 접촉(`y=0`) 오차 검사, 폴리곤 수 표시
+- **Rig 라이브 테스터:** `wheels` 구름 회전, `frontSteerPivots` 조향 슬라이더(`-35°~+35°`), `headlightMat`/`taillightMat` 점등·브레이크 테스트, 주간/야간 조명, 턴테이블, PNG 캡처
+- **IndexedDB 모델 이력 (최대 1,000건):** 렌더링 성공 코드 자동 누적(3분 내 동일 제목 병합) 및 `💾 저장` 수동 스냅샷, `240×150` JPEG 썸네일 미리보기·검색·원클릭 복원 모달 지원
+
 ---
 
 ## 4. Changelog
 
-### [2026-11-18] 4번 유틸리티 `JWT Inspector` (`/JWT/`) 신규 구축 및 런처 단축키 `4` 연동
+### [2026-11-18] 3D Rig Showcase IndexedDB 1,000건 히스토리 및 썸네일 미리보기 추가
+
+- **요약:** `RigShowcaseDB` IndexedDB에 최대 1,000건의 3D 모델 코드와 `240×150` WebGL 캔버스 썸네일·치수·폴리곤 수를 증분 저장(`put`/`delete`)하고, 검색 가능한 카드 모달에서 이전 모델을 즉시 복원할 수 있도록 확장.
+- **주요 변경:**
+  - `3d/index.html` 헤더에 `이력` 버튼(카운트 뱃지) 및 `💾 저장` 버튼 추가, `#modal-history` 썸네일 카드 모달 구현.
+  - 렌더링 성공 시(`lastRenderOk`)만 디바운스 자동 저장(`scheduleHistoryAutoSave`), `captureThumbnailDataUrl()`로 경량 JPEG 썸네일 생성.
+
+```diff
++ 3d/index.html: RigShowcaseDB(IndexedDB, 1,000 FIFO), 240x150 JPEG 썸네일 캡처, #modal-history 검색/복원/삭제 모달
+```
+
+### [2026-11-18] 5번 유틸리티 `3D Rig Showcase` (`/3d/`) 신규 구축 및 런처 단축키 `5` 연동
+
+- **요약:** `CustomVehicleRig` 협업 규약(`+Z` 전방, `y=0` 지면, `wheels`/`frontSteerPivots`/`headlightMat`/`taillightMat`)에 맞춘 Three.js 팩토리 함수 코드를 붙여넣으면 즉시 3D 모델링과 6방향 회전·조향·조명 검증을 수행할 수 있는 `3d/index.html` 구축 및 루트 런처 연동.
+- **주요 변경:**
+  - `3d/index.html` 신규 생성 (경량 TS 스트리퍼, Cybertruck/Roadster/Empty 프리셋, 6방향 카메라 프리셋, `y=0` 바닥 및 `+Z FRONT` 가이드, Rig 동작 테스터, PNG 저장).
+  - `index.html` 카드 그리드를 `xl:grid-cols-5`로 확장하고 단축키 `5` ➔ `./3d/` 연결.
+
+```diff
++ 3d/index.html (2-Pane Three.js CustomVehicleRig Live Showcase & Tester)
++ index.html: <a href="./3d/"> (단축키 [5])
+```
 
 - **요약:** 100% 로컬 브라우저 환경에서 외부 통신 없이 JWT 토큰을 즉시 해부(Header/Payload/만료 시각/HMAC 서명 검증)하고 Base64·URL·Epoch 시간 변환까지 지원하는 `JWT/index.html` 추가 및 루트 `index.html` 런처 연동.
 - **주요 변경:**

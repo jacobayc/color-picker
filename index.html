@@ -69,7 +69,7 @@
       </div>
       <div class="flex items-center gap-3 text-xs text-app-muted">
         <span class="hidden sm:inline font-mono text-[11px] bg-slate-800/80 border border-slate-700/60 px-2 py-0.5 rounded text-slate-300">
-          단축키 [1] ~ [4]
+          단축키 [1] ~ [5]
         </span>
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
         <span>Online</span>
@@ -78,7 +78,7 @@
   </header>
 
   <!-- 메인 런처 섹션 -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-5 py-12 sm:py-16 flex flex-col justify-center">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-5 py-12 sm:py-16 flex flex-col justify-center">
 
     <!-- 타이틀 & 안내 문구 -->
     <div class="text-center mb-12 sm:mb-14">
@@ -91,8 +91,8 @@
       </p>
     </div>
 
-    <!-- 4개 핵심 도구 카드 그리드 -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 5개 핵심 도구 카드 그리드 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 
       <!-- 1. Color Picker -->
       <a href="./picker/" class="tool-card group block p-6 rounded-xl bg-app-panel border border-app-border hover:border-blue-500/50 hover:bg-[#222632] relative overflow-hidden">
@@ -194,6 +194,31 @@
         </div>
       </a>
 
+      <!-- 5. 3D Rig Showcase -->
+      <a href="./3d/" class="tool-card group block p-6 rounded-xl bg-app-panel border border-app-border hover:border-cyan-500/50 hover:bg-[#222632] relative overflow-hidden">
+        <div class="absolute top-4 right-4 flex items-center gap-1.5">
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-semibold">5</span>
+        </div>
+        <div class="w-11 h-11 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-4 group-hover:scale-105 group-hover:bg-cyan-500/20 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        <h2 class="text-base font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2 mb-2">
+          3D Rig Showcase
+          <svg class="w-3.5 h-3.5 text-app-muted group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </h2>
+        <p class="text-xs text-app-muted leading-relaxed">
+          Three.js CustomVehicleRig 코드 실시간 렌더링, 6방향 뷰, 조향·바퀴·조명 검증 쇼케이스
+        </p>
+        <div class="mt-5 pt-3.5 border-t border-app-border/60 flex items-center justify-between text-[11px] font-mono text-app-muted">
+          <span>/3d</span>
+          <span class="text-cyan-400 group-hover:underline">실행 &rarr;</span>
+        </div>
+      </a>
+
     </div>
 
   </main>
@@ -216,6 +241,8 @@
         window.location.href = './preview/';
       } else if (e.key === '4') {
         window.location.href = './JWT/';
+      } else if (e.key === '5') {
+        window.location.href = './3d/';
       }
     });
   </script>

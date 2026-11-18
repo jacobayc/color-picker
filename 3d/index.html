@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D Rig Showcase | Workspace Suite</title>
+
+  <!-- 웹폰트: Pretendard & JetBrains Mono -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              main: '#1a1d24',
+              panel: '#1e212b',
+              panelAlt: '#181a22',
+              border: '#2d313f',
+              borderHover: '#3e4456',
+              text: '#cfd3dc',
+              heading: '#f3f4f6',
+              muted: '#7e8697'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Three.js r147 UMD + OrbitControls (file:/// 100% 호환) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(71, 85, 105, 0.45) transparent;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.65); }
+
+    body {
+      background-color: #1a1d24;
+      color: #cfd3dc;
+      font-family: 'Pretendard', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Range slider styling */
+    input[type="range"].rig-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 9999px;
+      background: #2d313f;
+      outline: none;
+    }
+    input[type="range"].rig-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+    input[type="range"].rig-slider:disabled::-webkit-slider-thumb {
+      background: #475569;
+      cursor: not-allowed;
+    }
+
+    /* Resizer handle */
+    .resizer-bar {
+      width: 5px;
+      cursor: col-resize;
+      background: #2d313f;
+      transition: background-color 0.15s ease;
+      position: relative;
+      z-index: 20;
+    }
+    .resizer-bar:hover,
+    .resizer-bar.dragging {
+      background: #38bdf8;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col antialiased">
+
+  <!-- 상단 툴바 -->
+  <header class="h-12 shrink-0 border-b border-app-border bg-app-panel flex items-center justify-between px-3 gap-2 z-30">
+    <div class="flex items-center gap-2 min-w-0">
+      <a href="../index.html" title="Workspace Hub로 돌아가기"
+         class="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-app-muted hover:text-white hover:bg-slate-800/70 transition-colors shrink-0">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        <span class="hidden sm:inline font-mono">Hub</span>
+      </a>
+
+      <div class="h-4 w-px bg-app-border shrink-0"></div>
+
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-6 h-6 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        <span class="text-xs sm:text-sm font-semibold text-white truncate">3D Rig Showcase</span>
+        <span class="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+          +Z Front &middot; y=0 Ground
+        </span>
+      </div>
+    </div>
+
+    <!-- 모바일 탭 전환 -->
+    <div class="flex md:hidden items-center bg-app-panelAlt border border-app-border rounded-md p-0.5 text-xs">
+      <button id="btn-mobile-editor" class="px-2.5 py-1 rounded text-white bg-slate-700/80 font-medium">Code</button>
+      <button id="btn-mobile-view" class="px-2.5 py-1 rounded text-app-muted hover:text-white font-medium">3D View</button>
+    </div>
+
+    <!-- 우측 액션 -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <select id="preset-select" title="샘플 프리셋 불러오기"
+              class="hidden sm:block h-7 px-2 rounded-md bg-app-panelAlt border border-app-border text-xs text-app-text focus:outline-none focus:border-cyan-500/60">
+        <option value="cybertruck">🛻 사이버트럭 (CustomVehicleRig)</option>
+        <option value="roadster">🏎️ 로우폴리 로드스터 (오픈탑)</option>
+        <option value="template">📦 빈 Rig 템플릿</option>
+      </select>
+
+      <button id="btn-open-history" title="저장된 3D 모델 이력 (최대 1,000건)"
+              class="flex items-center gap-1.5 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors">
+        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="hidden sm:inline">이력</span>
+        <span id="badge-history-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono text-cyan-300">0</span>
+      </button>
+
+      <button id="btn-save-history" title="현재 모델 스냅샷 즉시 저장"
+              class="hidden sm:flex items-center gap-1 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-cyan-500/50 text-xs text-app-text hover:text-white transition-colors">
+        <span>💾 저장</span>
+      </button>
+
+      <button id="btn-copy-spec" title="AI 협업용 CustomVehicleRig 규약 프롬프트 복사"
+              class="hidden xl:flex items-center gap-1 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors">
+        <span>규약 복사</span>
+      </button>
+
+      <button id="btn-toggle-editor" title="에디터 접기/펼치기 (Ctrl+B)"
+              class="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-app-muted hover:text-white transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"></path>
+        </svg>
+      </button>
+
+      <button id="btn-run" title="모델 실행 및 렌더링 (Ctrl+Enter)"
+              class="flex items-center gap-1.5 h-7 px-3 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors shadow-sm">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path>
+        </svg>
+        <span>실행</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 2-Pane 워크스페이스 -->
+  <main class="flex-1 flex min-h-0 relative overflow-hidden">
+
+    <!-- 좌측: 코드 에디터 패널 -->
+    <section id="pane-editor" class="flex flex-col bg-app-panelAlt border-r border-app-border min-w-0 w-full md:w-[42%]" style="flex-shrink: 0;">
+      <!-- 에디터 서브헤더 -->
+      <div class="h-9 shrink-0 px-3 border-b border-app-border flex items-center justify-between bg-app-panel/60 text-[11px]">
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-cyan-400 font-medium">createXxx3D.ts / .js</span>
+          <span id="detected-fn-badge" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ready</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-1.5 cursor-pointer text-app-muted hover:text-app-text select-none">
+            <input id="chk-autorun" type="checkbox" checked class="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-0 w-3 h-3">
+            <span>자동 실행</span>
+          </label>
+          <button id="btn-copy-code" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">복사</button>
+          <button id="btn-clear-code" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-rose-300 transition-colors">비우기</button>
+        </div>
+      </div>
+
+      <!-- 코드 입력창 -->
+      <div class="flex-1 relative min-h-0">
+        <textarea id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+                  placeholder="THREE를 사용하는 createXxx3D(): CustomVehicleRig 함수 또는 THREE.Group 리턴 코드를 붙여넣으세요..."
+                  class="w-full h-full p-3.5 bg-transparent text-[#d4d8e2] font-mono text-[12.5px] leading-relaxed resize-none focus:outline-none tab-size-2"></textarea>
+      </div>
+
+      <!-- 실행 상태 / 에러 배너 -->
+      <div id="status-bar" class="shrink-0 px-3 py-2 border-t border-app-border bg-app-panel text-[11px] font-mono flex items-center justify-between gap-2">
+        <div id="status-message" class="truncate text-emerald-400">✓ 렌더링 완료</div>
+        <div class="text-app-muted shrink-0">Ctrl+Enter 실행</div>
+      </div>
+    </section>
+
+    <!-- 드래그 리사이저 -->
+    <div id="resizer" class="hidden md:block resizer-bar shrink-0"></div>
+
+    <!-- 우측: 3D 쇼케이스 뷰포트 패널 -->
+    <section id="pane-viewport" class="hidden md:flex flex-1 flex-col relative min-w-0 bg-[#14171f] overflow-hidden">
+
+      <!-- Three.js 캔버스 컨테이너 -->
+      <div id="canvas-container" class="flex-1 relative w-full h-full overflow-hidden">
+
+        <!-- 상단 좌측: 6방향 + Iso 카메라 프리셋 바 -->
+        <div class="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1 p-1 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg">
+          <button data-view="iso" class="cam-btn px-2 py-1 rounded text-[11px] font-mono font-medium bg-cyan-600/80 text-white transition-colors">Iso</button>
+          <button data-view="front" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Front (+Z)</button>
+          <button data-view="back" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Back (-Z)</button>
+          <button data-view="left" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Left</button>
+          <button data-view="right" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Right</button>
+          <button data-view="top" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Top</button>
+          <button data-view="bottom" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Bottom</button>
+          <div class="w-px h-4 bg-app-border mx-0.5"></div>
+          <button id="btn-fit" title="모델 크기에 맞춰 카메라 정렬" class="px-2 py-1 rounded text-[11px] font-mono text-cyan-300 hover:text-white hover:bg-slate-700/70 transition-colors">Fit</button>
+        </div>
+
+        <!-- 상단 우측: 모델 치수 & Rig 검증 HUD -->
+        <div class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none select-none">
+          <div class="px-2.5 py-1.5 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg text-[11px] font-mono space-y-1">
+            <div class="flex items-center justify-end gap-2 text-app-text">
+              <span class="text-app-muted">Size (W×H×D)</span>
+              <span id="hud-size" class="text-white font-semibold">-</span>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+              <span class="text-app-muted">Ground (y=0)</span>
+              <span id="hud-ground" class="font-semibold text-emerald-400">-</span>
+            </div>
+            <div class="flex items-center justify-end gap-2 text-app-text">
+              <span class="text-app-muted">Tris / Meshes</span>
+              <span id="hud-tris" class="text-slate-200">-</span>
+            </div>
+          </div>
+
+          <!-- Rig 감지 뱃지 -->
+          <div id="hud-rig-badges" class="flex flex-wrap justify-end gap-1"></div>
+        </div>
+
+        <!-- 하단 통합 쇼케이스 & Rig 테스트 컨트롤 독 -->
+        <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 pointer-events-none">
+
+          <!-- 환경 / 뷰포트 옵션 -->
+          <div class="pointer-events-auto flex flex-wrap items-center gap-1 p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px]">
+            <button id="btn-lighting" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-medium transition-colors" title="주간/야간 조명 전환">☀️ 주간</button>
+            <button id="btn-grid" class="px-2 py-1 rounded bg-cyan-600/25 text-cyan-300 border border-cyan-500/30 font-medium transition-colors">Grid +Z</button>
+            <button id="btn-axes" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">Axes</button>
+            <button id="btn-wireframe" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">Wire</button>
+            <button id="btn-turntable" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">↻ 턴테이블</button>
+            <button id="btn-screenshot" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-colors" title="현재 3D 뷰 PNG 저장">📷 PNG</button>
+          </div>
+
+          <!-- CustomVehicleRig 실시간 동작 테스트 바 -->
+          <div class="pointer-events-auto flex flex-wrap items-center gap-2.5 px-3 py-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px]">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-app-muted hidden sm:inline">Rig Test</span>
+
+            <button id="btn-rig-spin" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              🛞 바퀴 구름
+            </button>
+
+            <div class="flex items-center gap-1.5">
+              <span class="text-app-muted font-mono">조향</span>
+              <input id="slider-rig-steer" type="range" min="-35" max="35" value="0" step="1" class="rig-slider w-20 sm:w-24">
+              <button id="btn-rig-steer-reset" title="조향 0° 리셋" class="font-mono text-[10px] w-8 text-right text-cyan-300 hover:text-white">0°</button>
+            </div>
+
+            <button id="btn-rig-headlight" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              💡 전조등
+            </button>
+
+            <button id="btn-rig-brake" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              🛑 브레이크
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 모델 이력 모달 (IndexedDB 최대 1,000건 + 썸네일 미리보기) -->
+  <div id="modal-history" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl max-h-[85vh] bg-app-panel border border-app-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="px-4 py-3 border-b border-app-border flex flex-wrap items-center justify-between gap-2 bg-app-panelAlt">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-white">3D 모델 히스토리</span>
+          <span id="modal-history-count" class="text-xs font-mono text-cyan-400">(0/1000)</span>
+        </div>
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+          <input id="history-search" type="text" placeholder="모델명 / 함수명 검색..."
+                 class="h-7 w-40 sm:w-52 px-2.5 rounded-md bg-app-main border border-app-border text-xs text-white placeholder-app-muted focus:outline-none focus:border-cyan-500/60">
+          <button id="btn-clear-all-history" class="h-7 px-2.5 rounded-md bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs transition-colors">전체 삭제</button>
+          <button id="btn-close-history" class="h-7 px-2.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition-colors">닫기</button>
+        </div>
+      </div>
+
+      <div id="history-list-container" class="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start"></div>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full bg-slate-900/95 border border-slate-700 text-xs text-white shadow-xl opacity-0 pointer-events-none transition-opacity duration-200"></div>
+
+  <script>
+    // =========================================================================
+    // 1. 기본 프리셋 코드 (CustomVehicleRig 협업 규약 준수)
+    // =========================================================================
+    const PRESETS = {
+      cybertruck: `import * as THREE from 'three';
+
+export interface CustomVehicleRig {
+  group: THREE.Group;
+  wheels: THREE.Object3D[];
+  frontSteerPivots: THREE.Group[];
+  headlightMat?: THREE.MeshStandardMaterial;
+  taillightMat?: THREE.MeshStandardMaterial;
+}
+
+// - 이름/이모지: 사이버트럭 / 🛻
+// - 좌석/지붕: 4인승 / 지붕 있음(hideAvatarInside: true)
+// - 속도(크루즈/부스트): 80 / 155 km/h
+// - 사운드: 전기차(ev)
+// - 스폰 위치: 주차장 남쪽 빈칸
+export function createCybertruck3D(): CustomVehicleRig {
+  const group = new THREE.Group();
+
+  // 1. Exoskeleton 재질 (무광 스테인리스 + 다크 트림 + 선팅 글래스)
+  const steelMat = new THREE.MeshStandardMaterial({
+    color: 0xb8bec4,
+    metalness: 0.78,
+    roughness: 0.28,
+    flatShading: true,
+  });
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0x1f2226,
+    metalness: 0.15,
+    roughness: 0.85,
+  });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x0c1118,
+    metalness: 0.9,
+    roughness: 0.1,
+  });
+  const headlightMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0xeef7ff,
+    emissiveIntensity: 1.4,
+  });
+  const taillightMat = new THREE.MeshStandardMaterial({
+    color: 0x550000,
+    emissive: 0xff1a1a,
+    emissiveIntensity: 1.1,
+  });
+
+  // 2. 측면 쐐기 단면 -> 폭(1.76m) Extrude (+Z 전방, y=0 지면)
+  const width = 1.76;
+  const bodyShape = new THREE.Shape();
+  bodyShape.moveTo(2.35, 0.38);
+  bodyShape.lineTo(2.40, 0.78);
+  bodyShape.lineTo(1.55, 0.98);
+  bodyShape.lineTo(0.15, 1.56);
+  bodyShape.lineTo(-2.30, 1.15);
+  bodyShape.lineTo(-2.38, 0.85);
+  bodyShape.lineTo(-2.30, 0.38);
+  bodyShape.closePath();
+
+  const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, {
+    depth: width,
+    bevelEnabled: false,
+  });
+  bodyGeo.translate(0, 0, -width / 2);
+  bodyGeo.rotateY(-Math.PI / 2);
+
+  const bodyMesh = new THREE.Mesh(bodyGeo, steelMat);
+  bodyMesh.castShadow = true;
+  bodyMesh.receiveShadow = true;
+  group.add(bodyMesh);
+
+  // 3. 하부 로커 패널 & 전면 스키드 플레이트
+  const lowerChassis = new THREE.Mesh(
+    new THREE.BoxGeometry(width + 0.04, 0.16, 4.66),
+    trimMat
+  );
+  lowerChassis.position.set(0, 0.36, 0.02);
+  group.add(lowerChassis);
+
+  const skidPlate = new THREE.Mesh(
+    new THREE.BoxGeometry(1.36, 0.1, 0.28),
+    trimMat
+  );
+  skidPlate.position.set(0, 0.31, 2.31);
+  skidPlate.rotation.x = -0.35;
+  group.add(skidPlate);
+
+  // 4. 전면 풀와이드 LED 라이트 바 & 후면 테일라이트 바
+  const frontLight = new THREE.Mesh(
+    new THREE.BoxGeometry(width - 0.04, 0.045, 0.05),
+    headlightMat
+  );
+  frontLight.position.set(0, 0.78, 2.40);
+  group.add(frontLight);
+
+  const rearLight = new THREE.Mesh(
+    new THREE.BoxGeometry(width - 0.04, 0.04, 0.05),
+    taillightMat
+  );
+  rearLight.position.set(0, 0.96, -2.35);
+  group.add(rearLight);
+
+  // 5. 앞유리 글래스 + 단일 대형 와이퍼 + 측면 창문 실루엣
+  const wsLen = Math.hypot(1.40, 0.58);
+  const wsAngle = Math.atan2(0.58, 1.40);
+  const windshield = new THREE.Mesh(
+    new THREE.BoxGeometry(width - 0.16, 0.02, wsLen - 0.08),
+    glassMat
+  );
+  windshield.position.set(0, 1.275, 0.85);
+  windshield.rotation.x = wsAngle;
+  group.add(windshield);
+
+  const wiper = new THREE.Mesh(
+    new THREE.BoxGeometry(0.035, 0.025, 1.15),
+    trimMat
+  );
+  wiper.position.set(-0.68, 1.22, 0.98);
+  wiper.rotation.x = wsAngle;
+  group.add(wiper);
+
+  // 측면 삼각 윈도우 (좌/우)
+  const sideWinShape = new THREE.Shape();
+  sideWinShape.moveTo(1.35, 0.98);
+  sideWinShape.lineTo(0.18, 1.46);
+  sideWinShape.lineTo(-0.85, 1.30);
+  sideWinShape.lineTo(-0.85, 0.98);
+  sideWinShape.closePath();
+  const sideWinGeo = new THREE.ExtrudeGeometry(sideWinShape, {
+    depth: 0.02,
+    bevelEnabled: false,
+  });
+  sideWinGeo.translate(0, 0, -0.01);
+  sideWinGeo.rotateY(-Math.PI / 2);
+
+  for (const side of [-1, 1]) {
+    const winMesh = new THREE.Mesh(sideWinGeo, glassMat);
+    winMesh.position.x = side * (width / 2 + 0.005);
+    group.add(winMesh);
+  }
+
+  // 6. 사다리꼴 각진 휠 아치 + 7각 에어로 오프로드 휠 (타이어 바닥 y=0)
+  const archShape = new THREE.Shape();
+  archShape.moveTo(-0.56, 0);
+  archShape.lineTo(-0.36, 0.34);
+  archShape.lineTo(0.36, 0.34);
+  archShape.lineTo(0.56, 0);
+  archShape.lineTo(0.45, 0);
+  archShape.lineTo(0.30, 0.25);
+  archShape.lineTo(-0.30, 0.25);
+  archShape.lineTo(-0.45, 0);
+  archShape.closePath();
+
+  const archGeo = new THREE.ExtrudeGeometry(archShape, {
+    depth: 0.14,
+    bevelEnabled: false,
+  });
+  archGeo.translate(0, 0, -0.07);
+  archGeo.rotateY(-Math.PI / 2);
+
+  const tireGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.26, 20);
+  tireGeo.rotateZ(Math.PI / 2);
+
+  const aeroCapGeo = new THREE.CylinderGeometry(0.25, 0.23, 0.28, 7);
+  aeroCapGeo.rotateZ(Math.PI / 2);
+
+  const wheels: THREE.Object3D[] = [];
+  const frontSteerPivots: THREE.Group[] = [];
+
+  const wheelPositions: Array<{ x: number; z: number; isFront: boolean }> = [
+    { x: -0.90, z: 1.48, isFront: true },
+    { x: 0.90, z: 1.48, isFront: true },
+    { x: -0.90, z: -1.48, isFront: false },
+    { x: 0.90, z: -1.48, isFront: false },
+  ];
+
+  for (const pos of wheelPositions) {
+    const arch = new THREE.Mesh(archGeo, trimMat);
+    arch.position.set(pos.x > 0 ? 0.94 : -0.94, 0.42, pos.z);
+    group.add(arch);
+
+    const steerPivot = new THREE.Group();
+    steerPivot.position.set(pos.x, 0.38, pos.z); // 반지름 0.38 -> 바닥면 정확히 y=0
+
+    const wheelSpin = new THREE.Group();
+    const tire = new THREE.Mesh(tireGeo, trimMat);
+    const cap = new THREE.Mesh(aeroCapGeo, steelMat);
+    tire.castShadow = true;
+    wheelSpin.add(tire, cap);
+
+    steerPivot.add(wheelSpin);
+    group.add(steerPivot);
+
+    wheels.push(wheelSpin);
+    if (pos.isFront) frontSteerPivots.push(steerPivot);
+  }
+
+  return { group, wheels, frontSteerPivots, headlightMat, taillightMat };
+}`,
+
+      roadster: `import * as THREE from 'three';
+
+// - 이름/이모지: 로우폴리 로드스터 / 🏎️
+// - 좌석/지붕: 2인승 / 오픈탑 (좌석: [-0.36, 0.42, -0.25], [0.36, 0.42, -0.25])
+// - 속도(크루즈/부스트): 110 / 210 km/h
+// - 사운드: 스포츠카(sport)
+export function createRoadster3D() {
+  const group = new THREE.Group();
+
+  const paintMat = new THREE.MeshStandardMaterial({
+    color: 0xe11d48,
+    metalness: 0.55,
+    roughness: 0.25,
+    flatShading: true,
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    metalness: 0.2,
+    roughness: 0.8,
+  });
+  const seatMat = new THREE.MeshStandardMaterial({
+    color: 0x3f2e21,
+    roughness: 0.75,
+  });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.45,
+    metalness: 0.6,
+    roughness: 0.1,
+  });
+  const headlightMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0xfff3c4,
+    emissiveIntensity: 1.5,
+  });
+  const taillightMat = new THREE.MeshStandardMaterial({
+    color: 0x7f1d1d,
+    emissive: 0xff2222,
+    emissiveIntensity: 1.2,
+  });
+
+  // 차체 하부 & 본체
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.66, 0.42, 3.85), paintMat);
+  chassis.position.set(0, 0.46, 0);
+  chassis.castShadow = true;
+  group.add(chassis);
+
+  // 오픈 콕핏(실내 바닥 + 시트 2개)
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.32, 0.14, 1.35), darkMat);
+  cabin.position.set(0, 0.63, -0.18);
+  group.add(cabin);
+
+  for (const sx of [-0.35, 0.35]) {
+    const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.46, 0.12), seatMat);
+    seatBack.position.set(sx, 0.82, -0.52);
+    seatBack.rotation.x = -0.22;
+    group.add(seatBack);
+  }
+
+  // 경사 윈드실드
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.38, 0.04), glassMat);
+  windshield.position.set(0, 0.80, 0.56);
+  windshield.rotation.x = -0.62;
+  group.add(windshield);
+
+  // 리어 스포일러
+  const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.58, 0.05, 0.24), darkMat);
+  spoiler.position.set(0, 0.78, -1.78);
+  group.add(spoiler);
+
+  // 헤드라이트 & 테일라이트
+  for (const lx of [-0.58, 0.58]) {
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.10, 0.06), headlightMat);
+    hl.position.set(lx, 0.50, 1.92);
+    group.add(hl);
+
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.09, 0.06), taillightMat);
+    tl.position.set(lx, 0.54, -1.92);
+    group.add(tl);
+  }
+
+  // 바퀴 (반지름 0.32 -> 중심 y=0.32)
+  const tireGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.24, 20);
+  tireGeo.rotateZ(Math.PI / 2);
+  const rimGeo = new THREE.CylinderGeometry(0.19, 0.19, 0.25, 10);
+  rimGeo.rotateZ(Math.PI / 2);
+  const rimMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.85, roughness: 0.2 });
+
+  const wheels: THREE.Object3D[] = [];
+  const frontSteerPivots: THREE.Group[] = [];
+
+  for (const pos of [
+    { x: -0.84, z: 1.22, front: true },
+    { x: 0.84, z: 1.22, front: true },
+    { x: -0.84, z: -1.22, front: false },
+    { x: 0.84, z: -1.22, front: false },
+  ]) {
+    const pivot = new THREE.Group();
+    pivot.position.set(pos.x, 0.32, pos.z);
+
+    const spin = new THREE.Group();
+    const tire = new THREE.Mesh(tireGeo, darkMat);
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    tire.castShadow = true;
+    spin.add(tire, rim);
+
+    pivot.add(spin);
+    group.add(pivot);
+    wheels.push(spin);
+    if (pos.front) frontSteerPivots.push(pivot);
+  }
+
+  return { group, wheels, frontSteerPivots, headlightMat, taillightMat };
+}`,
+
+      template: `import * as THREE from 'three';
+
+export interface CustomVehicleRig {
+  group: THREE.Group;
+  wheels: THREE.Object3D[];
+  frontSteerPivots: THREE.Group[];
+  headlightMat?: THREE.MeshStandardMaterial;
+  taillightMat?: THREE.MeshStandardMaterial;
+}
+
+// - 이름/이모지: 새 차량 / 🚗
+// - 좌석/지붕: 2인승 / 지붕 있음(hideAvatarInside: true)
+// - 속도(크루즈/부스트): 90 / 160 km/h
+// - 사운드: 일반(car)
+export function createCustomVehicle3D(): CustomVehicleRig {
+  const group = new THREE.Group();
+
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.4, roughness: 0.35 });
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
+  const headlightMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xeef7ff, emissiveIntensity: 1.2 });
+  const taillightMat = new THREE.MeshStandardMaterial({ color: 0x660000, emissive: 0xff2222, emissiveIntensity: 1.0 });
+
+  // 차체 (+Z가 전방)
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.65, 3.8), bodyMat);
+  body.position.set(0, 0.65, 0);
+  body.castShadow = true;
+  group.add(body);
+
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.5, 1.9), bodyMat);
+  cabin.position.set(0, 1.2, -0.2);
+  cabin.castShadow = true;
+  group.add(cabin);
+
+  // 전조등 / 후미등
+  const hl = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.08, 0.06), headlightMat);
+  hl.position.set(0, 0.68, 1.90);
+  group.add(hl);
+
+  const tl = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.08, 0.06), taillightMat);
+  tl.position.set(0, 0.68, -1.90);
+  group.add(tl);
+
+  // 바퀴 (반지름 0.35 -> y=0.35로 지면 y=0 정렬)
+  const tireGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.24, 18);
+  tireGeo.rotateZ(Math.PI / 2);
+
+  const wheels: THREE.Object3D[] = [];
+  const frontSteerPivots: THREE.Group[] = [];
+
+  for (const p of [
+    { x: -0.88, z: 1.2, f: true },
+    { x: 0.88, z: 1.2, f: true },
+    { x: -0.88, z: -1.2, f: false },
+    { x: 0.88, z: -1.2, f: false },
+  ]) {
+    const pivot = new THREE.Group();
+    pivot.position.set(p.x, 0.35, p.z);
+    const spin = new THREE.Group();
+    const tire = new THREE.Mesh(tireGeo, wheelMat);
+    tire.castShadow = true;
+    spin.add(tire);
+    pivot.add(spin);
+    group.add(pivot);
+    wheels.push(spin);
+    if (p.f) frontSteerPivots.push(pivot);
+  }
+
+  return { group, wheels, frontSteerPivots, headlightMat, taillightMat };
+}`
+    };
+
+    const SPEC_PROMPT_TEMPLATE = `아래 3D 코드 규약과 스펙 포맷에 맞춰 순수 Three.js 팩토리 함수 1개만 작성해줘.
+
+[3D 코드 규약]
+1. 좌표/바닥 기준: +Z가 차량 전방, x=0이 좌우 중심, y=0이 타이어 바닥면(지면).
+2. wheels: THREE.Object3D[] (wheel.rotation.x 구름 회전용)
+3. frontSteerPivots: THREE.Group[] (pivot.rotation.y 좌우 조향용)
+4. 리턴 타입: CustomVehicleRig { group, wheels, frontSteerPivots, headlightMat?, taillightMat? }
+
+[스펙 5줄 메모]
+- 이름/이모지:
+- 좌석/지붕:
+- 속도(크루즈/부스트):
+- 사운드: 전기차(ev) / 스포츠카(sport) / 일반(car)
+- 스폰 위치:`;
+
+    // =========================================================================
+    // 2. 경량 TypeScript -> JavaScript 변환기 (무빌드 / file:/// 호환용)
+    // =========================================================================
+    function transpileFactoryCode(rawCode) {
+      // 1) 문자열/주석 보호 (문자열 내부의 콜론/브래킷 오인 방지)
+      const tokens = [];
+      let masked = '';
+      let i = 0;
+      const len = rawCode.length;
+
+      while (i < len) {
+        const ch = rawCode[i];
+        const next = rawCode[i + 1];
+
+        if (ch === '/' && next === '/') {
+          const end = rawCode.indexOf('\n', i);
+          const slice = end === -1 ? rawCode.slice(i) : rawCode.slice(i, end);
+          masked += slice; // 한 줄 주석은 그대로 유지
+          i += slice.length;
+          continue;
+        }
+        if (ch === '/' && next === '*') {
+          const end = rawCode.indexOf('*/', i + 2);
+          const slice = end === -1 ? rawCode.slice(i) : rawCode.slice(i, end + 2);
+          masked += slice;
+          i += slice.length;
+          continue;
+        }
+        if (ch === "'" || ch === '"' || ch === '`') {
+          const quote = ch;
+          let j = i + 1;
+          while (j < len) {
+            if (rawCode[j] === '\\') { j += 2; continue; }
+            if (rawCode[j] === quote) { j++; break; }
+            j++;
+          }
+          const idx = tokens.length;
+          tokens.push(rawCode.slice(i, j));
+          masked += `__STR_TOKEN_${idx}__`;
+          i = j;
+          continue;
+        }
+        masked += ch;
+        i++;
+      }
+
+      // 2) import / export interface / export type 제거
+      masked = masked.replace(/^\s*import\s+[\s\S]*?from\s+__STR_TOKEN_\d+__\s*;?/gm, '');
+      masked = masked.replace(/^\s*import\s+__STR_TOKEN_\d+__\s*;?/gm, '');
+
+      // interface { ... } 블록(중첩 중괄호 포함) 안전 제거
+      masked = stripKeywordBlocks(masked, /\b(?:export\s+)?interface\s+[A-Za-z_$][\w$]*(?:\s+extends\s+[^{]+)?\s*\{/g);
+      // type Foo = ...; 제거
+      masked = masked.replace(/^\s*(?:export\s+)?type\s+[A-Za-z_$][\w$]*\s*=\s*[^;]+;/gm, '');
+      // export 키워드 제거
+      masked = masked.replace(/\bexport\s+(?=(?:function|const|let|var|class)\b)/g, '');
+      masked = masked.replace(/\bexport\s+default\s+/g, '');
+
+      // 3) 변수 선언부의 타입 어노테이션 제거: (const|let|var) name: Type =
+      masked = stripVarTypeAnnotations(masked);
+
+      // 4) 함수 매개변수 및 반환 타입 제거
+      masked = stripFunctionTypeAnnotations(masked);
+
+      // 5) 'as Type' 단언 제거 (예: as THREE.Mesh, as const)
+      masked = masked.replace(/\s+as\s+(?:const|[A-Za-z_$][\w$.<>[\]|&\s]*)(?=[,);\n\}])/g, '');
+
+      // 6) 문자열 복원
+      const jsCode = masked.replace(/__STR_TOKEN_(\d+)__/g, (_, idx) => tokens[Number(idx)]);
+      return jsCode;
+    }
+
+    function stripKeywordBlocks(src, startRegex) {
+      let out = '';
+      let lastIndex = 0;
+      startRegex.lastIndex = 0;
+      let match;
+      while ((match = startRegex.exec(src)) !== null) {
+        out += src.slice(lastIndex, match.index);
+        let depth = 1;
+        let p = startRegex.lastIndex;
+        while (p < src.length && depth > 0) {
+          if (src[p] === '{') depth++;
+          else if (src[p] === '}') depth--;
+          p++;
+        }
+        lastIndex = p;
+        startRegex.lastIndex = p;
+      }
+      out += src.slice(lastIndex);
+      return out;
+    }
+
+    function stripVarTypeAnnotations(src) {
+      const declRegex = /\b(const|let|var)\s+([A-Za-z_$][\w$]*)\s*:/g;
+      let out = '';
+      let lastIndex = 0;
+      let match;
+      while ((match = declRegex.exec(src)) !== null) {
+        out += src.slice(lastIndex, match.index) + match[1] + ' ' + match[2];
+        let p = declRegex.lastIndex;
+        let angle = 0, brace = 0, paren = 0, bracket = 0;
+        while (p < src.length) {
+          const c = src[p];
+          if (c === '<') angle++;
+          else if (c === '>' && angle > 0) angle--;
+          else if (c === '{') brace++;
+          else if (c === '}' && brace > 0) brace--;
+          else if (c === '(') paren++;
+          else if (c === ')' && paren > 0) paren--;
+          else if (c === '[') bracket++;
+          else if (c === ']' && bracket > 0) bracket--;
+          else if (angle === 0 && brace === 0 && paren === 0 && bracket === 0) {
+            if (c === '=' || c === ';' || c === '\n') break;
+          }
+          p++;
+        }
+        if (src[p] === '=') out += ' ';
+        lastIndex = p;
+        declRegex.lastIndex = p;
+      }
+      out += src.slice(lastIndex);
+      return out;
+    }
+
+    function stripFunctionTypeAnnotations(src) {
+      // 함수 선언/화살표 함수의 파라미터 목록 내부 ': Type' 및 닫는 괄호 뒤 ': ReturnType' 제거
+      // 패턴: function name(...) : ReturnType { 또는 (...) : ReturnType =>
+      let out = src.replace(/(function\s+[A-Za-z_$][\w$]*\s*\()([^)]*)(\)\s*):([^{]+)(\{)/g, (_, p1, params, p3, _ret, p5) => {
+        return p1 + cleanParams(params) + p3 + p5;
+      });
+      out = out.replace(/(\()([^()]*?)(\)\s*):([^=>{]+)(=>)/g, (_, p1, params, p3, _ret, p5) => {
+        return p1 + cleanParams(params) + p3 + p5;
+      });
+      // 반환 타입 없는 함수의 파라미터 타입만 제거
+      out = out.replace(/(function\s+[A-Za-z_$][\w$]*\s*\()([^)]*)(\)\s*\{)/g, (_, p1, params, p3) => {
+        return p1 + cleanParams(params) + p3;
+      });
+      out = out.replace(/(\()([^()]*?)(\)\s*=>)/g, (_, p1, params, p3) => {
+        return p1 + cleanParams(params) + p3;
+      });
+      return out;
+    }
+
+    function cleanParams(paramStr) {
+      // 콤마 기준 파라미터 분리 시 <>, {}, [] 내부 콤마 보호
+      const parts = [];
+      let cur = '';
+      let depth = 0;
+      for (let i = 0; i < paramStr.length; i++) {
+        const c = paramStr[i];
+        if ('<{(['.includes(c)) depth++;
+        else if ('>})]'.includes(c)) depth = Math.max(0, depth - 1);
+        if (c === ',' && depth === 0) {
+          parts.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      if (cur) parts.push(cur);
+
+      return parts.map((p) => {
+        // 기본값 '=' 앞의 ': Type' 만 제거
+        let d = 0;
+        let colonIdx = -1;
+        let eqIdx = -1;
+        for (let i = 0; i < p.length; i++) {
+          const c = p[i];
+          if ('<{(['.includes(c)) d++;
+          else if ('>})]'.includes(c)) d = Math.max(0, d - 1);
+          if (d === 0) {
+            if (c === ':' && colonIdx === -1) colonIdx = i;
+            if (c === '=' && eqIdx === -1) { eqIdx = i; break; }
+          }
+        }
+        if (colonIdx === -1) return p;
+        const left = p.slice(0, colonIdx).replace(/\?\s*$/, '');
+        const right = eqIdx !== -1 ? ' ' + p.slice(eqIdx) : '';
+        return left + right;
+      }).join(',');
+    }
+
+    function detectFactoryFunctionName(jsCode) {
+      const fnMatches = [...jsCode.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m => m[1]);
+      const arrowMatches = [...jsCode.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/g)].map(m => m[1]);
+      const all = [...fnMatches, ...arrowMatches];
+      // create... 패턴 우선 선택, 없으면 마지막 함수 선택
+      const preferred = all.filter(name => /^create/i.test(name));
+      if (preferred.length > 0) return preferred[preferred.length - 1];
+      return all.length > 0 ? all[all.length - 1] : null;
+    }
+
+    // =========================================================================
+    // 3. Three.js 쇼케이스 씬 & 컨트롤러 초기화
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x161a23);
+
+    const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.05, 500);
+    camera.position.set(5.2, 2.8, 5.8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    container.insertBefore(renderer.domElement, container.firstChild);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.target.set(0, 0.75, 0);
+
+    // 조명 셋업 (주간 / 야간 전환 가능)
+    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1f2937, 0.85);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.35);
+    dirLight.position.set(6, 10, 7);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 1;
+    dirLight.shadow.camera.far = 35;
+    dirLight.shadow.camera.left = -8;
+    dirLight.shadow.camera.right = 8;
+    dirLight.shadow.camera.top = 8;
+    dirLight.shadow.camera.bottom = -8;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
+
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.55);
+    rimLight.position.set(-6, 4, -7);
+    scene.add(rimLight);
+
+    // 그림자 받는 바닥 플레인 (y = 0)
+    const groundPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(60, 60),
+      new THREE.ShadowMaterial({ opacity: 0.35 })
+    );
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.position.y = -0.002;
+    groundPlane.receiveShadow = true;
+    scene.add(groundPlane);
+
+    // Grid + (+Z FRONT 방향 마커) 그룹
+    const guideGroup = new THREE.Group();
+    const gridHelper = new THREE.GridHelper(16, 32, 0x3b82f6, 0x262c3a);
+    guideGroup.add(gridHelper);
+
+    // +Z 전방 화살표
+    const frontArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1),
+      new THREE.Vector3(0, 0.01, 2.7),
+      1.1,
+      0x38bdf8,
+      0.32,
+      0.22
+    );
+    guideGroup.add(frontArrow);
+
+    // 바닥 '+Z FRONT' 캔버스 라벨
+    const labelCanvas = document.createElement('canvas');
+    labelCanvas.width = 256;
+    labelCanvas.height = 64;
+    const lctx = labelCanvas.getContext('2d');
+    lctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+    lctx.fillRect(0, 0, 256, 64);
+    lctx.strokeStyle = '#38bdf8';
+    lctx.lineWidth = 3;
+    lctx.strokeRect(2, 2, 252, 60);
+    lctx.fillStyle = '#38bdf8';
+    lctx.font = 'bold 28px monospace';
+    lctx.textAlign = 'center';
+    lctx.textBaseline = 'middle';
+    lctx.fillText('+Z FRONT', 128, 34);
+    const labelTex = new THREE.CanvasTexture(labelCanvas);
+    const labelMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.15, 0.28),
+      new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, side: THREE.DoubleSide })
+    );
+    labelMesh.rotation.x = -Math.PI / 2;
+    labelMesh.position.set(0, 0.01, 4.1);
+    guideGroup.add(labelMesh);
+    scene.add(guideGroup);
+
+    // Axes Helper
+    const axesHelper = new THREE.AxesHelper(2.2);
+    axesHelper.visible = false;
+    scene.add(axesHelper);
+
+    // =========================================================================
+    // 4. 런타임 상태 & 모델 로드/정리
+    // =========================================================================
+    let currentRig = null;
+    let modelCenter = new THREE.Vector3(0, 0.75, 0);
+    let modelSize = new THREE.Vector3(2, 1.5, 4.5);
+    let modelRadius = 2.6;
+
+    const state = {
+      isNight: false,
+      showGrid: true,
+      showAxes: false,
+      wireframe: false,
+      turntable: false,
+      wheelSpin: false,
+      steerDeg: 0,
+      headlightOn: true,
+      brakeOn: false,
+      baseHeadlightIntensity: 1.4,
+      baseTaillightIntensity: 1.1,
+    };
+
+    // 카메라 부드러운 이동 애니메이션용
+    let camTween = null;
+
+    function disposeObject3D(root) {
+      if (!root) return;
+      root.traverse((obj) => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach((m) => {
+            if (m.map) m.map.dispose();
+            m.dispose();
+          });
+        }
+      });
+    }
+
+    function applyWireframe(root, enabled) {
+      if (!root) return;
+      root.traverse((obj) => {
+        if (obj.isMesh && obj.material) {
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach((m) => { m.wireframe = enabled; });
+        }
+      });
+    }
+
+    function updateLightsAndMaterials() {
+      if (!currentRig) return;
+      if (currentRig.headlightMat) {
+        currentRig.headlightMat.emissiveIntensity = state.headlightOn
+          ? Math.max(state.baseHeadlightIntensity, state.isNight ? 2.4 : 1.4)
+          : 0.05;
+      }
+      if (currentRig.taillightMat) {
+        currentRig.taillightMat.emissiveIntensity = state.brakeOn
+          ? 3.4
+          : (state.headlightOn ? Math.max(state.baseTaillightIntensity, 0.9) : 0.15);
+      }
+    }
+
+    function applySteer(deg) {
+      state.steerDeg = deg;
+      document.getElementById('btn-rig-steer-reset').textContent = `${deg}°`;
+      if (!currentRig || !Array.isArray(currentRig.frontSteerPivots)) return;
+      const rad = THREE.MathUtils.degToRad(deg);
+      currentRig.frontSteerPivots.forEach((pivot) => {
+        if (pivot && pivot.rotation) pivot.rotation.y = rad;
+      });
+    }
+
+    let lastRenderOk = false;
+    let lastMeta = { fnName: '', sizeText: '-', tris: 0, meshes: 0, minY: 0 };
+
+    function executeUserCode(shouldFitCamera = false, options = {}) {
+      const rawCode = document.getElementById('code-editor').value;
+      const statusMsg = document.getElementById('status-message');
+      const fnBadge = document.getElementById('detected-fn-badge');
+
+      try {
+        const jsCode = transpileFactoryCode(rawCode);
+        const fnName = detectFactoryFunctionName(jsCode);
+        fnBadge.textContent = fnName ? `${fnName}()` : 'Inline Return';
+
+        const runnerCode = fnName
+          ? `${jsCode}\nreturn typeof ${fnName} === 'function' ? ${fnName}() : null;`
+          : jsCode;
+
+        const factory = new Function('THREE', runnerCode);
+        const result = factory(THREE);
+
+        if (!result) {
+          throw new Error('팩토리 함수가 CustomVehicleRig 또는 THREE.Object3D를 반환하지 않았습니다.');
+        }
+
+        // 반환값 정규화 (CustomVehicleRig 또는 순수 THREE.Object3D 모두 수용)
+        const rig = result.isObject3D
+          ? { group: result, wheels: [], frontSteerPivots: [] }
+          : {
+              group: result.group,
+              wheels: Array.isArray(result.wheels) ? result.wheels : [],
+              frontSteerPivots: Array.isArray(result.frontSteerPivots) ? result.frontSteerPivots : [],
+              headlightMat: result.headlightMat || null,
+              taillightMat: result.taillightMat || null,
+            };
+
+        if (!rig.group || !rig.group.isObject3D) {
+          throw new Error('반환 객체에 유효한 THREE.Group (rig.group)가 없습니다.');
+        }
+
+        // 기존 모델 정리 후 교체
+        if (currentRig && currentRig.group) {
+          scene.remove(currentRig.group);
+          disposeObject3D(currentRig.group);
+        }
+
+        currentRig = rig;
+        state.baseHeadlightIntensity = rig.headlightMat ? (rig.headlightMat.emissiveIntensity || 1.4) : 1.4;
+        state.baseTaillightIntensity = rig.taillightMat ? (rig.taillightMat.emissiveIntensity || 1.1) : 1.1;
+
+        scene.add(rig.group);
+        if (state.wireframe) applyWireframe(rig.group, true);
+        applySteer(state.steerDeg);
+        updateLightsAndMaterials();
+
+        // 메트릭 & 규약 검증 계산
+        rig.group.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(rig.group);
+        box.getCenter(modelCenter);
+        box.getSize(modelSize);
+        const sphere = new THREE.Sphere();
+        box.getBoundingSphere(sphere);
+        modelRadius = Math.max(sphere.radius, 0.8);
+
+        let tris = 0;
+        let meshes = 0;
+        rig.group.traverse((obj) => {
+          if (obj.isMesh && obj.geometry) {
+            meshes++;
+            const geo = obj.geometry;
+            tris += geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+          }
+        });
+
+        document.getElementById('hud-size').textContent =
+          `${modelSize.x.toFixed(2)} × ${modelSize.y.toFixed(2)} × ${modelSize.z.toFixed(2)} m`;
+
+        const minY = box.min.y;
+        const groundEl = document.getElementById('hud-ground');
+        if (Math.abs(minY) <= 0.03) {
+          groundEl.textContent = `${minY.toFixed(2)} m ✓`;
+          groundEl.className = 'font-semibold text-emerald-400';
+        } else {
+          groundEl.textContent = `${minY >= 0 ? '+' : ''}${minY.toFixed(2)} m ⚠`;
+          groundEl.className = 'font-semibold text-amber-400';
+        }
+
+        document.getElementById('hud-tris').textContent =
+          `${Math.round(tris).toLocaleString()} / ${meshes}`;
+
+        // Rig 뱃지 및 테스트 버튼 상태 업데이트
+        updateRigControlsUI(rig);
+
+        if (shouldFitCamera) {
+          setCameraPreset('iso', true);
+        }
+
+        lastRenderOk = true;
+        lastMeta = {
+          fnName: fnName || 'snippet',
+          sizeText: `${modelSize.x.toFixed(2)}×${modelSize.y.toFixed(2)}×${modelSize.z.toFixed(2)}m`,
+          tris: Math.round(tris),
+          meshes,
+          minY,
+        };
+
+        statusMsg.textContent = `✓ 렌더링 성공 (${fnName || 'snippet'})`;
+        statusMsg.className = 'truncate text-emerald-400';
+
+        if (options.recordHistory) {
+          scheduleHistoryAutoSave(rawCode);
+        }
+      } catch (err) {
+        lastRenderOk = false;
+        statusMsg.textContent = `✕ 오류: ${err.message}`;
+        statusMsg.className = 'truncate text-rose-400';
+      }
+    }
+
+    function updateRigControlsUI(rig) {
+      const badges = [];
+      const hasWheels = rig.wheels.length > 0;
+      const hasSteer = rig.frontSteerPivots.length > 0;
+      const hasHL = Boolean(rig.headlightMat);
+      const hasTL = Boolean(rig.taillightMat);
+
+      badges.push(makeBadge(`wheels: ${rig.wheels.length}`, hasWheels));
+      badges.push(makeBadge(`steer: ${rig.frontSteerPivots.length}`, hasSteer));
+      badges.push(makeBadge('headlight', hasHL));
+      badges.push(makeBadge('taillight', hasTL));
+
+      document.getElementById('hud-rig-badges').innerHTML = badges.join('');
+
+      document.getElementById('btn-rig-spin').disabled = !hasWheels;
+      document.getElementById('slider-rig-steer').disabled = !hasSteer;
+      document.getElementById('btn-rig-headlight').disabled = !hasHL;
+      document.getElementById('btn-rig-brake').disabled = !hasTL;
+    }
+
+    function makeBadge(label, active) {
+      return active
+        ? `<span class="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono">${label}</span>`
+        : `<span class="px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700/60 text-slate-500 text-[10px] font-mono">${label}</span>`;
+    }
+
+    // =========================================================================
+    // 5. 카메라 6방향 + Iso 프리셋 전환
+    // =========================================================================
+    function setCameraPreset(view, instant = false) {
+      const dist = modelRadius * 2.35;
+      const target = modelCenter.clone();
+      let dir;
+
+      switch (view) {
+        case 'front':  dir = new THREE.Vector3(0, 0.12, 1); break;
+        case 'back':   dir = new THREE.Vector3(0, 0.12, -1); break;
+        case 'left':   dir = new THREE.Vector3(-1, 0.1, 0); break;
+        case 'right':  dir = new THREE.Vector3(1, 0.1, 0); break;
+        case 'top':    dir = new THREE.Vector3(0, 1, 0.001); break;
+        case 'bottom': dir = new THREE.Vector3(0, -1, 0.001); break;
+        case 'iso':
+        default:       dir = new THREE.Vector3(0.75, 0.42, 0.82); break;
+      }
+
+      dir.normalize();
+      const destPos = target.clone().addScaledVector(dir, dist);
+
+      // 버튼 활성화 스타일
+      document.querySelectorAll('.cam-btn').forEach((btn) => {
+        const isActive = btn.dataset.view === view;
+        btn.className = isActive
+          ? 'cam-btn px-2 py-1 rounded text-[11px] font-mono font-medium bg-cyan-600/80 text-white transition-colors'
+          : 'cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors';
+      });
+
+      if (instant) {
+        camera.position.copy(destPos);
+        controls.target.copy(target);
+        controls.update();
+        camTween = null;
+      } else {
+        camTween = {
+          startPos: camera.position.clone(),
+          endPos: destPos,
+          startTarget: controls.target.clone(),
+          endTarget: target,
+          progress: 0,
+        };
+      }
+    }
+
+    // =========================================================================
+    // 6. UI 이벤트 바인딩 & 애니메이션 루프
+    // =========================================================================
+    const editorEl = document.getElementById('code-editor');
+    const STORAGE_KEY = 'ws_suite_3d_rig_code_v1';
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => toast.classList.add('opacity-0'), 1800);
+    }
+
+    // 초기 코드 로드 (localStorage 우선, 없으면 cybertruck 프리셋)
+    const savedCode = localStorage.getItem(STORAGE_KEY);
+    editorEl.value = savedCode && savedCode.trim() ? savedCode : PRESETS.cybertruck;
+
+    // Tab 키 2칸 들여쓰기 & Ctrl+Enter 실행
+    editorEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = editorEl.selectionStart;
+        const end = editorEl.selectionEnd;
+        editorEl.value = editorEl.value.slice(0, start) + '  ' + editorEl.value.slice(end);
+        editorEl.selectionStart = editorEl.selectionEnd = start + 2;
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        executeUserCode(false, { recordHistory: true });
+      }
+    });
+
+    // 자동 디바운스 실행 (성공한 코드만 히스토리 자동 누적)
+    let autoRunTimer = null;
+    editorEl.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, editorEl.value);
+      if (!document.getElementById('chk-autorun').checked) return;
+      clearTimeout(autoRunTimer);
+      autoRunTimer = setTimeout(() => executeUserCode(false, { recordHistory: true }), 420);
+    });
+
+    document.getElementById('btn-run').addEventListener('click', () => executeUserCode(false, { recordHistory: true }));
+
+    document.getElementById('preset-select').addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (PRESETS[val]) {
+        editorEl.value = PRESETS[val];
+        localStorage.setItem(STORAGE_KEY, editorEl.value);
+        executeUserCode(true, { recordHistory: false });
+        showToast(`프리셋 로드됨: ${val}`);
+      }
+    });
+
+    document.getElementById('btn-copy-code').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(editorEl.value);
+      showToast('코드가 클립보드에 복사되었습니다');
+    });
+
+    document.getElementById('btn-copy-spec').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(SPEC_PROMPT_TEMPLATE);
+      showToast('CustomVehicleRig 규약 프롬프트 복사됨');
+    });
+
+    document.getElementById('btn-clear-code').addEventListener('click', () => {
+      editorEl.value = '';
+      localStorage.removeItem(STORAGE_KEY);
+      editorEl.focus();
+    });
+
+    // 카메라 프리셋 버튼
+    document.querySelectorAll('.cam-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setCameraPreset(btn.dataset.view, false));
+    });
+    document.getElementById('btn-fit').addEventListener('click', () => setCameraPreset('iso', false));
+
+    // 환경 토글 버튼
+    function setToggleStyle(btn, active) {
+      btn.className = active
+        ? 'px-2 py-1 rounded bg-cyan-600/25 text-cyan-300 border border-cyan-500/30 font-medium transition-colors'
+        : 'px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors';
+    }
+
+    document.getElementById('btn-lighting').addEventListener('click', (e) => {
+      state.isNight = !state.isNight;
+      if (state.isNight) {
+        scene.background = new THREE.Color(0x090c14);
+        hemiLight.intensity = 0.25;
+        dirLight.intensity = 0.35;
+        rimLight.intensity = 0.85;
+        e.currentTarget.textContent = '🌙 야간';
+        e.currentTarget.className = 'px-2 py-1 rounded bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 font-medium transition-colors';
+      } else {
+        scene.background = new THREE.Color(0x161a23);
+        hemiLight.intensity = 0.85;
+        dirLight.intensity = 1.35;
+        rimLight.intensity = 0.55;
+        e.currentTarget.textContent = '☀️ 주간';
+        e.currentTarget.className = 'px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-medium transition-colors';
+      }
+      updateLightsAndMaterials();
+    });
+
+    document.getElementById('btn-grid').addEventListener('click', (e) => {
+      state.showGrid = !state.showGrid;
+      guideGroup.visible = state.showGrid;
+      setToggleStyle(e.currentTarget, state.showGrid);
+    });
+
+    document.getElementById('btn-axes').addEventListener('click', (e) => {
+      state.showAxes = !state.showAxes;
+      axesHelper.visible = state.showAxes;
+      setToggleStyle(e.currentTarget, state.showAxes);
+    });
+
+    document.getElementById('btn-wireframe').addEventListener('click', (e) => {
+      state.wireframe = !state.wireframe;
+      if (currentRig) applyWireframe(currentRig.group, state.wireframe);
+      setToggleStyle(e.currentTarget, state.wireframe);
+    });
+
+    document.getElementById('btn-turntable').addEventListener('click', (e) => {
+      state.turntable = !state.turntable;
+      controls.autoRotate = state.turntable;
+      controls.autoRotateSpeed = 2.0;
+      setToggleStyle(e.currentTarget, state.turntable);
+    });
+
+    document.getElementById('btn-screenshot').addEventListener('click', () => {
+      renderer.render(scene, camera);
+      const url = renderer.domElement.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `3d-rig-showcase-${Date.now()}.png`;
+      a.click();
+      showToast('PNG 스크린샷 저장됨');
+    });
+
+    // Rig 테스트 바 이벤트
+    document.getElementById('btn-rig-spin').addEventListener('click', (e) => {
+      state.wheelSpin = !state.wheelSpin;
+      setToggleStyle(e.currentTarget, state.wheelSpin);
+    });
+
+    document.getElementById('slider-rig-steer').addEventListener('input', (e) => {
+      applySteer(Number(e.target.value));
+    });
+    document.getElementById('btn-rig-steer-reset').addEventListener('click', () => {
+      document.getElementById('slider-rig-steer').value = '0';
+      applySteer(0);
+    });
+
+    document.getElementById('btn-rig-headlight').addEventListener('click', (e) => {
+      state.headlightOn = !state.headlightOn;
+      setToggleStyle(e.currentTarget, state.headlightOn);
+      updateLightsAndMaterials();
+    });
+    setToggleStyle(document.getElementById('btn-rig-headlight'), true);
+
+    document.getElementById('btn-rig-brake').addEventListener('click', (e) => {
+      state.brakeOn = !state.brakeOn;
+      setToggleStyle(e.currentTarget, state.brakeOn);
+      updateLightsAndMaterials();
+    });
+
+    // =========================================================================
+    // 7. Split Pane 리사이저 & 에디터 토글 & 반응형 리사이즈
+    // =========================================================================
+    const paneEditor = document.getElementById('pane-editor');
+    const paneViewport = document.getElementById('pane-viewport');
+    const resizer = document.getElementById('resizer');
+    let editorCollapsed = false;
+
+    function handleResize() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w > 0 && h > 0) {
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+    }
+    window.addEventListener('resize', handleResize);
+
+    // 드래그 리사이저 (20% ~ 80%)
+    let isDragging = false;
+    resizer.addEventListener('mousedown', () => {
+      isDragging = true;
+      resizer.classList.add('dragging');
+      document.body.style.userSelect = 'none';
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const pct = Math.min(80, Math.max(20, (e.clientX / window.innerWidth) * 100));
+      paneEditor.style.width = `${pct}%`;
+      handleResize();
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      resizer.classList.remove('dragging');
+      document.body.style.userSelect = '';
+    });
+
+    function toggleEditorPane() {
+      editorCollapsed = !editorCollapsed;
+      paneEditor.classList.toggle('md:hidden', editorCollapsed);
+      resizer.classList.toggle('md:hidden', editorCollapsed);
+      handleResize();
+    }
+    document.getElementById('btn-toggle-editor').addEventListener('click', toggleEditorPane);
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleEditorPane();
+      }
+    });
+
+    // 모바일 탭 전환
+    const btnMobEd = document.getElementById('btn-mobile-editor');
+    const btnMobView = document.getElementById('btn-mobile-view');
+    btnMobEd.addEventListener('click', () => {
+      paneEditor.classList.remove('hidden');
+      paneViewport.classList.add('hidden');
+      paneViewport.classList.remove('flex');
+      btnMobEd.className = 'px-2.5 py-1 rounded text-white bg-slate-700/80 font-medium';
+      btnMobView.className = 'px-2.5 py-1 rounded text-app-muted hover:text-white font-medium';
+    });
+    btnMobView.addEventListener('click', () => {
+      paneEditor.classList.add('hidden');
+      paneViewport.classList.remove('hidden');
+      paneViewport.classList.add('flex');
+      btnMobView.className = 'px-2.5 py-1 rounded text-white bg-slate-700/80 font-medium';
+      btnMobEd.className = 'px-2.5 py-1 rounded text-app-muted hover:text-white font-medium';
+      requestAnimationFrame(handleResize);
+    });
+
+    // 렌더 루프
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.1);
+
+      // 카메라 프리셋 부드러운 보간
+      if (camTween) {
+        camTween.progress = Math.min(1, camTween.progress + dt * 4.5);
+        const t = 1 - Math.pow(1 - camTween.progress, 3); // cubic ease-out
+        camera.position.lerpVectors(camTween.startPos, camTween.endPos, t);
+        controls.target.lerpVectors(camTween.startTarget, camTween.endTarget, t);
+        if (camTween.progress >= 1) camTween = null;
+      }
+
+      // 바퀴 구름 회전 (wheels[i].rotation.x += ...)
+      if (state.wheelSpin && currentRig && currentRig.wheels.length > 0) {
+        for (const w of currentRig.wheels) {
+          if (w && w.rotation) w.rotation.x += dt * 6.0;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // =========================================================================
+    // 8. IndexedDB 3D 모델 히스토리 (최대 1,000건 + 240x150 썸네일 미리보기)
+    // =========================================================================
+    const DB_NAME = 'RigShowcaseDB';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'history';
+    const MAX_HISTORY_ITEMS = 1000;
+    let dbPromise = null;
+    let cachedHistoryList = [];
+    let historyAutoTimer = null;
+
+    function openHistoryDB() {
+      if (!dbPromise) {
+        dbPromise = new Promise((resolve) => {
+          if (!('indexedDB' in window)) {
+            resolve(null);
+            return;
+          }
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+              store.createIndex('updatedAt', 'updatedAt', { unique: false });
+            }
+          };
+          req.onsuccess = (e) => resolve(e.target.result);
+          req.onerror = () => resolve(null);
+        });
+      }
+      return dbPromise;
+    }
+
+    async function initHistoryStore() {
+      const db = await openHistoryDB();
+      if (db) {
+        try {
+          const list = await new Promise((resolve) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          });
+          list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+          cachedHistoryList = list.slice(0, MAX_HISTORY_ITEMS);
+        } catch (e) {
+          cachedHistoryList = [];
+        }
+      }
+      updateHistoryBadges();
+    }
+
+    async function putHistoryItemDB(item) {
+      const db = await openHistoryDB();
+      if (!db) return;
+      try {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(item);
+      } catch (e) {}
+    }
+
+    async function deleteHistoryIdsDB(ids) {
+      if (!ids || ids.length === 0) return;
+      const db = await openHistoryDB();
+      if (!db) return;
+      try {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        ids.forEach((id) => store.delete(id));
+      } catch (e) {}
+    }
+
+    async function clearHistoryDB() {
+      const db = await openHistoryDB();
+      if (!db) return;
+      try {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).clear();
+      } catch (e) {}
+    }
+
+    function updateHistoryBadges() {
+      const count = cachedHistoryList.length;
+      document.getElementById('badge-history-count').textContent = count;
+      document.getElementById('modal-history-count').textContent = `(${count}/${MAX_HISTORY_ITEMS})`;
+    }
+
+    function extractModelTitle(code, fnName) {
+      const memoMatch = code.match(/이름\/이모지\s*:\s*([^\r\n]+)/);
+      if (memoMatch && memoMatch[1].trim()) {
+        const parts = memoMatch[1].split('/').map((s) => s.trim()).filter(Boolean);
+        if (parts.length >= 2) return `${parts[1]} ${parts[0]}`;
+        if (parts[0]) return parts[0];
+      }
+      if (fnName && fnName !== 'snippet') return fnName;
+      return '3D Model Snippet';
+    }
+
+    function captureThumbnailDataUrl() {
+      try {
+        renderer.render(scene, camera);
+        const src = renderer.domElement;
+        if (!src || src.width === 0 || src.height === 0) return '';
+        const tw = 240;
+        const th = 150;
+        const off = document.createElement('canvas');
+        off.width = tw;
+        off.height = th;
+        const ctx = off.getContext('2d');
+        ctx.fillStyle = '#14171f';
+        ctx.fillRect(0, 0, tw, th);
+
+        // Aspect-cover 크롭으로 모델 중심을 깔끔하게 캡처
+        const srcRatio = src.width / src.height;
+        const dstRatio = tw / th;
+        let sx = 0, sy = 0, sw = src.width, sh = src.height;
+        if (srcRatio > dstRatio) {
+          sw = src.height * dstRatio;
+          sx = (src.width - sw) / 2;
+        } else {
+          sh = src.width / dstRatio;
+          sy = (src.height - sh) / 2;
+        }
+        ctx.drawImage(src, sx, sy, sw, sh, 0, 0, tw, th);
+        return off.toDataURL('image/jpeg', 0.72);
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function scheduleHistoryAutoSave(codeSnapshot) {
+      clearTimeout(historyAutoTimer);
+      historyAutoTimer = setTimeout(() => {
+        if (editorEl.value !== codeSnapshot || !lastRenderOk) return;
+        saveHistorySnapshot(false);
+      }, 1400);
+    }
+
+    async function saveHistorySnapshot(manual = false) {
+      const code = editorEl.value;
+      if (!code || !code.trim()) {
+        if (manual) showToast('저장할 코드가 비어 있습니다');
+        return;
+      }
+      if (!lastRenderOk) {
+        if (manual) showToast('오류가 없는 코드만 저장할 수 있습니다');
+        return;
+      }
+
+      const now = Date.now();
+      const title = extractModelTitle(code, lastMeta.fnName);
+      const thumbnail = captureThumbnailDataUrl();
+
+      if (cachedHistoryList.length > 0) {
+        const top = cachedHistoryList[0];
+        if (top.code === code) {
+          // 동일 코드면 썸네일/시각만 최신화
+          top.thumbnail = thumbnail || top.thumbnail;
+          top.updatedAt = now;
+          await putHistoryItemDB(top);
+          updateHistoryBadges();
+          if (manual) showToast('현재 모델 이력 갱신됨');
+          return;
+        }
+        // 자동 저장 시 3분 이내 동일 모델명 수정은 새 항목 대신 병합
+        if (!manual && top.title === title && now - top.updatedAt < 3 * 60 * 1000) {
+          top.code = code;
+          top.thumbnail = thumbnail || top.thumbnail;
+          top.sizeText = lastMeta.sizeText;
+          top.tris = lastMeta.tris;
+          top.updatedAt = now;
+          await putHistoryItemDB(top);
+          updateHistoryBadges();
+          return;
+        }
+      }
+
+      const newItem = {
+        id: `rig_${now}_${Math.random().toString(36).slice(2, 6)}`,
+        title,
+        fnName: lastMeta.fnName,
+        sizeText: lastMeta.sizeText,
+        tris: lastMeta.tris,
+        thumbnail,
+        code,
+        updatedAt: now,
+      };
+
+      cachedHistoryList.unshift(newItem);
+      await putHistoryItemDB(newItem);
+
+      if (cachedHistoryList.length > MAX_HISTORY_ITEMS) {
+        const removed = cachedHistoryList.splice(MAX_HISTORY_ITEMS);
+        await deleteHistoryIdsDB(removed.map((it) => it.id));
+      }
+
+      updateHistoryBadges();
+      if (manual) showToast(`스냅샷 저장 완료 (${cachedHistoryList.length}/${MAX_HISTORY_ITEMS})`);
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatTime(ts) {
+      const d = new Date(ts);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function renderHistoryModalList() {
+      const containerEl = document.getElementById('history-list-container');
+      const query = (document.getElementById('history-search').value || '').trim().toLowerCase();
+      const filtered = query
+        ? cachedHistoryList.filter((it) =>
+            (it.title || '').toLowerCase().includes(query) ||
+            (it.fnName || '').toLowerCase().includes(query) ||
+            (it.code || '').toLowerCase().includes(query)
+          )
+        : cachedHistoryList;
+
+      if (filtered.length === 0) {
+        containerEl.innerHTML = `
+          <div class="col-span-full py-16 text-center text-xs text-app-muted">
+            ${cachedHistoryList.length === 0
+              ? '아직 저장된 모델 이력이 없습니다.<br/>코드를 수정·실행하거나 상단 [💾 저장] 버튼을 누르면 썸네일과 함께 자동 보관됩니다.'
+              : '검색 조건과 일치하는 모델 이력이 없습니다.'}
+          </div>`;
+        return;
+      }
+
+      containerEl.innerHTML = filtered.map((it) => `
+        <div data-id="${escapeHtml(it.id)}"
+             class="history-card group rounded-lg bg-app-main border border-app-border hover:border-cyan-500/60 overflow-hidden cursor-pointer transition-all flex flex-col">
+          <div class="relative aspect-[16/10] bg-[#14171f] overflow-hidden border-b border-app-border">
+            ${it.thumbnail
+              ? `<img src="${it.thumbnail}" alt="${escapeHtml(it.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />`
+              : `<div class="w-full h-full flex items-center justify-center text-xs font-mono text-app-muted">No Preview</div>`}
+            <button data-del-id="${escapeHtml(it.id)}" title="이력 삭제"
+                    class="btn-del-history absolute top-1.5 right-1.5 w-6 h-6 rounded bg-black/65 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+          </div>
+          <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
+            <div class="text-xs font-semibold text-white truncate">${escapeHtml(it.title)}</div>
+            <div class="flex items-center justify-between text-[10px] font-mono text-app-muted">
+              <span>${escapeHtml(it.sizeText || '-')}</span>
+              <span>${Number(it.tris || 0).toLocaleString()} tris</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-500">${formatTime(it.updatedAt)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const modalHistory = document.getElementById('modal-history');
+    function openHistoryModal() {
+      renderHistoryModalList();
+      modalHistory.classList.remove('hidden');
+      document.getElementById('history-search').focus();
+    }
+    function closeHistoryModal() {
+      modalHistory.classList.add('hidden');
+    }
+
+    document.getElementById('btn-open-history').addEventListener('click', openHistoryModal);
+    document.getElementById('btn-close-history').addEventListener('click', closeHistoryModal);
+    modalHistory.addEventListener('click', (e) => {
+      if (e.target === modalHistory) closeHistoryModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modalHistory.classList.contains('hidden')) {
+        closeHistoryModal();
+      }
+    });
+    document.getElementById('history-search').addEventListener('input', renderHistoryModalList);
+
+    document.getElementById('btn-save-history').addEventListener('click', () => {
+      executeUserCode(false);
+      saveHistorySnapshot(true);
+    });
+
+    document.getElementById('btn-clear-all-history').addEventListener('click', async () => {
+      if (cachedHistoryList.length === 0) return;
+      cachedHistoryList = [];
+      await clearHistoryDB();
+      updateHistoryBadges();
+      renderHistoryModalList();
+      showToast('모든 모델 이력이 삭제되었습니다');
+    });
+
+    document.getElementById('history-list-container').addEventListener('click', async (e) => {
+      const delBtn = e.target.closest('.btn-del-history');
+      if (delBtn) {
+        e.stopPropagation();
+        const id = delBtn.dataset.delId;
+        cachedHistoryList = cachedHistoryList.filter((it) => it.id !== id);
+        await deleteHistoryIdsDB([id]);
+        updateHistoryBadges();
+        renderHistoryModalList();
+        return;
+      }
+
+      const card = e.target.closest('.history-card');
+      if (card) {
+        const item = cachedHistoryList.find((it) => it.id === card.dataset.id);
+        if (item) {
+          editorEl.value = item.code;
+          localStorage.setItem(STORAGE_KEY, item.code);
+          executeUserCode(true, { recordHistory: false });
+          closeHistoryModal();
+          showToast(`불러옴: ${item.title}`);
+        }
+      }
+    });
+
+    // 초기 실행 & IndexedDB 이력 로드
+    executeUserCode(true);
+    initHistoryStore();
+    animate();
+  </script>
+</body>
+</html>
