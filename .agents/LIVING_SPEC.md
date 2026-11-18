@@ -90,6 +90,16 @@ flowchart TD
 
 ## 4. Changelog
 
+### [2026-11-18] 3D Rig Showcase 모바일 헤더 2단 분리 및 뷰포트 오버레이 겹침 해결
+
+- **요약:** 좁은 모바일 화면에서 상단 헤더·에디터 서브헤더 버튼이 줄바꿈/잘림으로 깨지던 문제와 3D 뷰포트 카메라 바·치수 HUD 겹침을, 헤더 2단 반응형 배치(`Code|3D View` + `#preset-select` 2행 분리) 및 뷰포트 컨트롤 가로 스크롤화로 해결.
+- **주요 변경:**
+  - `3d/index.html`: `<header>` 모바일 2행 분리(`flex-wrap md:flex-nowrap`), 에디터 서브헤더 축약, `#showcase-cam-bar` 및 `#showcase-bottom-dock` 가로 스크롤 처리, `#showcase-metrics-hud` 모바일 `top-12` 배치, `#drive-hud` 상단 컴팩트화.
+
+```diff
+~ 3d/index.html: 모바일 2단 헤더(1행 액션 / 2행 탭+프리셋) 및 뷰포트 HUD 겹침 방지
+```
+
 ### [2026-11-18] 3D Rig Showcase 기본 프리셋에 부가티 미스트랄(`createBugatti3D`) 및 슈퍼카 사운드 연동
 
 - **요약:** `3d/index.html` 프리셋 선택기에 `🏎️ 부가티 미스트랄`(`createBugatti3D`, 크루즈 110 / 부스트 220 km/h)을 추가하고, `3d/drive.js` 사운드 파서가 `슈퍼카(supercar)`를 `sport` 프로파일로 매핑하도록 보완.

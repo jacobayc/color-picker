@@ -103,11 +103,12 @@
 </head>
 <body class="h-full flex flex-col antialiased">
 
-  <!-- 상단 툴바 -->
-  <header class="h-12 shrink-0 border-b border-app-border bg-app-panel flex items-center justify-between px-3 gap-2 z-30">
-    <div class="flex items-center gap-2 min-w-0">
+  <!-- 상단 툴바 (모바일 2단 분리 / 데스크톱 1단 통합) -->
+  <header class="shrink-0 border-b border-app-border bg-app-panel px-2.5 sm:px-3 py-1.5 md:py-0 md:h-12 flex flex-wrap md:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5 z-30">
+    <!-- 좌측: 허브 링크 & 타이틀 -->
+    <div class="order-1 flex items-center gap-1.5 sm:gap-2 min-w-0">
       <a href="../index.html" title="Workspace Hub로 돌아가기"
-         class="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-app-muted hover:text-white hover:bg-slate-800/70 transition-colors shrink-0">
+         class="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-md text-xs text-app-muted hover:text-white hover:bg-slate-800/70 transition-colors shrink-0">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
@@ -116,39 +117,41 @@
 
       <div class="h-4 w-px bg-app-border shrink-0"></div>
 
-      <div class="flex items-center gap-2 min-w-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
         <div class="w-6 h-6 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center shrink-0">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
           </svg>
         </div>
-        <span class="text-xs sm:text-sm font-semibold text-white truncate">3D Rig Showcase</span>
-        <span class="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+        <span class="text-xs sm:text-sm font-semibold text-white whitespace-nowrap">3D Rig<span class="hidden sm:inline"> Showcase</span></span>
+        <span class="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 whitespace-nowrap">
           +Z Front &middot; y=0 Ground
         </span>
       </div>
     </div>
 
-    <!-- 모바일 탭 전환 -->
-    <div class="flex md:hidden items-center bg-app-panelAlt border border-app-border rounded-md p-0.5 text-xs">
-      <button id="btn-mobile-editor" class="px-2.5 py-1 rounded text-white bg-slate-700/80 font-medium">Code</button>
-      <button id="btn-mobile-view" class="px-2.5 py-1 rounded text-app-muted hover:text-white font-medium">3D View</button>
-    </div>
+    <!-- 모바일 전용 2행(Code/3D View + 프리셋 선택) / 데스크톱에서는 우측 프리셋 선택기로 합류 -->
+    <div class="order-3 w-full pt-1.5 border-t border-app-border/60 flex items-center justify-between gap-2 md:order-2 md:w-auto md:pt-0 md:border-t-0 md:ml-auto">
+      <div class="flex md:hidden items-center bg-app-panelAlt border border-app-border rounded-md p-0.5 text-[11px] shrink-0">
+        <button id="btn-mobile-editor" class="px-2.5 py-0.5 rounded text-white bg-slate-700/80 font-medium whitespace-nowrap">Code</button>
+        <button id="btn-mobile-view" class="px-2.5 py-0.5 rounded text-app-muted hover:text-white font-medium whitespace-nowrap">3D View</button>
+      </div>
 
-    <!-- 우측 액션 -->
-    <div class="flex items-center gap-1.5 shrink-0">
       <select id="preset-select" title="샘플 프리셋 불러오기"
-              class="hidden sm:block h-7 px-2 rounded-md bg-app-panelAlt border border-app-border text-xs text-app-text focus:outline-none focus:border-cyan-500/60">
+              class="flex-1 min-w-0 md:flex-initial md:max-w-[220px] h-7 px-2 rounded-md bg-app-panelAlt border border-app-border text-xs text-app-text focus:outline-none focus:border-cyan-500/60">
         <option value="cybertruck">🛻 사이버트럭 (CustomVehicleRig)</option>
         <option value="cultivator">🚜 경운기 (CustomVehicleRig)</option>
         <option value="bugatti">🏎️ 부가티 미스트랄 (CustomVehicleRig)</option>
         <option value="roadster">🏎️ 로우폴리 로드스터 (오픈탑)</option>
         <option value="template">📦 빈 Rig 템플릿</option>
       </select>
+    </div>
 
+    <!-- 우측 액션 -->
+    <div class="order-2 md:order-3 flex items-center gap-1 sm:gap-1.5 shrink-0">
       <button id="btn-open-history" title="저장된 3D 모델 이력 (최대 1,000건)"
-              class="flex items-center gap-1.5 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors">
-        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              class="flex items-center gap-1 h-7 px-2 sm:px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0">
+        <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <span class="hidden sm:inline">이력</span>
@@ -156,33 +159,33 @@
       </button>
 
       <button id="btn-save-history" title="현재 모델 스냅샷 즉시 저장"
-              class="hidden sm:flex items-center gap-1 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-cyan-500/50 text-xs text-app-text hover:text-white transition-colors">
-        <span>💾 저장</span>
+              class="flex items-center gap-1 h-7 px-2 sm:px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-cyan-500/50 text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0">
+        <span>💾</span><span class="hidden sm:inline">저장</span>
       </button>
 
       <button id="btn-copy-spec" title="AI 협업용 CustomVehicleRig 규약 프롬프트 복사"
-              class="hidden xl:flex items-center gap-1 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors">
+              class="hidden xl:flex items-center gap-1 h-7 px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0">
         <span>규약 복사</span>
       </button>
 
       <button id="btn-toggle-editor" title="에디터 접기/펼치기 (Ctrl+B)"
-              class="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-app-muted hover:text-white transition-colors">
+              class="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-app-muted hover:text-white transition-colors shrink-0">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"></path>
         </svg>
       </button>
 
       <button id="btn-run" title="모델 실행 및 렌더링 (Ctrl+Enter)"
-              class="flex items-center gap-1.5 h-7 px-3 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors shadow-sm">
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              class="flex items-center gap-1 h-7 px-2.5 sm:px-3 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors shadow-sm whitespace-nowrap shrink-0">
+        <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path>
         </svg>
         <span>실행</span>
       </button>
 
       <button id="btn-start-drive" title="코드 스펙대로 테스트 세트장에서 직접 시승하기"
-              class="flex items-center gap-1.5 h-7 px-3 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors shadow-sm">
-        <span>🏁 시승하기</span>
+              class="flex items-center gap-1 h-7 px-2.5 sm:px-3 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors shadow-sm whitespace-nowrap shrink-0">
+        <span>🏁</span><span>시승<span class="hidden sm:inline">하기</span></span>
       </button>
     </div>
   </header>
@@ -193,15 +196,15 @@
     <!-- 좌측: 코드 에디터 패널 -->
     <section id="pane-editor" class="flex flex-col bg-app-panelAlt border-r border-app-border min-w-0 w-full md:w-[42%]" style="flex-shrink: 0;">
       <!-- 에디터 서브헤더 -->
-      <div class="h-9 shrink-0 px-3 border-b border-app-border flex items-center justify-between bg-app-panel/60 text-[11px]">
-        <div class="flex items-center gap-2">
-          <span class="font-mono text-cyan-400 font-medium">createXxx3D.ts / .js</span>
-          <span id="detected-fn-badge" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ready</span>
+      <div class="h-9 shrink-0 px-2.5 sm:px-3 border-b border-app-border flex items-center justify-between gap-2 bg-app-panel/60 text-[11px]">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="hidden sm:inline font-mono text-cyan-400 font-medium whitespace-nowrap">createXxx3D.ts</span>
+          <span id="detected-fn-badge" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] truncate max-w-[150px] sm:max-w-none">Ready</span>
         </div>
-        <div class="flex items-center gap-2">
-          <label class="flex items-center gap-1.5 cursor-pointer text-app-muted hover:text-app-text select-none">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap">
+          <label class="flex items-center gap-1 cursor-pointer text-app-muted hover:text-app-text select-none">
             <input id="chk-autorun" type="checkbox" checked class="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-0 w-3 h-3">
-            <span>자동 실행</span>
+            <span>자동<span class="hidden sm:inline"> 실행</span></span>
           </label>
           <button id="btn-copy-code" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">복사</button>
           <button id="btn-clear-code" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-rose-300 transition-colors">비우기</button>
@@ -235,29 +238,29 @@
         <div id="drive-hud" class="hidden absolute inset-0 z-20 pointer-events-none select-none flex flex-col justify-between p-3 sm:p-4">
 
           <!-- 상단 HUD 바 -->
-          <div class="flex flex-wrap items-start justify-between gap-2">
+          <div class="flex items-start justify-between gap-2">
             <!-- 좌측: 복귀 & 트랙 컨트롤 -->
-            <div class="pointer-events-auto flex flex-wrap items-center gap-1.5 p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-xs">
-              <button id="btn-exit-drive" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-rose-600/80 text-white font-medium transition-colors">
-                ← 쇼케이스로 (ESC)
+            <div class="pointer-events-auto flex flex-wrap items-center gap-1 p-1 sm:p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px] sm:text-xs max-w-[calc(100%-116px)] sm:max-w-none">
+              <button id="btn-exit-drive" class="px-2 py-1 rounded bg-slate-800 hover:bg-rose-600/80 text-white font-medium transition-colors whitespace-nowrap">
+                ← <span class="hidden sm:inline">쇼케이스로 (ESC)</span><span class="sm:hidden">복귀</span>
               </button>
-              <span id="drive-track-badge" class="px-2 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-mono text-[11px]">🛣️ 아스팔트</span>
-              <button id="btn-drive-reset" title="차량 위치 원점 초기화 (R)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">🔄 리셋(R)</button>
-              <button id="btn-drive-cam" title="시점 전환 (C)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">📷 체이스(C)</button>
-              <button id="btn-drive-night" title="주간/야간 조명 (L)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 transition-colors">☀️ 주간(L)</button>
-              <button id="btn-drive-mute" title="주행 사운드 음소거" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">🔊</button>
-              <button id="btn-drive-pad-toggle" title="가상 패드 표시 전환" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">📱 패드</button>
+              <span id="drive-track-badge" class="px-1.5 sm:px-2 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-mono text-[10px] sm:text-[11px] whitespace-nowrap">🛣️ 아스팔트</span>
+              <button id="btn-drive-reset" title="차량 위치 원점 초기화 (R)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors whitespace-nowrap">🔄<span class="hidden sm:inline"> 리셋(R)</span></button>
+              <button id="btn-drive-cam" title="시점 전환 (C)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors whitespace-nowrap">📷 체이스(C)</button>
+              <button id="btn-drive-night" title="주간/야간 조명 (L)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 transition-colors whitespace-nowrap">☀️ 주간(L)</button>
+              <button id="btn-drive-mute" title="주행 사운드 음소거" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors whitespace-nowrap">🔊</button>
+              <button id="btn-drive-pad-toggle" title="가상 패드 표시 전환" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors whitespace-nowrap">📱<span class="hidden sm:inline"> 패드</span></button>
             </div>
 
             <!-- 우측: 실시간 속도계 & 스펙 인디케이터 -->
-            <div class="flex flex-col items-end gap-1.5">
-              <div class="px-3.5 py-2 rounded-xl bg-app-panel/90 backdrop-blur-md border border-app-border shadow-xl text-right min-w-[148px]">
-                <div id="drive-vehicle-label" class="text-[11px] text-app-muted font-medium truncate">🛻 사이버트럭</div>
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              <div class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-app-panel/90 backdrop-blur-md border border-app-border shadow-xl text-right min-w-[104px] sm:min-w-[148px]">
+                <div id="drive-vehicle-label" class="text-[10px] sm:text-[11px] text-app-muted font-medium truncate max-w-[100px] sm:max-w-[150px]">🛻 사이버트럭</div>
                 <div class="flex items-baseline justify-end gap-1 mt-0.5">
-                  <span id="drive-speed-num" class="text-3xl font-bold font-mono text-white tracking-tight">0</span>
-                  <span class="text-xs font-mono text-app-muted">km/h</span>
+                  <span id="drive-speed-num" class="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight">0</span>
+                  <span class="text-[10px] sm:text-xs font-mono text-app-muted">km/h</span>
                 </div>
-                <div class="flex items-center justify-end gap-1.5 mt-1 text-[10px] font-mono">
+                <div class="flex items-center justify-end gap-1.5 mt-1 text-[9px] sm:text-[10px] font-mono">
                   <span id="drive-state-pill" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">IDLE</span>
                   <span id="drive-spec-limit" class="text-app-muted">80 / 155</span>
                 </div>
@@ -313,22 +316,22 @@
 
         </div>
 
-        <!-- 상단 좌측: 6방향 + Iso 카메라 프리셋 바 -->
-        <div id="showcase-cam-bar" class="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1 p-1 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg">
-          <button data-view="iso" class="cam-btn px-2 py-1 rounded text-[11px] font-mono font-medium bg-cyan-600/80 text-white transition-colors">Iso</button>
-          <button data-view="front" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Front (+Z)</button>
-          <button data-view="back" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Back (-Z)</button>
-          <button data-view="left" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Left</button>
-          <button data-view="right" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Right</button>
-          <button data-view="top" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Top</button>
-          <button data-view="bottom" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors">Bottom</button>
-          <div class="w-px h-4 bg-app-border mx-0.5"></div>
-          <button id="btn-fit" title="모델 크기에 맞춰 카메라 정렬" class="px-2 py-1 rounded text-[11px] font-mono text-cyan-300 hover:text-white hover:bg-slate-700/70 transition-colors">Fit</button>
+        <!-- 상단 좌측: 6방향 + Iso 카메라 프리셋 바 (모바일 가로 스크롤) -->
+        <div id="showcase-cam-bar" class="absolute top-2 left-2 right-2 md:right-auto md:top-3 md:left-3 z-10 flex flex-nowrap md:flex-wrap items-center gap-1 p-1 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg overflow-x-auto whitespace-nowrap">
+          <button data-view="iso" class="cam-btn px-2 py-1 rounded text-[11px] font-mono font-medium bg-cyan-600/80 text-white transition-colors shrink-0">Iso</button>
+          <button data-view="front" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Front (+Z)</button>
+          <button data-view="back" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Back (-Z)</button>
+          <button data-view="left" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Left</button>
+          <button data-view="right" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Right</button>
+          <button data-view="top" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Top</button>
+          <button data-view="bottom" class="cam-btn px-2 py-1 rounded text-[11px] font-mono text-app-text hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Bottom</button>
+          <div class="w-px h-4 bg-app-border mx-0.5 shrink-0"></div>
+          <button id="btn-fit" title="모델 크기에 맞춰 카메라 정렬" class="px-2 py-1 rounded text-[11px] font-mono text-cyan-300 hover:text-white hover:bg-slate-700/70 transition-colors shrink-0">Fit</button>
         </div>
 
-        <!-- 상단 우측: 모델 치수 & Rig 검증 HUD -->
-        <div id="showcase-metrics-hud" class="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none select-none">
-          <div class="px-2.5 py-1.5 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg text-[11px] font-mono space-y-1">
+        <!-- 상단 우측: 모델 치수 & Rig 검증 HUD (모바일에서는 카메라 바 아래 배치해 겹침 방지) -->
+        <div id="showcase-metrics-hud" class="absolute top-12 right-2 md:top-3 md:right-3 z-10 flex flex-col items-end gap-1.5 pointer-events-none select-none">
+          <div class="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-app-panel/85 backdrop-blur-md border border-app-border shadow-lg text-[10px] sm:text-[11px] font-mono space-y-0.5 sm:space-y-1">
             <div class="flex items-center justify-end gap-2 text-app-text">
               <span class="text-app-muted">Size (W×H×D)</span>
               <span id="hud-size" class="text-white font-semibold">-</span>
@@ -347,21 +350,21 @@
           <div id="hud-rig-badges" class="flex flex-wrap justify-end gap-1"></div>
         </div>
 
-        <!-- 하단 통합 쇼케이스 & Rig 테스트 컨트롤 독 -->
-        <div id="showcase-bottom-dock" class="absolute bottom-3 left-3 right-3 z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 pointer-events-none">
+        <!-- 하단 통합 쇼케이스 & Rig 테스트 컨트롤 독 (모바일 가로 스크롤) -->
+        <div id="showcase-bottom-dock" class="absolute bottom-2 left-2 right-2 md:bottom-3 md:left-3 md:right-3 z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-1.5 sm:gap-2 pointer-events-none">
 
           <!-- 환경 / 뷰포트 옵션 -->
-          <div class="pointer-events-auto flex flex-wrap items-center gap-1 p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px]">
-            <button id="btn-lighting" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-medium transition-colors" title="주간/야간 조명 전환">☀️ 주간</button>
-            <button id="btn-grid" class="px-2 py-1 rounded bg-cyan-600/25 text-cyan-300 border border-cyan-500/30 font-medium transition-colors">Grid +Z</button>
-            <button id="btn-axes" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">Axes</button>
-            <button id="btn-wireframe" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">Wire</button>
-            <button id="btn-turntable" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors">↻ 턴테이블</button>
-            <button id="btn-screenshot" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-colors" title="현재 3D 뷰 PNG 저장">📷 PNG</button>
+          <div class="pointer-events-auto flex flex-nowrap md:flex-wrap items-center gap-1 p-1 sm:p-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px] overflow-x-auto whitespace-nowrap">
+            <button id="btn-lighting" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-medium transition-colors shrink-0" title="주간/야간 조명 전환">☀️ 주간</button>
+            <button id="btn-grid" class="px-2 py-1 rounded bg-cyan-600/25 text-cyan-300 border border-cyan-500/30 font-medium transition-colors shrink-0">Grid +Z</button>
+            <button id="btn-axes" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors shrink-0">Axes</button>
+            <button id="btn-wireframe" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors shrink-0">Wire</button>
+            <button id="btn-turntable" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors shrink-0">↻ 턴테이블</button>
+            <button id="btn-screenshot" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-colors shrink-0" title="현재 3D 뷰 PNG 저장">📷 PNG</button>
           </div>
 
           <!-- CustomVehicleRig 실시간 동작 테스트 바 -->
-          <div class="pointer-events-auto flex flex-wrap items-center gap-2.5 px-3 py-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px]">
+          <div class="pointer-events-auto flex flex-nowrap md:flex-wrap items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-app-panel/88 backdrop-blur-md border border-app-border shadow-lg text-[11px] overflow-x-auto whitespace-nowrap">
             <span class="font-mono text-[10px] uppercase tracking-wider text-app-muted hidden sm:inline">Rig Test</span>
 
             <button id="btn-rig-spin" class="px-2 py-1 rounded bg-slate-800 text-app-muted hover:text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
@@ -2424,7 +2427,8 @@ export function createCustomVehicle3D(): CustomVehicleRig {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x161a23);
 
-    const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.05, 500);
+    const initAspect = (container.clientWidth > 0 && container.clientHeight > 0) ? (container.clientWidth / container.clientHeight) : 1.6;
+    const camera = new THREE.PerspectiveCamera(42, initAspect, 0.05, 500);
     camera.position.set(5.2, 2.8, 5.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
