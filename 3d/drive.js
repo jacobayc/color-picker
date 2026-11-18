@@ -36,7 +36,8 @@
     if (soundMatch) {
       const raw = soundMatch[1].toLowerCase();
       if (raw.includes('ev') || raw.includes('전기')) spec.soundType = 'ev';
-      else if (raw.includes('sport') || raw.includes('스포츠')) spec.soundType = 'sport';
+      else if (raw.includes('sport') || raw.includes('스포츠') || raw.includes('super') || raw.includes('슈퍼')) spec.soundType = 'sport';
+      else if (raw.includes('diesel') || raw.includes('디젤') || raw.includes('경운기')) spec.soundType = 'diesel';
       else spec.soundType = 'car';
     }
 
@@ -98,6 +99,12 @@
         this.osc1.frequency.value = 72;
         this.osc2.frequency.value = 36;
         this.filter.frequency.value = 260;
+      } else if (this.soundType === 'diesel') {
+        this.osc1.type = 'sawtooth';
+        this.osc2.type = 'triangle';
+        this.osc1.frequency.value = 32;
+        this.osc2.frequency.value = 16;
+        this.filter.frequency.value = 180;
       } else {
         this.osc1.type = 'triangle';
         this.osc2.type = 'sawtooth';
@@ -142,6 +149,13 @@
         this.osc2.frequency.setTargetAtTime(base * 0.5, t, 0.05);
         this.filter.frequency.setTargetAtTime(240 + r * 720, t, 0.06);
         const vol = 0.02 + Math.min(0.065, r * 0.055);
+        this.engineGain.gain.setTargetAtTime(vol, t, 0.08);
+      } else if (this.soundType === 'diesel') {
+        const base = 30 + r * 62 + (isBoosting ? 14 : 0);
+        this.osc1.frequency.setTargetAtTime(base, t, 0.07);
+        this.osc2.frequency.setTargetAtTime(base * 0.5, t, 0.07);
+        this.filter.frequency.setTargetAtTime(160 + r * 280, t, 0.08);
+        const vol = 0.026 + Math.min(0.06, r * 0.05);
         this.engineGain.gain.setTargetAtTime(vol, t, 0.08);
       } else {
         const base = 58 + r * 130 + (isBoosting ? 24 : 0);

@@ -90,6 +90,30 @@ flowchart TD
 
 ## 4. Changelog
 
+### [2026-11-18] 3D Rig Showcase 기본 프리셋에 부가티 미스트랄(`createBugatti3D`) 및 슈퍼카 사운드 연동
+
+- **요약:** `3d/index.html` 프리셋 선택기에 `🏎️ 부가티 미스트랄`(`createBugatti3D`, 크루즈 110 / 부스트 220 km/h)을 추가하고, `3d/drive.js` 사운드 파서가 `슈퍼카(supercar)`를 `sport` 프로파일로 매핑하도록 보완.
+- **주요 변경:**
+  - `3d/index.html`: `#preset-select` 및 `PRESETS.bugatti` 추가.
+  - `3d/drive.js`: `parseVehicleSpec`에서 `super`/`슈퍼` 키워드 → `sport` 사운드 매핑 추가.
+
+```diff
++ 3d/index.html: PRESETS.bugatti (🏎️ 부가티 미스트랄) 프리셋 등록
+~ 3d/drive.js: supercar/슈퍼카 사운드 매핑 추가
+```
+
+### [2026-11-18] 3D Rig Showcase 기본 프리셋에 경운기(`createCultivator3D`) 및 디젤 사운드 추가
+
+- **요약:** `3d/index.html` 프리셋 선택기에 `🚜 경운기`(`createCultivator3D`, 크루즈 28 / 부스트 48 km/h)를 추가하고, `3d/drive.js`에 `diesel`(디젤 엔진) 주행음 합성 프로파일을 연동.
+- **주요 변경:**
+  - `3d/index.html`: `#preset-select` 및 `PRESETS.cultivator` 추가.
+  - `3d/drive.js`: `parseVehicleSpec` 및 `DriveAudioSynth`에 `diesel` 사운드 지원 추가.
+
+```diff
++ 3d/index.html: PRESETS.cultivator (🚜 경운기) 프리셋 등록
++ 3d/drive.js: diesel 사운드 파싱 및 저음 단기통 디젤 합성음 추가
+```
+
 ### [2026-11-18] 3D Rig Showcase 시승 테스트 세트장(`🏁 시승하기`) 구축
 
 - **요약:** `3d/drive.js`를 추가해 렌더링된 3D 모델과 주석 스펙(속도·사운드) 그대로 아스팔트/오프로드 세트장에서 직접 주행·점프·경적 테스트를 수행할 수 있도록 확장.
