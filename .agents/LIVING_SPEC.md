@@ -90,6 +90,16 @@ flowchart TD
 
 ## 4. Changelog
 
+### [2026-11-18] 3D Rig Showcase 기본 프리셋에 체코 프라하 트램(`createCzechTram3D`) 추가
+
+- **요약:** `3d/index.html` 프리셋 선택기(`#preset-select`)에 `🚋 체코 프라하 트램 (Tatra T3)`(`createCzechTram3D`, 크루즈 55 / 부스트 85 km/h, `ev` 사운드) 샘플 모델을 추가.
+- **주요 변경:**
+  - `3d/index.html`: `#preset-select` 및 `PRESETS.tram` 추가.
+
+```diff
++ 3d/index.html: PRESETS.tram (🚋 체코 프라하 트램 Tatra T3) 프리셋 등록
+```
+
 ### [2026-11-18] 3D Rig Showcase 모바일 헤더 2단 분리 및 뷰포트 오버레이 겹침 해결
 
 - **요약:** 좁은 모바일 화면에서 상단 헤더·에디터 서브헤더 버튼이 줄바꿈/잘림으로 깨지던 문제와 3D 뷰포트 카메라 바·치수 HUD 겹침을, 헤더 2단 반응형 배치(`Code|3D View` + `#preset-select` 2행 분리) 및 뷰포트 컨트롤 가로 스크롤화로 해결.

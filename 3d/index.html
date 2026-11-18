@@ -142,6 +142,7 @@
         <option value="cybertruck">🛻 사이버트럭 (CustomVehicleRig)</option>
         <option value="cultivator">🚜 경운기 (CustomVehicleRig)</option>
         <option value="bugatti">🏎️ 부가티 미스트랄 (CustomVehicleRig)</option>
+        <option value="tram">🚋 체코 프라하 트램 (Tatra T3)</option>
         <option value="roadster">🏎️ 로우폴리 로드스터 (오픈탑)</option>
         <option value="template">📦 빈 Rig 템플릿</option>
       </select>
@@ -2015,6 +2016,403 @@ export function createBugatti3D(): CustomVehicleRig {
         wheelSpin.add(spoke);
       }
     }
+
+    steerPivot.add(wheelSpin);
+    group.add(steerPivot);
+    wheels.push(wheelSpin);
+    if (pos.isFront) frontSteerPivots.push(steerPivot);
+  }
+
+  return { group, wheels, frontSteerPivots, headlightMat, taillightMat };
+}`,
+
+      tram: `import * as THREE from 'three';
+
+// - 이름/이모지: 체코 프라하 트램 (Tatra T3) / 🚋
+// - 좌석/지붕: 다인승 노면전차 / 지붕 있음(hideAvatarInside: true)
+// - 속도(크루즈/부스트): 55 / 85 km/h
+// - 사운드: 전기차(ev)
+// - 스폰 위치: 도로 중앙
+export function createCzechTram3D() {
+  const group = new THREE.Group();
+
+  // 1. 재질 설정 (유리 투명도 추가 및 인테리어 재질 추가)
+  const creamMat = new THREE.MeshStandardMaterial({
+    color: 0xebe0c5, metalness: 0.18, roughness: 0.34, side: THREE.DoubleSide
+  });
+  const redMat = new THREE.MeshStandardMaterial({
+    color: 0xc22b23, metalness: 0.22, roughness: 0.32, side: THREE.DoubleSide
+  });
+  const bumperMat = new THREE.MeshStandardMaterial({
+    color: 0x2a211d, metalness: 0.15, roughness: 0.78,
+  });
+  const darkMetalMat = new THREE.MeshStandardMaterial({
+    color: 0x1c1e22, metalness: 0.5, roughness: 0.6,
+  });
+  const rubberMat = new THREE.MeshStandardMaterial({
+    color: 0x111111, metalness: 0.1, roughness: 0.9,
+  });
+  const pantoYellowMat = new THREE.MeshStandardMaterial({
+    color: 0xc99a1e, metalness: 0.45, roughness: 0.35,
+  });
+  // 유리 투명도 적용 (내부가 보이도록 설정)
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x19232e, emissive: 0x091018, emissiveIntensity: 0.2,
+    metalness: 0.4, roughness: 0.1, transparent: true, opacity: 0.4, side: THREE.DoubleSide
+  });
+  const chromeMat = new THREE.MeshStandardMaterial({
+    color: 0xdce2e8, metalness: 0.85, roughness: 0.18,
+  });
+  const amberMat = new THREE.MeshStandardMaterial({
+    color: 0xff9d00, emissive: 0xff7b00, emissiveIntensity: 1.4,
+  });
+  const routeSignMat = new THREE.MeshStandardMaterial({
+    color: 0x221c08, emissive: 0xe6c832, emissiveIntensity: 1.15, roughness: 0.4,
+  });
+  const headlightMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, emissive: 0xfff5d6, emissiveIntensity: 1.8,
+  });
+  const taillightMat = new THREE.MeshStandardMaterial({
+    color: 0x660000, emissive: 0xff1e1e, emissiveIntensity: 1.4,
+  });
+  // 인테리어용 재질
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x333538, metalness: 0.2, roughness: 0.8
+  });
+  const seatMat = new THREE.MeshStandardMaterial({
+    color: 0x8b1c1c, metalness: 0.1, roughness: 0.7
+  });
+  const poleMat = new THREE.MeshStandardMaterial({
+    color: 0xdcba00, metalness: 0.3, roughness: 0.4
+  });
+
+  // 2. 타트라 T3 둥근 모서리(Superellipse) 횡단면 유틸리티
+  const halfW = 0.88;
+  const halfL = 2.68;
+  const cornerPower = 5.2;
+
+  const getPerimeterPoint = (theta, scaleX = 1, scaleZ = 1) => {
+    const c = Math.cos(theta);
+    const s = Math.sin(theta);
+    const exp = 2 / cornerPower;
+    const rx = Math.sign(c) * Math.pow(Math.abs(c), exp) * halfW * scaleX;
+    const rz = Math.sign(s) * Math.pow(Math.abs(s), exp) * halfL * scaleZ;
+    return { x: rx, z: rz };
+  };
+
+  const buildLoftedBand = (y0, y1, sx0, sz0, sx1, sz1, material, segs = 72) => {
+    const positions = [];
+    const indices = [];
+    for (let i = 0; i <= segs; i++) {
+      const theta = (i / segs) * Math.PI * 2;
+      const p0 = getPerimeterPoint(theta, sx0, sz0);
+      const p1 = getPerimeterPoint(theta, sx1, sz1);
+      positions.push(p0.x, y0, p0.z);
+      positions.push(p1.x, y1, p1.z);
+    }
+    for (let i = 0; i < segs; i++) {
+      const a = i * 2;
+      const b = a + 1;
+      const c = a + 2;
+      const d = a + 3;
+      indices.push(a, c, b);
+      indices.push(b, c, d);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  };
+
+  // 3. 차체 외피 (투명 유리 포함)
+  group.add(buildLoftedBand(0.22, 0.46, 0.985, 0.992, 1.0, 1.0, creamMat));
+  group.add(buildLoftedBand(0.46, 1.08, 1.0, 1.0, 1.0, 1.0, redMat));
+  // 앞유리 가장자리 블랙 고무 실링 처리
+  group.add(buildLoftedBand(1.08, 1.10, 1.0, 1.0, 0.98, 0.99, rubberMat)); 
+  group.add(buildLoftedBand(1.10, 1.74, 0.98, 0.99, 0.97, 0.98, glassMat));
+  group.add(buildLoftedBand(1.74, 1.76, 0.97, 0.98, 0.99, 0.994, rubberMat));
+  group.add(buildLoftedBand(1.76, 1.86, 0.99, 0.994, 0.965, 0.982, creamMat));
+
+  const roofSteps = 6;
+  for (let r = 0; r < roofSteps; r++) {
+    const t0 = r / roofSteps;
+    const t1 = (r + 1) / roofSteps;
+    const y0 = 1.86 + Math.sin(t0 * Math.PI * 0.5) * 0.16;
+    const y1 = 1.86 + Math.sin(t1 * Math.PI * 0.5) * 0.16;
+    const s0 = 0.965 * (1 - t0 * 0.14);
+    const sz0 = 0.982 * (1 - t0 * 0.06);
+    const s1 = 0.965 * (1 - t1 * 0.14);
+    const sz1 = 0.982 * (1 - t1 * 0.06);
+    group.add(buildLoftedBand(y0, y1, s0, sz0, s1, sz1, creamMat));
+  }
+  const roofTopCap = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.62, 0.02, halfL * 1.82), creamMat);
+  roofTopCap.position.set(0, 2.015, 0);
+  group.add(roofTopCap);
+
+  // 4. 내부 인테리어 (텅 빈 느낌을 없애는 핵심 디테일)
+  const interiorGroup = new THREE.Group();
+  group.add(interiorGroup);
+
+  // 실내 바닥판
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.9, 0.02, halfL * 1.95), floorMat);
+  floor.position.set(0, 0.46, 0);
+  interiorGroup.add(floor);
+
+  // 운전석 격벽 (캐빈 분리대)
+  const cabinWall = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.9, 1.25, 0.04), creamMat);
+  cabinWall.position.set(0, 1.1, halfL * 0.72);
+  interiorGroup.add(cabinWall);
+
+  // 운전대 대시보드 및 의자
+  const dashboard = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.5, 0.4, 0.3), darkMetalMat);
+  dashboard.position.set(0, 0.8, halfL * 0.88);
+  interiorGroup.add(dashboard);
+  
+  const driverSeat = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.3), darkMetalMat);
+  driverSeat.position.set(0, 0.7, halfL * 0.78);
+  interiorGroup.add(driverSeat);
+
+  // 승객용 버킷 시트 & 노란색 수직 손잡이 봉(Stanchion)
+  const seatZPositions = [1.2, 0.6, 0.0, -0.6, -1.2, -1.8];
+  for (const sz of seatZPositions) {
+    for (const side of [-1, 1]) {
+      // 문이 있는 우측(-X)의 특정 위치는 의자 생략
+      if (side === -1 && (sz === 1.2 || sz === -1.2)) continue;
+
+      // 레드 버킷 시트
+      const seatBottom = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.05, 0.35), seatMat);
+      seatBottom.position.set(side * 0.55, 0.8, sz);
+      interiorGroup.add(seatBottom);
+
+      const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 0.05), seatMat);
+      seatBack.position.set(side * 0.55, 0.98, sz - 0.15);
+      seatBack.rotation.x = -0.15;
+      interiorGroup.add(seatBack);
+
+      // 의자 옆 노란색 안전 봉
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.3, 8), poleMat);
+      pole.position.set(side * 0.32, 1.15, sz + 0.1);
+      interiorGroup.add(pole);
+    }
+  }
+
+  // 5. 창문 필러, 고무 패킹 & 폴딩 도어
+  // 전면 앞유리 중앙 분할 기둥 (고무 실링 포함)
+  const frontCenterPillar = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.65, 0.04), creamMat);
+  frontCenterPillar.position.set(0, 1.40, halfL * 0.986);
+  frontCenterPillar.rotation.x = -0.05;
+  group.add(frontCenterPillar);
+
+  const frontPillarRubber = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.65, 0.03), rubberMat);
+  frontPillarRubber.position.set(0, 1.40, halfL * 0.986);
+  frontPillarRubber.rotation.x = -0.05;
+  group.add(frontPillarRubber);
+
+  for (const wx of [-0.26, 0.22]) {
+    const wiperArm = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.44, 0.018), darkMetalMat);
+    wiperArm.position.set(wx, 1.33, halfL * 0.995);
+    wiperArm.rotation.z = -0.14;
+    wiperArm.rotation.x = -0.05;
+    group.add(wiperArm);
+    
+    // 와이퍼 블레이드 디테일
+    const wiperBlade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.35, 0.01), rubberMat);
+    wiperBlade.position.set(wx - 0.04, 1.4, halfL * 0.998);
+    wiperBlade.rotation.z = -0.14;
+    wiperBlade.rotation.x = -0.05;
+    group.add(wiperBlade);
+  }
+
+  const rearCenterPillar = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.65, 0.04), creamMat);
+  rearCenterPillar.position.set(0, 1.40, -halfL * 0.986);
+  group.add(rearCenterPillar);
+
+  const pillarZPositions = [1.88, 1.12, 0.36, -0.40, -1.16, -1.92];
+  for (const side of [-1, 1]) {
+    for (const pz of pillarZPositions) {
+      const sidePillar = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.66, 0.11), creamMat);
+      sidePillar.position.set(side * (halfW * 0.986), 1.40, pz);
+      sidePillar.rotation.z = side * 0.045;
+      group.add(sidePillar);
+    }
+    const transomBar = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.024, 3.84), chromeMat);
+    transomBar.position.set(side * (halfW * 0.98), 1.56, -0.02);
+    group.add(transomBar);
+  }
+
+  for (const doorZ of [1.50, -1.54]) {
+    const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.46, 0.66), creamMat);
+    doorFrame.position.set(-(halfW * 0.995), 0.98, doorZ);
+    group.add(doorFrame);
+    
+    // 폴딩 도어 힌지 라인 (접히는 선)
+    const doorHinge = new THREE.Mesh(new THREE.BoxGeometry(0.035, 1.44, 0.02), rubberMat);
+    doorHinge.position.set(-(halfW * 0.995), 0.98, doorZ);
+    group.add(doorHinge);
+
+    for (const leaf of [-0.16, 0.16]) {
+      const upperPane = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.56, 0.25), glassMat);
+      upperPane.position.set(-(halfW * 0.996), 1.38, doorZ + leaf);
+      group.add(upperPane);
+      const lowerPane = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.42, 0.25), glassMat);
+      lowerPane.position.set(-(halfW * 0.996), 0.74, doorZ + leaf);
+      group.add(lowerPane);
+    }
+  }
+
+  // 6. 전면부 기계적 디테일 (행선판, 헤드라이트, 샤르펜베르크 커플러)
+  const destHousing = new THREE.Mesh(new THREE.BoxGeometry(1.06, 0.21, 0.14), darkMetalMat);
+  destHousing.position.set(0, 1.81, halfL * 0.965);
+  destHousing.rotation.x = -0.14;
+  group.add(destHousing);
+
+  const destScreen = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.14, 0.02), routeSignMat);
+  destScreen.position.set(0, 1.81, halfL * 0.992);
+  destScreen.rotation.x = -0.14;
+  group.add(destScreen);
+
+  for (const side of [-1, 1]) {
+    const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.045, 24), chromeMat);
+    bezel.rotation.x = Math.PI / 2;
+    bezel.position.set(side * 0.45, 0.68, halfL * 0.996);
+    group.add(bezel);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.078, 0.05, 24), headlightMat);
+    lens.rotation.x = Math.PI / 2;
+    lens.position.set(side * 0.45, 0.68, halfL * 0.998);
+    group.add(lens);
+    const cornerTurn = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.055, 0.045), amberMat);
+    cornerTurn.position.set(side * 0.75, 0.74, halfL * 0.935);
+    group.add(cornerTurn);
+    const cornerWhite = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.055, 0.045), chromeMat);
+    cornerWhite.position.set(side * 0.75, 0.67, halfL * 0.935);
+    group.add(cornerWhite);
+  }
+
+  const fleetPlate = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.065, 0.02), routeSignMat);
+  fleetPlate.position.set(0, 0.66, halfL * 1.001);
+  group.add(fleetPlate);
+
+  const frontBumper = buildLoftedBand(0.43, 0.49, 1.015, 1.014, 1.015, 1.014, bumperMat);
+  group.add(frontBumper);
+
+  // 범퍼 하단 정비용 스텝(발판) 디테일
+  const bumperStep = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.08), darkMetalMat);
+  bumperStep.position.set(0, 0.42, halfL * 1.015);
+  group.add(bumperStep);
+
+  // 샤르펜베르크(Scharfenberg) 커플러 고도화
+  const couplerRecess = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.22, 0.14), darkMetalMat);
+  couplerRecess.position.set(0, 0.31, halfL * 0.985);
+  group.add(couplerRecess);
+
+  const couplerArm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.35), darkMetalMat);
+  couplerArm.position.set(0, 0.29, halfL * 1.02);
+  group.add(couplerArm);
+  
+  const couplerHead = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.1), chromeMat);
+  couplerHead.position.set(0, 0.29, halfL * 1.02 + 0.18);
+  group.add(couplerHead);
+
+  const couplerPin = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 12), darkMetalMat);
+  couplerPin.rotation.x = Math.PI / 2;
+  couplerPin.position.set(0.05, 0.29, halfL * 1.02 + 0.24);
+  group.add(couplerPin);
+
+  for (const side of [-1, 1]) {
+    const tailLamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.03), taillightMat);
+    tailLamp.position.set(side * 0.56, 0.68, -halfL * 0.996);
+    group.add(tailLamp);
+  }
+
+  // 7. 지붕 저항기 박스, 케이블 & 다이아몬드 팬터그래프
+  const roofBox = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.16, 0.64), darkMetalMat);
+  roofBox.position.set(0, 2.08, 1.36);
+  roofBox.castShadow = true;
+  group.add(roofBox);
+  
+  // 지붕 케이블 라인
+  const roofCable = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.0, 8), rubberMat);
+  roofCable.rotation.x = Math.PI / 2;
+  roofCable.position.set(0, 2.04, 0.9);
+  group.add(roofCable);
+
+  const pantoGroup = new THREE.Group();
+  pantoGroup.position.set(0, 2.02, 0.52);
+  group.add(pantoGroup);
+
+  const pantoBase = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.05, 0.62), pantoYellowMat);
+  pantoBase.position.set(0, 0.04, 0);
+  pantoGroup.add(pantoBase);
+
+  for (const side of [-1, 1]) {
+    for (const dir of [-1, 1]) {
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.44, 10), pantoYellowMat);
+      lowerArm.position.set(side * 0.24, 0.22, dir * 0.16);
+      lowerArm.rotation.x = dir * 0.62;
+      pantoGroup.add(lowerArm);
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.44, 10), pantoYellowMat);
+      upperArm.position.set(side * 0.20, 0.50, dir * 0.16);
+      upperArm.rotation.x = dir * -0.62;
+      pantoGroup.add(upperArm);
+    }
+  }
+  const collectorBow = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.025, 0.14), chromeMat);
+  collectorBow.position.set(0, 0.66, 0);
+  pantoGroup.add(collectorBow);
+
+  // 8. 하부 대차(Bogie) 기계식 디테일 추가
+  const wheelRadius = 0.26;
+  const wheelGeo = new THREE.CylinderGeometry(wheelRadius, wheelRadius, 0.09, 28);
+  wheelGeo.rotateZ(Math.PI / 2);
+  const hubGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.10, 20);
+  hubGeo.rotateZ(Math.PI / 2);
+
+  const wheels = [];
+  const frontSteerPivots = [];
+  const wheelPositions = [
+    { x: -0.66, z: 1.48, isFront: true },
+    { x: 0.66, z: 1.48, isFront: true },
+    { x: -0.66, z: -1.48, isFront: false },
+    { x: 0.66, z: -1.48, isFront: false },
+  ];
+
+  // 디테일한 대차(Bogie) 프레임 및 서스펜션
+  for (const bz of [1.48, -1.48]) {
+    // 메인 중앙 프레임
+    const bogieCenter = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.12, 0.6), darkMetalMat);
+    bogieCenter.position.set(0, 0.26, bz);
+    group.add(bogieCenter);
+    
+    // 좌우 측면 H-프레임 & 코일 스프링
+    for (const side of [-1, 1]) {
+      const sideFrame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 1.4), darkMetalMat);
+      sideFrame.position.set(side * 0.75, 0.26, bz);
+      group.add(sideFrame);
+      
+      const trackBrake = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.7), chromeMat);
+      trackBrake.position.set(side * 0.75, 0.08, bz);
+      group.add(trackBrake);
+
+      for (const springZ of [-0.4, 0.4]) {
+        const spring = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.2, 12), rubberMat);
+        spring.position.set(side * 0.75, 0.35, bz + springZ);
+        group.add(spring);
+      }
+    }
+  }
+
+  for (const pos of wheelPositions) {
+    const steerPivot = new THREE.Group();
+    steerPivot.position.set(pos.x, wheelRadius, pos.z);
+
+    const wheelSpin = new THREE.Group();
+    const steelWheel = new THREE.Mesh(wheelGeo, darkMetalMat);
+    const wheelCenter = new THREE.Mesh(hubGeo, chromeMat);
+    wheelSpin.add(steelWheel, wheelCenter);
 
     steerPivot.add(wheelSpin);
     group.add(steerPivot);
