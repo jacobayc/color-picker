@@ -89,6 +89,16 @@ flowchart TD
 
 ## 4. Changelog
 
+### [2026-11-18] 3D Rig Showcase 기본 사이버트럭 프리셋 고도화
+
+- **요약:** `3d/index.html`의 초기 하드코딩 프리셋(`PRESETS.cybertruck`)을 28-step 곡면 라운드 노즈·일체형 DRL·파노라믹 루프 글래스·적재함 베드·도어 심·삼각 사이드 미러·7스포크 에어로 휠 커버 버전으로 교체.
+- **주요 변경:**
+  - `3d/index.html`: `PRESETS.cybertruck` 업데이트 (`getFrontBowOffset`, `steps: 28` 곡면 보정, 통유리/천장/후면/2분할 측면 유리, 7스포크 윙 커버).
+
+```diff
+~ 3d/index.html: PRESETS.cybertruck 고도화 모델로 교체
+```
+
 ### [2026-11-18] 3D Rig Showcase IndexedDB 1,000건 히스토리 및 썸네일 미리보기 추가
 
 - **요약:** `RigShowcaseDB` IndexedDB에 최대 1,000건의 3D 모델 코드와 `240×150` WebGL 캔버스 썸네일·치수·폴리곤 수를 증분 저장(`put`/`delete`)하고, 검색 가능한 카드 모달에서 이전 모델을 즉시 복원할 수 있도록 확장.

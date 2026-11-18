@@ -345,22 +345,39 @@ export interface CustomVehicleRig {
 export function createCybertruck3D(): CustomVehicleRig {
   const group = new THREE.Group();
 
-  // 1. Exoskeleton 재질 (무광 스테인리스 + 다크 트림 + 선팅 글래스)
+  // 1. 재질 설정 (곡면이 매끄럽게 보이도록 flatShading 제거 + 전 방향 색상 균일 글래스)
   const steelMat = new THREE.MeshStandardMaterial({
     color: 0xb8bec4,
-    metalness: 0.78,
-    roughness: 0.28,
-    flatShading: true,
+    metalness: 0.72,
+    roughness: 0.30,
   });
   const trimMat = new THREE.MeshStandardMaterial({
     color: 0x1f2226,
     metalness: 0.15,
     roughness: 0.85,
   });
+  const bedMat = new THREE.MeshStandardMaterial({
+    color: 0x16181c,
+    metalness: 0.1,
+    roughness: 0.92,
+  });
+  const tireMat = new THREE.MeshStandardMaterial({
+    color: 0x18191b,
+    metalness: 0.05,
+    roughness: 0.9,
+  });
+  // 앞유리·천장유리·뒷유리·옆유리 모두 각도에 상관없이 동일한 톤으로 보이도록 설정
   const glassMat = new THREE.MeshStandardMaterial({
-    color: 0x0c1118,
-    metalness: 0.9,
-    roughness: 0.1,
+    color: 0x1b2430,
+    emissive: 0x0a1017,
+    emissiveIntensity: 0.55,
+    metalness: 0.25,
+    roughness: 0.22,
+  });
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xd8dde3,
+    metalness: 0.2,
+    roughness: 0.5,
   });
   const headlightMat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
@@ -373,152 +390,382 @@ export function createCybertruck3D(): CustomVehicleRig {
     emissiveIntensity: 1.1,
   });
 
-  // 2. 측면 쐐기 단면 -> 폭(1.76m) Extrude (+Z 전방, y=0 지면)
-  const width = 1.76;
+  const width = 1.96;
+  const halfW = width / 2;
+
+  // 전면부(차체·범퍼·라이트·유리)가 모두 공유하는 매끄러운 라운드 곡률 함수
+  const getFrontBowOffset = (x: number): number => {
+    const nx = Math.min(1, Math.abs(x) / halfW);
+    return (1 - Math.cos(nx * Math.PI * 0.5)) * 0.38;
+  };
+
+  // 2. 다중 세그먼트(steps: 28) 기반 둥근 곡면 노즈 바디
   const bodyShape = new THREE.Shape();
-  bodyShape.moveTo(2.35, 0.38);
-  bodyShape.lineTo(2.40, 0.78);
-  bodyShape.lineTo(1.55, 0.98);
-  bodyShape.lineTo(0.15, 1.56);
-  bodyShape.lineTo(-2.30, 1.15);
-  bodyShape.lineTo(-2.38, 0.85);
-  bodyShape.lineTo(-2.30, 0.38);
+  bodyShape.moveTo(2.40, 0.40);  // 전면 하단
+  bodyShape.lineTo(2.46, 0.80);  // 전면 노즈 끝
+  bodyShape.lineTo(2.26, 0.89);  // 전면 통유리 하단 시작점
+  bodyShape.lineTo(0.16, 1.60);  // 루프 정점
+  bodyShape.lineTo(-2.32, 1.16); // 테일게이트 상단
+  bodyShape.lineTo(-2.38, 0.86); // 후면 꺾임
+  bodyShape.lineTo(-2.30, 0.40); // 후면 하단
   bodyShape.closePath();
 
   const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, {
     depth: width,
+    steps: 28, // 좌우 폭 방향을 28칸으로 쪼개어 곡선이 부드럽게 이어지도록 함
     bevelEnabled: false,
   });
-  bodyGeo.translate(0, 0, -width / 2);
+  bodyGeo.translate(0, 0, -halfW);
   bodyGeo.rotateY(-Math.PI / 2);
+
+  const posAttr = bodyGeo.attributes.position;
+  for (let i = 0; i < posAttr.count; i++) {
+    let x = posAttr.getX(i);
+    const y = posAttr.getY(i);
+    let z = posAttr.getZ(i);
+    const nx = Math.min(1, Math.abs(x) / halfW);
+
+    // 1) 전면부 매끄러운 라운드 곡률 & 펜더 방향 자연스러운 테이퍼링
+    if (z > 0.8) {
+      const fFactor = Math.min(1, (z - 0.8) / 1.66);
+      const smoothF = fFactor * fFactor * (3 - 2 * fFactor);
+      z -= smoothF * getFrontBowOffset(x);
+      x *= 1 - smoothF * Math.pow(nx, 2.2) * 0.065;
+    }
+
+    // 2) 측면 볼륨감(배럴 곡면) + 상단 캐빈 텀블홈 기울기
+    if (y > 0.96) {
+      const hFactor = Math.min(1, (y - 0.96) / 0.64);
+      x *= 1 - hFactor * 0.08;
+    }
+
+    posAttr.setXYZ(i, x, y, z);
+  }
+  bodyGeo.computeVertexNormals();
 
   const bodyMesh = new THREE.Mesh(bodyGeo, steelMat);
   bodyMesh.castShadow = true;
   bodyMesh.receiveShadow = true;
   group.add(bodyMesh);
 
-  // 3. 하부 로커 패널 & 전면 스키드 플레이트
+  // 적재함(Vault) 베드 & 좌우 세일 필러 레일
+  const bedFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(width - 0.38, 0.04, 1.38),
+    bedMat
+  );
+  bedFloor.position.set(0, 1.11, -1.52);
+  bedFloor.rotation.x = 0.175;
+  group.add(bedFloor);
+
+  for (const side of [-1, 1]) {
+    const sailRail = new THREE.Mesh(
+      new THREE.BoxGeometry(0.11, 0.07, 1.98),
+      steelMat
+    );
+    sailRail.position.set(side * (halfW - 0.12), 1.28, -1.24);
+    sailRail.rotation.x = 0.175;
+    group.add(sailRail);
+  }
+
+  // 3. 각지지 않고 옆면까지 곡선으로 부드럽게 감싸는 일체형 전면 범퍼 & 하부 섀시
   const lowerChassis = new THREE.Mesh(
-    new THREE.BoxGeometry(width + 0.04, 0.16, 4.66),
+    new THREE.BoxGeometry(width + 0.02, 0.16, 4.46),
     trimMat
   );
-  lowerChassis.position.set(0, 0.36, 0.02);
+  lowerChassis.position.set(0, 0.36, -0.06);
   group.add(lowerChassis);
 
-  const skidPlate = new THREE.Mesh(
-    new THREE.BoxGeometry(1.36, 0.1, 0.28),
-    trimMat
-  );
-  skidPlate.position.set(0, 0.31, 2.31);
-  skidPlate.rotation.x = -0.35;
+  // 전면 범퍼를 32세그먼트 단일 곡면 메쉬로 생성해 옆으로 매끄럽게 감싸도록 처리
+  const frontBumperGeo = new THREE.BoxGeometry(width + 0.05, 0.23, 0.26, 32, 1, 4);
+  const fbPos = frontBumperGeo.attributes.position;
+  for (let i = 0; i < fbPos.count; i++) {
+    let bx = fbPos.getX(i);
+    let bz = fbPos.getZ(i);
+    const nx = Math.min(1, Math.abs(bx) / (halfW + 0.025));
+    bz -= getFrontBowOffset(bx) * 1.05;
+    bx *= 1 - Math.pow(nx, 2.2) * 0.06;
+    fbPos.setXYZ(i, bx, fbPos.getY(i), bz);
+  }
+  frontBumperGeo.computeVertexNormals();
+
+  const frontBumper = new THREE.Mesh(frontBumperGeo, trimMat);
+  frontBumper.position.set(0, 0.44, 2.34);
+  group.add(frontBumper);
+
+  // 번호판도 전면 곡면에 맞춰 살짝 라운드 처리
+  const plateGeo = new THREE.BoxGeometry(0.50, 0.11, 0.03, 12, 1, 1);
+  const pPos = plateGeo.attributes.position;
+  for (let i = 0; i < pPos.count; i++) {
+    const px = pPos.getX(i);
+    pPos.setZ(i, pPos.getZ(i) - getFrontBowOffset(px));
+  }
+  plateGeo.computeVertexNormals();
+  const licensePlate = new THREE.Mesh(plateGeo, plateMat);
+  licensePlate.position.set(0, 0.45, 2.47);
+  group.add(licensePlate);
+
+  // 곡면 스키드 플레이트
+  const skidGeo = new THREE.BoxGeometry(1.46, 0.10, 0.28, 20, 1, 1);
+  const sPos = skidGeo.attributes.position;
+  for (let i = 0; i < sPos.count; i++) {
+    const sx = sPos.getX(i);
+    sPos.setZ(i, sPos.getZ(i) - getFrontBowOffset(sx));
+  }
+  skidGeo.computeVertexNormals();
+  const skidPlate = new THREE.Mesh(skidGeo, trimMat);
+  skidPlate.position.set(0, 0.31, 2.30);
+  skidPlate.rotation.x = -0.32;
   group.add(skidPlate);
 
-  // 4. 전면 풀와이드 LED 라이트 바 & 후면 테일라이트 바
-  const frontLight = new THREE.Mesh(
-    new THREE.BoxGeometry(width - 0.04, 0.045, 0.05),
-    headlightMat
+  const rearBumper = new THREE.Mesh(
+    new THREE.BoxGeometry(width + 0.04, 0.24, 0.24),
+    trimMat
   );
-  frontLight.position.set(0, 0.78, 2.40);
-  group.add(frontLight);
+  rearBumper.position.set(0, 0.45, -2.32);
+  group.add(rearBumper);
+
+  const towHitch = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.12, 0.14),
+    trimMat
+  );
+  towHitch.position.set(0, 0.34, -2.41);
+  group.add(towHitch);
+
+  // 4. 끊김 없이 옆 펜더까지 곡선으로 이어지는 일체형 DRL 라이트 바 & 로우빔
+  const drlGeo = new THREE.BoxGeometry(width - 0.04, 0.048, 0.06, 32, 1, 1);
+  const dPos = drlGeo.attributes.position;
+  for (let i = 0; i < dPos.count; i++) {
+    let dx = dPos.getX(i);
+    let dz = dPos.getZ(i);
+    const nx = Math.min(1, Math.abs(dx) / halfW);
+    dz -= getFrontBowOffset(dx);
+    dx *= 1 - Math.pow(nx, 2.2) * 0.065;
+    dPos.setXYZ(i, dx, dPos.getY(i), dz);
+  }
+  drlGeo.computeVertexNormals();
+
+  const frontLightBar = new THREE.Mesh(drlGeo, headlightMat);
+  frontLightBar.position.set(0, 0.80, 2.45);
+  group.add(frontLightBar);
+
+  // 라이트 바 바로 위를 감싸는 곡면 불노즈 처마(눈썹)
+  const browGeo = new THREE.BoxGeometry(width - 0.02, 0.038, 0.09, 32, 1, 1);
+  const brPos = browGeo.attributes.position;
+  for (let i = 0; i < brPos.count; i++) {
+    let bx = brPos.getX(i);
+    let bz = brPos.getZ(i);
+    const nx = Math.min(1, Math.abs(bx) / halfW);
+    bz -= getFrontBowOffset(bx);
+    bx *= 1 - Math.pow(nx, 2.2) * 0.065;
+    brPos.setXYZ(i, bx, brPos.getY(i), bz);
+  }
+  browGeo.computeVertexNormals();
+  const browLip = new THREE.Mesh(browGeo, steelMat);
+  browLip.position.set(0, 0.835, 2.44);
+  group.add(browLip);
 
   const rearLight = new THREE.Mesh(
-    new THREE.BoxGeometry(width - 0.04, 0.04, 0.05),
+    new THREE.BoxGeometry(width - 0.12, 0.04, 0.05),
     taillightMat
   );
   rearLight.position.set(0, 0.96, -2.35);
   group.add(rearLight);
 
-  // 5. 앞유리 글래스 + 단일 대형 와이퍼 + 측면 창문 실루엣
-  const wsLen = Math.hypot(1.40, 0.58);
-  const wsAngle = Math.atan2(0.58, 1.40);
-  const windshield = new THREE.Mesh(
-    new THREE.BoxGeometry(width - 0.16, 0.02, wsLen - 0.08),
-    glassMat
-  );
-  windshield.position.set(0, 1.275, 0.85);
-  windshield.rotation.x = wsAngle;
+  // 5. 앞유리 + 천장 루프 유리 + 뒷유리 + 옆유리 (모두 동일한 glassMat & 곡면 일체화)
+  // (1) 전면 풀-스윕 통유리 (하단 노즈 곡률을 따라 둥글게 시작해 루프 정점까지 연결)
+  const dzGlass = 2.06;
+  const dyGlass = 0.70;
+  const fullGlassLen = Math.hypot(dzGlass, dyGlass);
+  const fullGlassAngle = Math.atan2(dyGlass, dzGlass);
+
+  const windshieldGeo = new THREE.BoxGeometry(1.66, 0.028, fullGlassLen, 24, 1, 16);
+  const wPos = windshieldGeo.attributes.position;
+  for (let i = 0; i < wPos.count; i++) {
+    let wx = wPos.getX(i);
+    const wy = wPos.getY(i);
+    let wz = wPos.getZ(i);
+    // wz: +fullGlassLen/2 (전면 하단) ~ -fullGlassLen/2 (루프 상단)
+    const tFront = (wz + fullGlassLen / 2) / fullGlassLen; // 0(루프 상단) ~ 1(전면 하단)
+    const topRatio = 1 - tFront;
+    wx *= 1 - topRatio * 0.075;
+    // 전면 하단으로 갈수록 노즈 곡률에 맞춰 부드럽게 라운딩
+    wz -= Math.pow(tFront, 1.5) * getFrontBowOffset(wx) * 0.78;
+    wPos.setXYZ(i, wx, wy, wz);
+  }
+  windshieldGeo.computeVertexNormals();
+
+  const windshield = new THREE.Mesh(windshieldGeo, glassMat);
+  windshield.position.set(0, 1.252, 1.20);
+  windshield.rotation.x = fullGlassAngle;
   group.add(windshield);
 
+  // (2) 천장 파노라믹 루프 유리 (루프 정점 z=0.16 -> 뒷좌석 끝 z=-0.92까지 이어지는 통유리 천장)
+  const roofDz = 1.08;
+  const roofDy = 0.188;
+  const roofLen = Math.hypot(roofDz, roofDy);
+  const roofAngle = Math.atan2(roofDy, roofDz);
+
+  const roofGlass = new THREE.Mesh(
+    new THREE.BoxGeometry(1.52, 0.028, roofLen),
+    glassMat
+  );
+  roofGlass.position.set(0, 1.508, -0.37);
+  roofGlass.rotation.x = -roofAngle;
+  group.add(roofGlass);
+
+  // (3) 뒷유리 (캐빈 후면 격벽 글래스)
+  const rearWindow = new THREE.Mesh(
+    new THREE.BoxGeometry(1.50, 0.30, 0.025),
+    glassMat
+  );
+  rearWindow.position.set(0, 1.28, -0.90);
+  rearWindow.rotation.x = -0.12;
+  group.add(rearWindow);
+
+  // 기가 와이퍼
   const wiper = new THREE.Mesh(
-    new THREE.BoxGeometry(0.035, 0.025, 1.15),
+    new THREE.BoxGeometry(0.04, 0.03, 1.48),
     trimMat
   );
-  wiper.position.set(-0.68, 1.22, 0.98);
-  wiper.rotation.x = wsAngle;
+  wiper.position.set(-0.68, 1.275, 1.12);
+  wiper.rotation.x = fullGlassAngle;
+  wiper.rotation.y = 0.05;
   group.add(wiper);
 
-  // 측면 삼각 윈도우 (좌/우)
-  const sideWinShape = new THREE.Shape();
-  sideWinShape.moveTo(1.35, 0.98);
-  sideWinShape.lineTo(0.18, 1.46);
-  sideWinShape.lineTo(-0.85, 1.30);
-  sideWinShape.lineTo(-0.85, 0.98);
-  sideWinShape.closePath();
-  const sideWinGeo = new THREE.ExtrudeGeometry(sideWinShape, {
+  // (4) 측면 2분할 창문 (앞유리·천장유리와 동일한 glassMat 적용)
+  const frontWinShape = new THREE.Shape();
+  frontWinShape.moveTo(1.56, 0.98);
+  frontWinShape.lineTo(0.14, 1.54);
+  frontWinShape.lineTo(0.14, 0.98);
+  frontWinShape.closePath();
+
+  const frontWinGeo = new THREE.ExtrudeGeometry(frontWinShape, {
     depth: 0.02,
     bevelEnabled: false,
   });
-  sideWinGeo.translate(0, 0, -0.01);
-  sideWinGeo.rotateY(-Math.PI / 2);
+  frontWinGeo.translate(0, 0, -0.01);
+  frontWinGeo.rotateY(-Math.PI / 2);
+
+  const rearWinShape = new THREE.Shape();
+  rearWinShape.moveTo(0.04, 1.54);
+  rearWinShape.lineTo(-0.88, 1.36);
+  rearWinShape.lineTo(-0.88, 0.98);
+  rearWinShape.lineTo(0.04, 0.98);
+  rearWinShape.closePath();
+
+  const rearWinGeo = new THREE.ExtrudeGeometry(rearWinShape, {
+    depth: 0.02,
+    bevelEnabled: false,
+  });
+  rearWinGeo.translate(0, 0, -0.01);
+  rearWinGeo.rotateY(-Math.PI / 2);
+
+  const doorSeamPositions = [
+    { z: 0.94, h: 0.56, y: 0.70 },
+    { z: 0.09, h: 0.56, y: 0.70 },
+    { z: -0.88, h: 0.54, y: 0.71 },
+  ];
 
   for (const side of [-1, 1]) {
-    const winMesh = new THREE.Mesh(sideWinGeo, glassMat);
-    winMesh.position.x = side * (width / 2 + 0.005);
-    group.add(winMesh);
+    const fWin = new THREE.Mesh(frontWinGeo, glassMat);
+    fWin.position.set(side * (halfW - 0.022), 0, 0);
+    fWin.rotation.z = side * 0.12;
+    group.add(fWin);
+
+    const rWin = new THREE.Mesh(rearWinGeo, glassMat);
+    rWin.position.set(side * (halfW - 0.022), 0, 0);
+    rWin.rotation.z = side * 0.12;
+    group.add(rWin);
+
+    // 도어 패널 갭 라인
+    for (const seam of doorSeamPositions) {
+      const seamLine = new THREE.Mesh(
+        new THREE.BoxGeometry(0.012, seam.h, 0.012),
+        trimMat
+      );
+      seamLine.position.set(side * (halfW + 0.002), seam.y, seam.z);
+      group.add(seamLine);
+    }
+
+    // 삼각 사이드 미러
+    const mirrorArm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.03, 0.06),
+      trimMat
+    );
+    mirrorArm.position.set(side * (halfW + 0.04), 1.04, 1.22);
+    group.add(mirrorArm);
+
+    const mirrorHead = new THREE.Mesh(
+      new THREE.ConeGeometry(0.088, 0.19, 3),
+      trimMat
+    );
+    mirrorHead.rotation.z = side * (Math.PI / 2);
+    mirrorHead.rotation.y = side * 0.25;
+    mirrorHead.position.set(side * (halfW + 0.14), 1.05, 1.20);
+    group.add(mirrorHead);
   }
 
-  // 6. 사다리꼴 각진 휠 아치 + 7각 에어로 오프로드 휠 (타이어 바닥 y=0)
+  // 6. 사다리꼴 각진 휠 아치 + 7스포크 에어로 휠 커버
   const archShape = new THREE.Shape();
-  archShape.moveTo(-0.56, 0);
-  archShape.lineTo(-0.36, 0.34);
-  archShape.lineTo(0.36, 0.34);
-  archShape.lineTo(0.56, 0);
-  archShape.lineTo(0.45, 0);
-  archShape.lineTo(0.30, 0.25);
-  archShape.lineTo(-0.30, 0.25);
-  archShape.lineTo(-0.45, 0);
+  archShape.moveTo(-0.60, 0);
+  archShape.lineTo(-0.39, 0.39);
+  archShape.lineTo(0.39, 0.39);
+  archShape.lineTo(0.60, 0);
+  archShape.lineTo(0.47, 0);
+  archShape.lineTo(0.31, 0.27);
+  archShape.lineTo(-0.31, 0.27);
+  archShape.lineTo(-0.47, 0);
   archShape.closePath();
 
   const archGeo = new THREE.ExtrudeGeometry(archShape, {
-    depth: 0.14,
+    depth: 0.20,
     bevelEnabled: false,
   });
-  archGeo.translate(0, 0, -0.07);
+  archGeo.translate(0, 0, -0.10);
   archGeo.rotateY(-Math.PI / 2);
 
-  const tireGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.26, 20);
+  const tireGeo = new THREE.CylinderGeometry(0.39, 0.39, 0.30, 28);
   tireGeo.rotateZ(Math.PI / 2);
 
-  const aeroCapGeo = new THREE.CylinderGeometry(0.25, 0.23, 0.28, 7);
-  aeroCapGeo.rotateZ(Math.PI / 2);
+  const aeroPlateGeo = new THREE.CylinderGeometry(0.26, 0.27, 0.315, 7);
+  aeroPlateGeo.rotateZ(Math.PI / 2);
+
+  const aeroWingGeo = new THREE.BoxGeometry(0.325, 0.068, 0.36);
+  const centerHexGeo = new THREE.CylinderGeometry(0.09, 0.10, 0.34, 7);
+  centerHexGeo.rotateZ(Math.PI / 2);
 
   const wheels: THREE.Object3D[] = [];
   const frontSteerPivots: THREE.Group[] = [];
-
   const wheelPositions: Array<{ x: number; z: number; isFront: boolean }> = [
-    { x: -0.90, z: 1.48, isFront: true },
-    { x: 0.90, z: 1.48, isFront: true },
-    { x: -0.90, z: -1.48, isFront: false },
-    { x: 0.90, z: -1.48, isFront: false },
+    { x: -1.00, z: 1.48, isFront: true },
+    { x: 1.00, z: 1.48, isFront: true },
+    { x: -1.00, z: -1.50, isFront: false },
+    { x: 1.00, z: -1.50, isFront: false },
   ];
 
   for (const pos of wheelPositions) {
     const arch = new THREE.Mesh(archGeo, trimMat);
-    arch.position.set(pos.x > 0 ? 0.94 : -0.94, 0.42, pos.z);
+    arch.position.set(pos.x > 0 ? 1.00 : -1.00, 0.43, pos.z);
     group.add(arch);
 
     const steerPivot = new THREE.Group();
-    steerPivot.position.set(pos.x, 0.38, pos.z); // 반지름 0.38 -> 바닥면 정확히 y=0
+    steerPivot.position.set(pos.x, 0.39, pos.z);
 
     const wheelSpin = new THREE.Group();
-    const tire = new THREE.Mesh(tireGeo, trimMat);
-    const cap = new THREE.Mesh(aeroCapGeo, steelMat);
+    const tire = new THREE.Mesh(tireGeo, tireMat);
+    const aeroPlate = new THREE.Mesh(aeroPlateGeo, trimMat);
+    const centerHex = new THREE.Mesh(centerHexGeo, trimMat);
     tire.castShadow = true;
-    wheelSpin.add(tire, cap);
+    wheelSpin.add(tire, aeroPlate, centerHex);
+
+    for (let i = 0; i < 7; i++) {
+      const wing = new THREE.Mesh(aeroWingGeo, trimMat);
+      wing.rotation.x = (i * Math.PI * 2) / 7;
+      wheelSpin.add(wing);
+    }
 
     steerPivot.add(wheelSpin);
     group.add(steerPivot);
-
     wheels.push(wheelSpin);
     if (pos.isFront) frontSteerPivots.push(steerPivot);
   }
