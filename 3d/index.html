@@ -4200,11 +4200,11 @@ export function createCustomVehicle3D(): CustomVehicleRig {
                  class="history-card group rounded-lg bg-app-main border border-app-border hover:border-cyan-500/60 overflow-hidden cursor-pointer transition-all flex flex-col">
               <div class="relative aspect-[16/10] bg-[#14171f] overflow-hidden border-b border-app-border">
                 ${thumbHtml}
-                <div class="absolute top-1.5 right-1.5 flex items-center gap-1 opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <div class="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
                   <button data-share-id="${escapeHtml(it.id)}" title="공유 링크 복사"
-                          class="btn-share-history w-6 h-6 rounded bg-black/70 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">🔗</button>
+                          class="btn-share-history w-7 h-7 sm:w-6 sm:h-6 rounded bg-black/75 border border-white/15 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">🔗</button>
                   <button data-del-id="${escapeHtml(it.id)}" title="서버 이력 삭제"
-                          class="btn-del-history w-6 h-6 rounded bg-black/70 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center">✕</button>
+                          class="btn-del-history w-7 h-7 sm:w-6 sm:h-6 rounded bg-black/75 border border-white/15 hover:bg-rose-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">✕</button>
                 </div>
               </div>
               <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
@@ -4227,7 +4227,7 @@ export function createCustomVehicle3D(): CustomVehicleRig {
           : '';
         const uploadBtn = serverOnline && !synced
           ? `<button data-upload-id="${escapeHtml(it.id)}" title="이 항목만 서버에 올리기"
-                     class="btn-upload-one-history w-6 h-6 rounded bg-black/70 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">☁️</button>`
+                     class="btn-upload-one-history w-7 h-7 sm:w-6 sm:h-6 rounded bg-black/75 border border-white/15 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">☁️</button>`
           : '';
 
         return `
@@ -4238,10 +4238,10 @@ export function createCustomVehicle3D(): CustomVehicleRig {
                 ? `<img src="${it.thumbnail}" alt="${escapeHtml(it.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />`
                 : `<div class="w-full h-full flex items-center justify-center text-xs font-mono text-app-muted">No Preview</div>`}
               ${statusBadge}
-              <div class="absolute top-1.5 right-1.5 flex items-center gap-1 opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <div class="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
                 ${uploadBtn}
                 <button data-del-id="${escapeHtml(it.id)}" title="로컬 이력 삭제"
-                        class="btn-del-history w-6 h-6 rounded bg-black/70 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center">✕</button>
+                        class="btn-del-history w-7 h-7 sm:w-6 sm:h-6 rounded bg-black/75 border border-white/15 hover:bg-rose-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">✕</button>
               </div>
             </div>
             <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
