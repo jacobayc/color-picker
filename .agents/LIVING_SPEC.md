@@ -12,6 +12,12 @@ flowchart TD
         SHOWCASE3D["3D Rig Showcase (/3d/)<br/>Three.js Factory Live View & Rig Tester"]
     end
 
+    subgraph Cloud ["Server History Sync (Netlify)"]
+        HISTFN["Netlify Functions v2 (/api/histories*)<br/>x-admin-key Write Guard & CDN Cache"]
+        BLOBS["Netlify Blobs (rig-code-histories)<br/>_index + code/:id + thumb/:id"]
+        HISTFN --> BLOBS
+    end
+
     subgraph Archived ["Archived / Disabled (URL Access Blocked)"]
         TRIP["_archive/trip/ (404 / Redirect Block)"]
         WG["_archive/wg/ (404 / Redirect Block)"]
@@ -22,6 +28,7 @@ flowchart TD
     ROOT -->|단축키 3 / Click| PREVIEW
     ROOT -->|단축키 4 / Click| JWT
     ROOT -->|단축키 5 / Click| SHOWCASE3D
+    SHOWCASE3D -.->|"수동 저장·공유(?id=)"| HISTFN
 ```
 
 ---
@@ -83,12 +90,28 @@ flowchart TD
 - **경량 TS→JS 전처리기:** `import`/`export`/`interface`/변수·파라미터·리턴 타입 어노테이션을 스트리핑해 무빌드 환경에서 `CustomVehicleRig` TS 코드 즉시 실행
 - **6방향 + Iso 카메라 & 규약 HUD:** `OrbitControls` 회전, `Front(+Z)`/`Back(-Z)`/`Left`/`Right`/`Top`/`Bottom`/`Iso` 전환, 치수(`W×H×D`), 바닥 접촉(`y=0`) 오차 검사, 폴리곤 수 표시
 - **Rig 라이브 테스터:** `wheels` 구름 회전, `frontSteerPivots` 조향 슬라이더(`-35°~+35°`), `headlightMat`/`taillightMat` 점등·브레이크 테스트, 주간/야간 조명, 턴테이블, PNG 캡처
-- **IndexedDB 모델 이력 (최대 1,000건):** 렌더링 성공 코드 자동 누적(3분 내 동일 제목 병합) 및 `💾 저장` 수동 스냅샷, `240×150` JPEG 썸네일 미리보기·검색·원클릭 복원 모달 지원
+- **하이브리드 모델 이력 (Netlify Blobs 서버 수동 저장 + IndexedDB 자동 백업, 최대 1,000건):**
+  - 로컬 자동 누적(`IndexedDB` 1.4초 디바운스·3분 내 동일 제목 병합, API 호출 0회) + `[💾 저장]` 클릭 시에만 `POST /api/histories` 수동 서버 저장 (`rig-code-histories` 스토어에 `_index` / `code/:id` / `thumb/:id` 분리 보관 및 `Netlify-CDN-Cache-Control` 장기 캐시)
+  - `codeHash` 대조로 헤더(`+N`) 및 로컬 백업 탭에서 `저장할 내용 N건` 실시간 표시, 20건 청크 일괄 업로드(`POST /api/histories/import`) 및 단건 업로드 지원
+  - 공유 링크(`🔗`, `/3d/?id=<id>`)로 키 없이 열람 가능, `HISTORY_ADMIN_KEY` 설정 시 쓰기/삭제 `x-admin-key` 인증 및 `file:///`·오프라인 환경 IndexedDB 폴백 지원
 - **시승 테스트 세트장 (`3d/drive.js`):** 코드 주석 스펙(크루즈/부스트 km/h, `ev`/`sport`/`car` 사운드) 파싱 연동, 시작 전 트랙(`아스팔트` / `오프로드` 램프·요철) 및 모바일 가상 패드(`A안` 통합 스틱 / `B안` 레이싱 패드) 사전 선택, PC(`방향키`·`Shift`·`Space`·`B`) 및 멀티터치 주행·바퀴 구름·조향·제동등 실시간 검증
 
 ---
 
 ## 4. Changelog
+
+### [2026-11-19] 3D Rig Showcase Netlify Blobs 하이브리드 이력 저장소 및 공유 링크 구축
+
+- **요약:** Netlify 무료 티어(300 크레딧) 최적화를 위해 `IndexedDB` 자동 백업(서버 호출 0회)을 유지하면서 `[💾 저장]` 수동 서버 저장, `_index`·`code/`·`thumb/` 3분할 Blob 저장, `codeHash` 기반 `저장할 내용 N건` 동기화 카운트/일괄 업로드, `?id=...` 공유 링크 열람을 구현.
+- **주요 변경:**
+  - `netlify/functions/histories.mjs`, `netlify.toml`, `package.json`, `.gitignore` 신규 생성 (`@netlify/blobs`, Functions v2 라우팅, `HISTORY_ADMIN_KEY` 검증, `POST /api/histories/import` 배치 업로드).
+  - `3d/index.html`: 헤더 미저장 뱃지(`+N`), 이력 모달 2-탭(`☁️ 서버 이력` / `💻 로컬 백업`), 동기화 상태 바, 카드 공유 링크(`🔗`) 및 단건 업로드(`☁️`), `#modal-admin-key` 인증 UI, `?id=` 초기 로드 추가.
+
+```diff
++ package.json, netlify.toml, .gitignore (@netlify/blobs 의존성 및 Functions v2 환경 구성)
++ netlify/functions/histories.mjs (_index / code/:id / thumb/:id 분리 저장, import 배치, x-admin-key 보호)
+~ 3d/index.html: 하이브리드 이력(서버 수동 + IndexedDB 자동 백업), 저장할 내용 N건 비교/업로드, ?id= 공유 열람
+```
 
 ### [2026-11-18] 3D Rig Showcase 기본 프리셋에 체코 프라하 트램(`createCzechTram3D`) 추가
 

@@ -150,18 +150,19 @@
 
     <!-- 우측 액션 -->
     <div class="order-2 md:order-3 flex items-center gap-1 sm:gap-1.5 shrink-0">
-      <button id="btn-open-history" title="저장된 3D 모델 이력 (최대 1,000건)"
+      <button id="btn-open-history" title="저장된 3D 모델 이력 (서버 + 로컬 백업)"
               class="flex items-center gap-1 h-7 px-2 sm:px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0">
         <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <span class="hidden sm:inline">이력</span>
         <span id="badge-history-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono text-cyan-300">0</span>
+        <span id="badge-unsynced-count" title="서버에 아직 저장되지 않은 로컬 백업 수" class="hidden px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-500/40 text-[10px] font-mono text-amber-300">+0</span>
       </button>
 
-      <button id="btn-save-history" title="현재 모델 스냅샷 즉시 저장"
-              class="flex items-center gap-1 h-7 px-2 sm:px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-cyan-500/50 text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0">
-        <span>💾</span><span class="hidden sm:inline">저장</span>
+      <button id="btn-save-history" title="현재 모델 스냅샷 서버 & 로컬 저장"
+              class="flex items-center gap-1 h-7 px-2 sm:px-2.5 rounded-md bg-app-panelAlt border border-app-border hover:border-cyan-500/50 text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-wait">
+        <span id="save-btn-icon">💾</span><span id="save-btn-label" class="hidden sm:inline">저장</span>
       </button>
 
       <button id="btn-copy-spec" title="AI 협업용 CustomVehicleRig 규약 프롬프트 복사"
@@ -393,23 +394,72 @@
     </section>
   </main>
 
-  <!-- 모델 이력 모달 (IndexedDB 최대 1,000건 + 썸네일 미리보기) -->
+  <!-- 모델 이력 모달 (Netlify Blobs 서버 + IndexedDB 로컬 백업 하이브리드) -->
   <div id="modal-history" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="w-full max-w-4xl max-h-[85vh] bg-app-panel border border-app-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
       <div class="px-4 py-3 border-b border-app-border flex flex-wrap items-center justify-between gap-2 bg-app-panelAlt">
         <div class="flex items-center gap-2">
           <span class="text-sm font-semibold text-white">3D 모델 히스토리</span>
+          <span id="modal-storage-mode" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">💻 로컬</span>
           <span id="modal-history-count" class="text-xs font-mono text-cyan-400">(0/1000)</span>
         </div>
         <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
           <input id="history-search" type="text" placeholder="모델명 / 함수명 검색..."
                  class="h-7 w-40 sm:w-52 px-2.5 rounded-md bg-app-main border border-app-border text-xs text-white placeholder-app-muted focus:outline-none focus:border-cyan-500/60">
-          <button id="btn-clear-all-history" class="h-7 px-2.5 rounded-md bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs transition-colors">전체 삭제</button>
+          <button id="btn-admin-key" title="서버 관리자 키 설정"
+                  class="hidden h-7 px-2 rounded-md bg-app-main hover:bg-slate-800 border border-app-border text-xs text-slate-300 hover:text-white transition-colors">🔑</button>
+          <button id="btn-clear-all-history" class="hidden h-7 px-2.5 rounded-md bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs transition-colors">전체 삭제</button>
           <button id="btn-close-history" class="h-7 px-2.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition-colors">닫기</button>
         </div>
       </div>
 
+      <div class="px-4 py-2 border-b border-app-border bg-app-panel/90 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1.5">
+          <button id="tab-history-server"
+                  class="h-7 px-2.5 rounded-md border text-xs font-medium transition-colors flex items-center gap-1.5">
+            <span>☁️ 서버 이력</span>
+            <span id="tab-server-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono text-cyan-300">0</span>
+          </button>
+          <button id="tab-history-local"
+                  class="h-7 px-2.5 rounded-md border text-xs font-medium transition-colors flex items-center gap-1.5">
+            <span>💻 로컬 백업</span>
+            <span id="tab-local-count" class="px-1.5 py-0.2 rounded-full bg-slate-800 text-[10px] font-mono text-slate-300">0</span>
+          </button>
+        </div>
+        <div id="history-sync-bar" class="hidden flex items-center gap-2">
+          <span id="history-sync-status" class="text-[11px] font-mono text-slate-400"></span>
+          <button id="btn-sync-unsynced"
+                  class="hidden h-7 px-2.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-wait">
+          </button>
+        </div>
+      </div>
+
       <div id="history-list-container" class="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start"></div>
+    </div>
+  </div>
+
+  <!-- 서버 관리자 키 입력 모달 -->
+  <div id="modal-admin-key" class="hidden fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-app-panel border border-app-border rounded-xl shadow-2xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-app-border bg-app-panelAlt flex items-center justify-between">
+        <span class="text-sm font-semibold text-white">🔑 서버 관리자 키 설정</span>
+        <button id="btn-admin-key-cancel" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 hover:text-white">닫기</button>
+      </div>
+      <form id="form-admin-key" class="p-4 space-y-3 text-xs">
+        <p class="text-app-muted leading-relaxed">
+          서버 저장·삭제를 위해 설정된 <code class="text-cyan-300">HISTORY_ADMIN_KEY</code>를 입력해 주세요. (브라우저 로컬에만 보관됩니다)
+        </p>
+        <input id="input-admin-key" type="password" autocomplete="off" placeholder="관리자 키 입력..."
+               class="w-full h-8 px-2.5 rounded-md bg-app-main border border-app-border text-xs text-white placeholder-app-muted focus:outline-none focus:border-cyan-500/60">
+        <div id="admin-key-error" class="hidden text-[11px] text-rose-400"></div>
+        <div class="flex items-center justify-between pt-1">
+          <button type="button" id="btn-admin-key-clear" class="h-7 px-2.5 rounded-md bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs">키 초기화</button>
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="btn-admin-key-close" class="h-7 px-3 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">취소</button>
+            <button type="submit" class="h-7 px-3 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium">확인</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -3458,15 +3508,84 @@ export function createCustomVehicle3D(): CustomVehicleRig {
     }
 
     // =========================================================================
-    // 8. IndexedDB 3D 모델 히스토리 (최대 1,000건 + 240x150 썸네일 미리보기)
+    // 8. 하이브리드 3D 모델 히스토리 (Netlify Blobs 서버 수동 저장 + IndexedDB 로컬 백업)
     // =========================================================================
     const DB_NAME = 'RigShowcaseDB';
     const DB_VERSION = 1;
     const STORE_NAME = 'history';
     const MAX_HISTORY_ITEMS = 1000;
+    const API_BASE = '/api/histories';
+    const ADMIN_KEY_STORAGE = 'rig_showcase_admin_key_v1';
+    const IMPORT_CHUNK_SIZE = 20;
+
     let dbPromise = null;
-    let cachedHistoryList = [];
+    let localHistoryList = [];
+    let serverHistoryList = [];
+    let serverHashSet = new Set();
+    let serverCodeCache = new Map();
+    let serverOnline = false;
+    let serverAuthRequired = false;
+    let activeHistoryTab = location.protocol === 'file:' ? 'local' : 'server';
+    let isSavingServer = false;
+    let isSyncingServer = false;
     let historyAutoTimer = null;
+
+    function computeCodeHash(rawCode) {
+      const str = String(rawCode || '').replace(/\r\n/g, '\n').trim();
+      let h1 = 0x811c9dc5;
+      let h2 = 0x811c9dc5 ^ 0x9e3779b9;
+      for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        h1 ^= c;
+        h1 = Math.imul(h1, 0x01000193);
+        h2 ^= (c + i) & 0xffff;
+        h2 = Math.imul(h2, 0x01000193);
+      }
+      return `${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}_${str.length}`;
+    }
+
+    function getItemHash(it) {
+      if (!it) return '';
+      if (!it.codeHash && typeof it.code === 'string') {
+        it.codeHash = computeCodeHash(it.code);
+      }
+      return it.codeHash || '';
+    }
+
+    function setServerHistoryList(list) {
+      serverHistoryList = Array.isArray(list) ? list : [];
+      serverHashSet = new Set(serverHistoryList.map((it) => it && it.codeHash).filter(Boolean));
+    }
+
+    function getUnsyncedLocalItems() {
+      if (!serverOnline) return [];
+      const seen = new Set();
+      const unsynced = [];
+      for (const it of localHistoryList) {
+        const h = getItemHash(it);
+        if (!h || serverHashSet.has(h) || seen.has(h)) continue;
+        seen.add(h);
+        unsynced.push(it);
+      }
+      return unsynced;
+    }
+
+    async function copyTextWithFallback(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }
+    }
 
     function openHistoryDB() {
       if (!dbPromise) {
@@ -3488,25 +3607,6 @@ export function createCustomVehicle3D(): CustomVehicleRig {
         });
       }
       return dbPromise;
-    }
-
-    async function initHistoryStore() {
-      const db = await openHistoryDB();
-      if (db) {
-        try {
-          const list = await new Promise((resolve) => {
-            const tx = db.transaction(STORE_NAME, 'readonly');
-            const req = tx.objectStore(STORE_NAME).getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => resolve([]);
-          });
-          list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-          cachedHistoryList = list.slice(0, MAX_HISTORY_ITEMS);
-        } catch (e) {
-          cachedHistoryList = [];
-        }
-      }
-      updateHistoryBadges();
     }
 
     async function putHistoryItemDB(item) {
@@ -3538,10 +3638,254 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       } catch (e) {}
     }
 
+    const modalAdminKey = document.getElementById('modal-admin-key');
+    const inputAdminKey = document.getElementById('input-admin-key');
+    const adminKeyError = document.getElementById('admin-key-error');
+    let adminKeyResolver = null;
+
+    function closeAdminKeyModal(value = null) {
+      modalAdminKey.classList.add('hidden');
+      adminKeyError.classList.add('hidden');
+      adminKeyError.textContent = '';
+      if (adminKeyResolver) {
+        const resolve = adminKeyResolver;
+        adminKeyResolver = null;
+        resolve(value);
+      }
+    }
+
+    function promptAdminKeyModal(errorMsg = '') {
+      if (adminKeyResolver) closeAdminKeyModal(null);
+      inputAdminKey.value = localStorage.getItem(ADMIN_KEY_STORAGE) || '';
+      if (errorMsg) {
+        adminKeyError.textContent = errorMsg;
+        adminKeyError.classList.remove('hidden');
+      } else {
+        adminKeyError.classList.add('hidden');
+        adminKeyError.textContent = '';
+      }
+      modalAdminKey.classList.remove('hidden');
+      setTimeout(() => {
+        inputAdminKey.focus();
+        inputAdminKey.select();
+      }, 20);
+      return new Promise((resolve) => {
+        adminKeyResolver = resolve;
+      });
+    }
+
+    document.getElementById('form-admin-key').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = inputAdminKey.value.trim();
+      if (!val) {
+        adminKeyError.textContent = '관리자 키를 입력해 주세요.';
+        adminKeyError.classList.remove('hidden');
+        return;
+      }
+      localStorage.setItem(ADMIN_KEY_STORAGE, val);
+      closeAdminKeyModal(val);
+      updateHistoryBadges();
+    });
+
+    document.getElementById('btn-admin-key-clear').addEventListener('click', () => {
+      localStorage.removeItem(ADMIN_KEY_STORAGE);
+      inputAdminKey.value = '';
+      adminKeyError.classList.add('hidden');
+      updateHistoryBadges();
+      showToast('저장된 관리자 키가 초기화되었습니다');
+    });
+
+    document.getElementById('btn-admin-key-cancel').addEventListener('click', () => closeAdminKeyModal(null));
+    document.getElementById('btn-admin-key-close').addEventListener('click', () => closeAdminKeyModal(null));
+    modalAdminKey.addEventListener('click', (e) => {
+      if (e.target === modalAdminKey) closeAdminKeyModal(null);
+    });
+
+    async function apiFetchHistory(path = '', options = {}) {
+      const { _retried = false, ...fetchOpts } = options;
+      const method = (fetchOpts.method || 'GET').toUpperCase();
+      const headers = new Headers(fetchOpts.headers || {});
+      if (fetchOpts.body && !headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (method !== 'GET' && method !== 'HEAD') {
+        const storedKey = localStorage.getItem(ADMIN_KEY_STORAGE) || '';
+        if (storedKey) headers.set('x-admin-key', storedKey);
+      }
+
+      const res = await fetch(`${API_BASE}${path}`, { ...fetchOpts, headers });
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json().catch(() => null) : null;
+
+      if (res.status === 401 && !_retried) {
+        const nextKey = await promptAdminKeyModal('관리자 키가 필요하거나 일치하지 않습니다.');
+        if (!nextKey) {
+          const abortErr = new Error('관리자 인증이 취소되었습니다');
+          abortErr.aborted = true;
+          throw abortErr;
+        }
+        return apiFetchHistory(path, { ...options, _retried: true });
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    async function loadSharedModelFromQuery() {
+      if (location.protocol === 'file:') return false;
+      const sharedId = new URLSearchParams(location.search).get('id');
+      if (!sharedId) return false;
+
+      const known = serverHistoryList.find((it) => it && it.id === sharedId);
+      const query = known && known.updatedAt ? `?v=${encodeURIComponent(known.updatedAt)}` : '';
+      try {
+        const data = await apiFetchHistory(`/${encodeURIComponent(sharedId)}${query}`);
+        if (data && typeof data.code === 'string') {
+          editorEl.value = data.code;
+          serverCodeCache.set(sharedId, { updatedAt: data.updatedAt, code: data.code });
+          executeUserCode(true, { recordHistory: false });
+          showToast(`공유 모델 불러옴: ${data.title || sharedId}`);
+          return true;
+        }
+      } catch (e) {
+        showToast('공유 모델을 찾을 수 없어 기본 모델을 표시합니다');
+      }
+      return false;
+    }
+
+    async function initHistoryStore() {
+      const db = await openHistoryDB();
+      if (db) {
+        try {
+          const list = await new Promise((resolve) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          });
+          list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+          localHistoryList = list.slice(0, MAX_HISTORY_ITEMS);
+          localHistoryList.forEach(getItemHash);
+        } catch (e) {
+          localHistoryList = [];
+        }
+      }
+
+      if (location.protocol !== 'file:') {
+        try {
+          const res = await apiFetchHistory('');
+          serverOnline = true;
+          serverAuthRequired = Boolean(res?.authRequired);
+          setServerHistoryList(res?.items || []);
+          activeHistoryTab = 'server';
+        } catch (e) {
+          serverOnline = false;
+          activeHistoryTab = 'local';
+        }
+      } else {
+        serverOnline = false;
+        activeHistoryTab = 'local';
+      }
+
+      updateHistoryBadges();
+      if (!modalHistory.classList.contains('hidden')) {
+        renderHistoryModalList();
+      }
+
+      const hasSharedId = location.protocol !== 'file:' && Boolean(new URLSearchParams(location.search).get('id'));
+      if (hasSharedId) {
+        const loaded = await loadSharedModelFromQuery();
+        if (!loaded) executeUserCode(true);
+      }
+    }
+
     function updateHistoryBadges() {
-      const count = cachedHistoryList.length;
-      document.getElementById('badge-history-count').textContent = count;
-      document.getElementById('modal-history-count').textContent = `(${count}/${MAX_HISTORY_ITEMS})`;
+      const serverCount = serverHistoryList.length;
+      const localCount = localHistoryList.length;
+      const unsynced = getUnsyncedLocalItems();
+
+      document.getElementById('badge-history-count').textContent = serverOnline ? serverCount : localCount;
+
+      const unsyncedBadge = document.getElementById('badge-unsynced-count');
+      if (serverOnline && unsynced.length > 0) {
+        unsyncedBadge.textContent = `+${unsynced.length}`;
+        unsyncedBadge.classList.remove('hidden');
+      } else {
+        unsyncedBadge.classList.add('hidden');
+      }
+
+      const modeBadge = document.getElementById('modal-storage-mode');
+      if (serverOnline) {
+        modeBadge.textContent = '☁️ 서버 연결';
+        modeBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30 text-[10px] font-mono text-cyan-300';
+      } else {
+        modeBadge.textContent = '💻 로컬 전용';
+        modeBadge.className = 'px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300';
+      }
+
+      document.getElementById('tab-server-count').textContent = serverOnline ? serverCount : '-';
+      document.getElementById('tab-local-count').textContent = localCount;
+      document.getElementById('modal-history-count').textContent =
+        activeHistoryTab === 'server' && serverOnline
+          ? `(${serverCount}/${MAX_HISTORY_ITEMS})`
+          : `(${localCount}/${MAX_HISTORY_ITEMS})`;
+
+      const btnAdminKey = document.getElementById('btn-admin-key');
+      btnAdminKey.classList.toggle('hidden', !serverOnline);
+      if (serverOnline) {
+        const hasStoredKey = Boolean(localStorage.getItem(ADMIN_KEY_STORAGE));
+        btnAdminKey.className = hasStoredKey
+          ? 'h-7 px-2 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-xs text-emerald-300 transition-colors'
+          : 'h-7 px-2 rounded-md bg-app-main hover:bg-slate-800 border border-app-border text-xs text-slate-300 hover:text-white transition-colors';
+        btnAdminKey.title = hasStoredKey
+          ? '관리자 키 저장됨 (클릭하여 변경/초기화)'
+          : (serverAuthRequired ? '관리자 키 필요 (클릭하여 입력)' : '관리자 키 설정 (현재 서버 무인증)');
+      }
+
+      const btnClearAll = document.getElementById('btn-clear-all-history');
+      btnClearAll.classList.toggle('hidden', activeHistoryTab !== 'local');
+
+      const tabServerBtn = document.getElementById('tab-history-server');
+      const tabLocalBtn = document.getElementById('tab-history-local');
+      tabServerBtn.disabled = !serverOnline;
+      if (!serverOnline) {
+        tabServerBtn.className = 'h-7 px-2.5 rounded-md border border-app-border/60 bg-app-main/40 text-slate-500 opacity-50 cursor-not-allowed text-xs font-medium flex items-center gap-1.5';
+        tabServerBtn.title = '오프라인 또는 file:/// 환경에서는 서버 이력을 사용할 수 없습니다';
+      } else if (activeHistoryTab === 'server') {
+        tabServerBtn.className = 'h-7 px-2.5 rounded-md border border-cyan-500/50 bg-cyan-500/15 text-cyan-200 text-xs font-medium transition-colors flex items-center gap-1.5';
+        tabServerBtn.title = '공유 및 영구 보관용 서버 이력';
+      } else {
+        tabServerBtn.className = 'h-7 px-2.5 rounded-md border border-app-border bg-app-main text-slate-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5';
+        tabServerBtn.title = '공유 및 영구 보관용 서버 이력';
+      }
+
+      if (activeHistoryTab === 'local') {
+        tabLocalBtn.className = 'h-7 px-2.5 rounded-md border border-cyan-500/50 bg-cyan-500/15 text-cyan-200 text-xs font-medium transition-colors flex items-center gap-1.5';
+      } else {
+        tabLocalBtn.className = 'h-7 px-2.5 rounded-md border border-app-border bg-app-main text-slate-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5';
+      }
+
+      const syncBar = document.getElementById('history-sync-bar');
+      const syncStatus = document.getElementById('history-sync-status');
+      const btnSync = document.getElementById('btn-sync-unsynced');
+      syncBar.classList.toggle('hidden', !serverOnline);
+      if (serverOnline) {
+        if (unsynced.length === 0) {
+          syncStatus.textContent = '✅ 저장할 내용 0건';
+          syncStatus.className = 'text-[11px] font-mono text-emerald-400';
+          btnSync.classList.add('hidden');
+        } else {
+          syncStatus.textContent = `저장할 내용 ${unsynced.length}건`;
+          syncStatus.className = 'text-[11px] font-mono text-amber-300';
+          btnSync.classList.remove('hidden');
+          btnSync.disabled = isSyncingServer;
+          if (!isSyncingServer) {
+            btnSync.textContent = `☁️ ${unsynced.length}건 서버에 올리기`;
+          }
+        }
+      }
     }
 
     function extractModelTitle(code, fnName) {
@@ -3591,46 +3935,53 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       clearTimeout(historyAutoTimer);
       historyAutoTimer = setTimeout(() => {
         if (editorEl.value !== codeSnapshot || !lastRenderOk) return;
-        saveHistorySnapshot(false);
+        saveLocalHistorySnapshot(false);
       }, 1400);
     }
 
-    async function saveHistorySnapshot(manual = false) {
+    async function saveLocalHistorySnapshot(manual = false) {
       const code = editorEl.value;
       if (!code || !code.trim()) {
         if (manual) showToast('저장할 코드가 비어 있습니다');
-        return;
+        return null;
       }
       if (!lastRenderOk) {
         if (manual) showToast('오류가 없는 코드만 저장할 수 있습니다');
-        return;
+        return null;
       }
 
       const now = Date.now();
       const title = extractModelTitle(code, lastMeta.fnName);
       const thumbnail = captureThumbnailDataUrl();
+      const codeHash = computeCodeHash(code);
 
-      if (cachedHistoryList.length > 0) {
-        const top = cachedHistoryList[0];
+      if (localHistoryList.length > 0) {
+        const top = localHistoryList[0];
         if (top.code === code) {
-          // 동일 코드면 썸네일/시각만 최신화
           top.thumbnail = thumbnail || top.thumbnail;
+          top.codeHash = codeHash;
           top.updatedAt = now;
           await putHistoryItemDB(top);
           updateHistoryBadges();
-          if (manual) showToast('현재 모델 이력 갱신됨');
-          return;
+          if (!modalHistory.classList.contains('hidden') && activeHistoryTab === 'local') {
+            renderHistoryModalList();
+          }
+          if (manual) showToast('로컬 백업 이력 갱신됨');
+          return top;
         }
-        // 자동 저장 시 3분 이내 동일 모델명 수정은 새 항목 대신 병합
         if (!manual && top.title === title && now - top.updatedAt < 3 * 60 * 1000) {
           top.code = code;
+          top.codeHash = codeHash;
           top.thumbnail = thumbnail || top.thumbnail;
           top.sizeText = lastMeta.sizeText;
           top.tris = lastMeta.tris;
           top.updatedAt = now;
           await putHistoryItemDB(top);
           updateHistoryBadges();
-          return;
+          if (!modalHistory.classList.contains('hidden') && activeHistoryTab === 'local') {
+            renderHistoryModalList();
+          }
+          return top;
         }
       }
 
@@ -3642,19 +3993,161 @@ export function createCustomVehicle3D(): CustomVehicleRig {
         tris: lastMeta.tris,
         thumbnail,
         code,
+        codeHash,
+        createdAt: now,
         updatedAt: now,
       };
 
-      cachedHistoryList.unshift(newItem);
+      localHistoryList.unshift(newItem);
       await putHistoryItemDB(newItem);
 
-      if (cachedHistoryList.length > MAX_HISTORY_ITEMS) {
-        const removed = cachedHistoryList.splice(MAX_HISTORY_ITEMS);
+      if (localHistoryList.length > MAX_HISTORY_ITEMS) {
+        const removed = localHistoryList.splice(MAX_HISTORY_ITEMS);
         await deleteHistoryIdsDB(removed.map((it) => it.id));
       }
 
       updateHistoryBadges();
-      if (manual) showToast(`스냅샷 저장 완료 (${cachedHistoryList.length}/${MAX_HISTORY_ITEMS})`);
+      if (!modalHistory.classList.contains('hidden') && activeHistoryTab === 'local') {
+        renderHistoryModalList();
+      }
+      if (manual) showToast(`로컬 백업 저장 완료 (${localHistoryList.length}/${MAX_HISTORY_ITEMS})`);
+      return newItem;
+    }
+
+    async function saveCurrentToServer() {
+      if (isSavingServer) return;
+      executeUserCode(false);
+
+      const code = editorEl.value;
+      if (!code || !code.trim()) {
+        showToast('저장할 코드가 비어 있습니다');
+        return;
+      }
+      if (!lastRenderOk) {
+        showToast('오류가 없는 코드만 저장할 수 있습니다');
+        return;
+      }
+
+      const localSnapshot = await saveLocalHistorySnapshot(false);
+      if (!serverOnline) {
+        showToast('로컬 백업 저장 완료 (오프라인 모드)');
+        return;
+      }
+
+      const codeHash = computeCodeHash(code);
+      if (serverHashSet.has(codeHash)) {
+        showToast('이미 서버에 저장된 코드입니다');
+        return;
+      }
+
+      const btnSave = document.getElementById('btn-save-history');
+      const saveLabel = document.getElementById('save-btn-label');
+      isSavingServer = true;
+      btnSave.disabled = true;
+      saveLabel.textContent = '저장중...';
+
+      try {
+        const thumbnail = localSnapshot?.thumbnail || captureThumbnailDataUrl();
+        const title = extractModelTitle(code, lastMeta.fnName);
+        const res = await apiFetchHistory('', {
+          method: 'POST',
+          body: JSON.stringify({
+            title,
+            fnName: lastMeta.fnName,
+            sizeText: lastMeta.sizeText,
+            tris: lastMeta.tris,
+            thumbnail,
+            code,
+          }),
+        });
+
+        const savedItem = res.item;
+        const nextList = serverHistoryList.filter((it) => it && it.id !== savedItem.id);
+        nextList.unshift(savedItem);
+        setServerHistoryList(nextList.slice(0, MAX_HISTORY_ITEMS));
+        serverCodeCache.set(savedItem.id, { updatedAt: savedItem.updatedAt, code });
+
+        updateHistoryBadges();
+        if (!modalHistory.classList.contains('hidden')) {
+          renderHistoryModalList();
+        }
+        showToast(
+          res.deduped
+            ? '☁️ 서버 이력 갱신 완료'
+            : `☁️ 서버 저장 완료 (${serverHistoryList.length}/${MAX_HISTORY_ITEMS})`
+        );
+      } catch (err) {
+        if (!err.aborted) {
+          showToast(`서버 저장 실패 (로컬 백업 유지됨): ${err.message}`);
+        }
+      } finally {
+        isSavingServer = false;
+        btnSave.disabled = false;
+        saveLabel.textContent = '저장';
+      }
+    }
+
+    async function syncUnsyncedToServer(targetItems = null) {
+      if (!serverOnline || isSyncingServer) return;
+      const items = Array.isArray(targetItems) ? targetItems : getUnsyncedLocalItems();
+      if (items.length === 0) {
+        showToast('저장할 새 내용이 없습니다');
+        return;
+      }
+
+      const btnSync = document.getElementById('btn-sync-unsynced');
+      isSyncingServer = true;
+      btnSync.disabled = true;
+
+      let totalImported = 0;
+      let processed = 0;
+
+      try {
+        for (let i = 0; i < items.length; i += IMPORT_CHUNK_SIZE) {
+          const chunk = items.slice(i, i + IMPORT_CHUNK_SIZE);
+          btnSync.textContent = `업로드 중 ${processed}/${items.length}...`;
+
+          const res = await apiFetchHistory('/import', {
+            method: 'POST',
+            body: JSON.stringify({
+              items: chunk.map((it) => ({
+                id: it.id,
+                title: it.title,
+                fnName: it.fnName,
+                sizeText: it.sizeText,
+                tris: it.tris,
+                thumbnail: it.thumbnail,
+                code: it.code,
+                createdAt: it.createdAt || it.updatedAt,
+                updatedAt: it.updatedAt,
+              })),
+            }),
+          });
+
+          if (Array.isArray(res?.items)) {
+            setServerHistoryList(res.items);
+          }
+          totalImported += Number(res?.imported || 0);
+          processed += chunk.length;
+        }
+
+        updateHistoryBadges();
+        renderHistoryModalList();
+        showToast(
+          totalImported > 0
+            ? `☁️ ${totalImported}건 서버 업로드 완료`
+            : '모든 항목이 이미 서버와 동기화되어 있습니다'
+        );
+      } catch (err) {
+        updateHistoryBadges();
+        renderHistoryModalList();
+        if (!err.aborted) {
+          showToast(`업로드 실패: ${err.message}`);
+        }
+      } finally {
+        isSyncingServer = false;
+        updateHistoryBadges();
+      }
     }
 
     function escapeHtml(text) {
@@ -3674,48 +4167,100 @@ export function createCustomVehicle3D(): CustomVehicleRig {
     function renderHistoryModalList() {
       const containerEl = document.getElementById('history-list-container');
       const query = (document.getElementById('history-search').value || '').trim().toLowerCase();
+      const isServerTab = activeHistoryTab === 'server' && serverOnline;
+      const sourceList = isServerTab ? serverHistoryList : localHistoryList;
+
       const filtered = query
-        ? cachedHistoryList.filter((it) =>
-            (it.title || '').toLowerCase().includes(query) ||
-            (it.fnName || '').toLowerCase().includes(query) ||
-            (it.code || '').toLowerCase().includes(query)
-          )
-        : cachedHistoryList;
+        ? sourceList.filter((it) => {
+            const matchMeta =
+              (it.title || '').toLowerCase().includes(query) ||
+              (it.fnName || '').toLowerCase().includes(query);
+            if (matchMeta) return true;
+            return !isServerTab && (it.code || '').toLowerCase().includes(query);
+          })
+        : sourceList;
 
       if (filtered.length === 0) {
-        containerEl.innerHTML = `
-          <div class="col-span-full py-16 text-center text-xs text-app-muted">
-            ${cachedHistoryList.length === 0
-              ? '아직 저장된 모델 이력이 없습니다.<br/>코드를 수정·실행하거나 상단 [💾 저장] 버튼을 누르면 썸네일과 함께 자동 보관됩니다.'
-              : '검색 조건과 일치하는 모델 이력이 없습니다.'}
-          </div>`;
+        const emptyMsg = sourceList.length === 0
+          ? (isServerTab
+              ? '아직 서버에 저장된 모델 이력이 없습니다.<br/>상단 [💾 저장] 버튼을 누르거나 [💻 로컬 백업] 탭에서 기존 이력을 올릴 수 있습니다.'
+              : '아직 로컬 백업 이력이 없습니다.<br/>코드를 수정·실행하면 브라우저 IndexedDB에 자동 보관됩니다.')
+          : '검색 조건과 일치하는 모델 이력이 없습니다.';
+        containerEl.innerHTML = `<div class="col-span-full py-16 text-center text-xs text-app-muted">${emptyMsg}</div>`;
         return;
       }
 
-      containerEl.innerHTML = filtered.map((it) => `
-        <div data-id="${escapeHtml(it.id)}"
-             class="history-card group rounded-lg bg-app-main border border-app-border hover:border-cyan-500/60 overflow-hidden cursor-pointer transition-all flex flex-col">
-          <div class="relative aspect-[16/10] bg-[#14171f] overflow-hidden border-b border-app-border">
-            ${it.thumbnail
-              ? `<img src="${it.thumbnail}" alt="${escapeHtml(it.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />`
-              : `<div class="w-full h-full flex items-center justify-center text-xs font-mono text-app-muted">No Preview</div>`}
-            <button data-del-id="${escapeHtml(it.id)}" title="이력 삭제"
-                    class="btn-del-history absolute top-1.5 right-1.5 w-6 h-6 rounded bg-black/65 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-          </div>
-          <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
-            <div class="text-xs font-semibold text-white truncate">${escapeHtml(it.title)}</div>
-            <div class="flex items-center justify-between text-[10px] font-mono text-app-muted">
-              <span>${escapeHtml(it.sizeText || '-')}</span>
-              <span>${Number(it.tris || 0).toLocaleString()} tris</span>
+      containerEl.innerHTML = filtered.map((it) => {
+        if (isServerTab) {
+          const thumbHtml = it.hasThumb
+            ? `<img src="${API_BASE}/${encodeURIComponent(it.id)}/thumb?v=${encodeURIComponent(it.updatedAt || 0)}" loading="lazy" alt="${escapeHtml(it.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />`
+            : `<div class="w-full h-full flex items-center justify-center text-xs font-mono text-app-muted">No Preview</div>`;
+          return `
+            <div data-id="${escapeHtml(it.id)}" data-source="server"
+                 class="history-card group rounded-lg bg-app-main border border-app-border hover:border-cyan-500/60 overflow-hidden cursor-pointer transition-all flex flex-col">
+              <div class="relative aspect-[16/10] bg-[#14171f] overflow-hidden border-b border-app-border">
+                ${thumbHtml}
+                <div class="absolute top-1.5 right-1.5 flex items-center gap-1 opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <button data-share-id="${escapeHtml(it.id)}" title="공유 링크 복사"
+                          class="btn-share-history w-6 h-6 rounded bg-black/70 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">🔗</button>
+                  <button data-del-id="${escapeHtml(it.id)}" title="서버 이력 삭제"
+                          class="btn-del-history w-6 h-6 rounded bg-black/70 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center">✕</button>
+                </div>
+              </div>
+              <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
+                <div class="text-xs font-semibold text-white truncate">${escapeHtml(it.title)}</div>
+                <div class="flex items-center justify-between text-[10px] font-mono text-app-muted">
+                  <span>${escapeHtml(it.sizeText || '-')}</span>
+                  <span>${Number(it.tris || 0).toLocaleString()} tris</span>
+                </div>
+                <div class="text-[10px] font-mono text-slate-500">${formatTime(it.updatedAt)}</div>
+              </div>
             </div>
-            <div class="text-[10px] font-mono text-slate-500">${formatTime(it.updatedAt)}</div>
+          `;
+        }
+
+        const synced = serverOnline && serverHashSet.has(getItemHash(it));
+        const statusBadge = serverOnline
+          ? (synced
+              ? '<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 backdrop-blur-sm">☁️ 저장됨</span>'
+              : '<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-[10px] font-mono text-amber-200 backdrop-blur-sm">미저장</span>')
+          : '';
+        const uploadBtn = serverOnline && !synced
+          ? `<button data-upload-id="${escapeHtml(it.id)}" title="이 항목만 서버에 올리기"
+                     class="btn-upload-one-history w-6 h-6 rounded bg-black/70 hover:bg-cyan-600 text-slate-200 hover:text-white text-xs flex items-center justify-center">☁️</button>`
+          : '';
+
+        return `
+          <div data-id="${escapeHtml(it.id)}" data-source="local"
+               class="history-card group rounded-lg bg-app-main border border-app-border hover:border-cyan-500/60 overflow-hidden cursor-pointer transition-all flex flex-col">
+            <div class="relative aspect-[16/10] bg-[#14171f] overflow-hidden border-b border-app-border">
+              ${it.thumbnail
+                ? `<img src="${it.thumbnail}" alt="${escapeHtml(it.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />`
+                : `<div class="w-full h-full flex items-center justify-center text-xs font-mono text-app-muted">No Preview</div>`}
+              ${statusBadge}
+              <div class="absolute top-1.5 right-1.5 flex items-center gap-1 opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                ${uploadBtn}
+                <button data-del-id="${escapeHtml(it.id)}" title="로컬 이력 삭제"
+                        class="btn-del-history w-6 h-6 rounded bg-black/70 hover:bg-rose-600 text-slate-300 hover:text-white text-xs flex items-center justify-center">✕</button>
+              </div>
+            </div>
+            <div class="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
+              <div class="text-xs font-semibold text-white truncate">${escapeHtml(it.title)}</div>
+              <div class="flex items-center justify-between text-[10px] font-mono text-app-muted">
+                <span>${escapeHtml(it.sizeText || '-')}</span>
+                <span>${Number(it.tris || 0).toLocaleString()} tris</span>
+              </div>
+              <div class="text-[10px] font-mono text-slate-500">${formatTime(it.updatedAt)}</div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     const modalHistory = document.getElementById('modal-history');
     function openHistoryModal() {
+      if (!serverOnline) activeHistoryTab = 'local';
+      updateHistoryBadges();
       renderHistoryModalList();
       modalHistory.classList.remove('hidden');
       document.getElementById('history-search').focus();
@@ -3730,48 +4275,129 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       if (e.target === modalHistory) closeHistoryModal();
     });
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modalHistory.classList.contains('hidden')) {
+      if (e.key !== 'Escape') return;
+      if (!modalAdminKey.classList.contains('hidden')) {
+        closeAdminKeyModal(null);
+        return;
+      }
+      if (!modalHistory.classList.contains('hidden')) {
         closeHistoryModal();
       }
     });
     document.getElementById('history-search').addEventListener('input', renderHistoryModalList);
 
-    document.getElementById('btn-save-history').addEventListener('click', () => {
-      executeUserCode(false);
-      saveHistorySnapshot(true);
+    document.getElementById('tab-history-server').addEventListener('click', () => {
+      if (!serverOnline) return;
+      activeHistoryTab = 'server';
+      updateHistoryBadges();
+      renderHistoryModalList();
     });
 
+    document.getElementById('tab-history-local').addEventListener('click', () => {
+      activeHistoryTab = 'local';
+      updateHistoryBadges();
+      renderHistoryModalList();
+    });
+
+    document.getElementById('btn-admin-key').addEventListener('click', () => {
+      promptAdminKeyModal();
+    });
+
+    document.getElementById('btn-sync-unsynced').addEventListener('click', () => {
+      syncUnsyncedToServer();
+    });
+
+    document.getElementById('btn-save-history').addEventListener('click', saveCurrentToServer);
+
     document.getElementById('btn-clear-all-history').addEventListener('click', async () => {
-      if (cachedHistoryList.length === 0) return;
-      cachedHistoryList = [];
+      if (activeHistoryTab !== 'local' || localHistoryList.length === 0) return;
+      localHistoryList = [];
       await clearHistoryDB();
       updateHistoryBadges();
       renderHistoryModalList();
-      showToast('모든 모델 이력이 삭제되었습니다');
+      showToast('모든 로컬 백업 이력이 삭제되었습니다');
     });
 
     document.getElementById('history-list-container').addEventListener('click', async (e) => {
+      const shareBtn = e.target.closest('.btn-share-history');
+      if (shareBtn) {
+        e.stopPropagation();
+        const id = shareBtn.dataset.shareId;
+        const shareUrl = `${location.origin}${location.pathname}?id=${encodeURIComponent(id)}`;
+        const copied = await copyTextWithFallback(shareUrl);
+        showToast(copied ? '🔗 공유 링크가 복사되었습니다' : '링크 복사에 실패했습니다');
+        return;
+      }
+
+      const uploadBtn = e.target.closest('.btn-upload-one-history');
+      if (uploadBtn) {
+        e.stopPropagation();
+        const item = localHistoryList.find((it) => it.id === uploadBtn.dataset.uploadId);
+        if (item) await syncUnsyncedToServer([item]);
+        return;
+      }
+
       const delBtn = e.target.closest('.btn-del-history');
       if (delBtn) {
         e.stopPropagation();
         const id = delBtn.dataset.delId;
-        cachedHistoryList = cachedHistoryList.filter((it) => it.id !== id);
-        await deleteHistoryIdsDB([id]);
-        updateHistoryBadges();
-        renderHistoryModalList();
+        if (activeHistoryTab === 'server' && serverOnline) {
+          try {
+            await apiFetchHistory(`/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            setServerHistoryList(serverHistoryList.filter((it) => it.id !== id));
+            serverCodeCache.delete(id);
+            updateHistoryBadges();
+            renderHistoryModalList();
+            showToast('서버 이력이 삭제되었습니다');
+          } catch (err) {
+            if (!err.aborted) showToast(`삭제 실패: ${err.message}`);
+          }
+        } else {
+          localHistoryList = localHistoryList.filter((it) => it.id !== id);
+          await deleteHistoryIdsDB([id]);
+          updateHistoryBadges();
+          renderHistoryModalList();
+        }
         return;
       }
 
       const card = e.target.closest('.history-card');
-      if (card) {
-        const item = cachedHistoryList.find((it) => it.id === card.dataset.id);
-        if (item) {
-          editorEl.value = item.code;
-          localStorage.setItem(STORAGE_KEY, item.code);
+      if (!card) return;
+      const id = card.dataset.id;
+
+      if (card.dataset.source === 'server' && serverOnline) {
+        const meta = serverHistoryList.find((it) => it.id === id);
+        if (!meta) return;
+        const cached = serverCodeCache.get(id);
+        let code = cached && cached.updatedAt === meta.updatedAt ? cached.code : null;
+        if (code === null) {
+          try {
+            showToast('서버에서 모델 코드 불러오는 중...');
+            const data = await apiFetchHistory(`/${encodeURIComponent(id)}?v=${encodeURIComponent(meta.updatedAt || 0)}`);
+            code = data?.code || '';
+            serverCodeCache.set(id, { updatedAt: data.updatedAt, code });
+          } catch (err) {
+            showToast(`불러오기 실패: ${err.message}`);
+            return;
+          }
+        }
+        if (code) {
+          editorEl.value = code;
+          localStorage.setItem(STORAGE_KEY, code);
           executeUserCode(true, { recordHistory: false });
           closeHistoryModal();
-          showToast(`불러옴: ${item.title}`);
+          showToast(`☁️ 불러옴: ${meta.title}`);
         }
+        return;
+      }
+
+      const item = localHistoryList.find((it) => it.id === id);
+      if (item) {
+        editorEl.value = item.code;
+        localStorage.setItem(STORAGE_KEY, item.code);
+        executeUserCode(true, { recordHistory: false });
+        closeHistoryModal();
+        showToast(`불러옴: ${item.title}`);
       }
     });
 
@@ -4077,8 +4703,11 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       configureTouchPadUI(driveSession.mobileMode, visible);
     });
 
-    // 초기 실행 & IndexedDB 이력 로드
-    executeUserCode(true);
+    // 초기 실행 & 하이브리드 이력 로드 (?id= 공유 링크 우선 지원)
+    const initialHasSharedId = location.protocol !== 'file:' && Boolean(new URLSearchParams(location.search).get('id'));
+    if (!initialHasSharedId) {
+      executeUserCode(true);
+    }
     initHistoryStore();
     animate();
   </script>
