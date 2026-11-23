@@ -277,11 +277,12 @@
 
         <button
           id="btn-toggle-editor"
-          title="에디터 접기/펼치기 (Ctrl+B)"
-          class="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-app-muted hover:text-white transition-colors shrink-0"
+          title="좌측 코드창 접기/펼치기 (Ctrl+B)"
+          class="hidden md:flex items-center gap-1 h-7 px-2 rounded-md bg-app-panelAlt border border-app-border hover:border-app-borderHover text-xs text-app-text hover:text-white transition-colors whitespace-nowrap shrink-0"
         >
           <svg
-            class="w-3.5 h-3.5"
+            id="icon-toggle-editor"
+            class="w-3.5 h-3.5 text-app-muted shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -290,9 +291,10 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M4 6h16M4 12h10M4 18h16"
+              d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
             ></path>
           </svg>
+          <span id="label-toggle-editor">코드 접기</span>
         </button>
 
         <button
@@ -4162,15 +4164,34 @@ export function createCustomVehicle3D(): CustomVehicleRig {
         document.body.style.userSelect = "";
       });
 
-      function toggleEditorPane() {
-        editorCollapsed = !editorCollapsed;
+      const btnToggleEditor = document.getElementById("btn-toggle-editor");
+      const labelToggleEditor = document.getElementById("label-toggle-editor");
+      const iconToggleEditor = document.getElementById("icon-toggle-editor");
+      function setEditorCollapsed(collapsed) {
+        editorCollapsed = Boolean(collapsed);
+        if (!editorCollapsed) paneEditor.classList.remove("hidden");
         paneEditor.classList.toggle("md:hidden", editorCollapsed);
         resizer.classList.toggle("md:hidden", editorCollapsed);
+        if (labelToggleEditor) {
+          labelToggleEditor.textContent = editorCollapsed
+            ? "코드 펼치기"
+            : "코드 접기";
+        }
+        if (iconToggleEditor) {
+          iconToggleEditor.style.transform = editorCollapsed
+            ? "rotate(180deg)"
+            : "";
+        }
+        if (btnToggleEditor) {
+          btnToggleEditor.classList.toggle("border-cyan-500/50", editorCollapsed);
+          btnToggleEditor.classList.toggle("text-cyan-300", editorCollapsed);
+        }
         handleResize();
       }
-      document
-        .getElementById("btn-toggle-editor")
-        .addEventListener("click", toggleEditorPane);
+      function toggleEditorPane() {
+        setEditorCollapsed(!editorCollapsed);
+      }
+      btnToggleEditor.addEventListener("click", toggleEditorPane);
       window.addEventListener("keydown", (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
           e.preventDefault();
@@ -4202,8 +4223,11 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       });
 
       function showSharedPreviewLayout() {
-        if (!editorCollapsed) toggleEditorPane();
-        btnMobView.click();
+        if (window.innerWidth < 768) {
+          btnMobView.click();
+        } else {
+          setEditorCollapsed(true);
+        }
       }
       const clock = new THREE.Clock();
       let driveSession = null;
