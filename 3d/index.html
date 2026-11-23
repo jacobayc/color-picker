@@ -3974,6 +3974,7 @@ export function createCustomVehicle3D(): CustomVehicleRig {
           if (PRESETS[val]) {
             editorEl.value = PRESETS[val];
             localStorage.setItem(STORAGE_KEY, editorEl.value);
+            syncModelQueryUrl(null);
             executeUserCode(true, { recordHistory: false });
             showToast(`프리셋 로드됨: ${val}`);
           }
@@ -4060,14 +4061,16 @@ export function createCustomVehicle3D(): CustomVehicleRig {
           setToggleStyle(e.currentTarget, state.wireframe);
         });
 
-      document
-        .getElementById("btn-turntable")
-        .addEventListener("click", (e) => {
-          state.turntable = !state.turntable;
-          controls.autoRotate = state.turntable;
-          controls.autoRotateSpeed = 2.0;
-          setToggleStyle(e.currentTarget, state.turntable);
-        });
+      const btnTurntable = document.getElementById("btn-turntable");
+      function setTurntable(enabled) {
+        state.turntable = Boolean(enabled);
+        controls.autoRotate = state.turntable;
+        controls.autoRotateSpeed = 2.0;
+        setToggleStyle(btnTurntable, state.turntable);
+      }
+      btnTurntable.addEventListener("click", () => {
+        setTurntable(!state.turntable);
+      });
 
       document
         .getElementById("btn-screenshot")
@@ -4198,7 +4201,10 @@ export function createCustomVehicle3D(): CustomVehicleRig {
         requestAnimationFrame(handleResize);
       });
 
-      // 렌더 루프
+      function showSharedPreviewLayout() {
+        if (!editorCollapsed) toggleEditorPane();
+        btnMobView.click();
+      }
       const clock = new THREE.Clock();
       let driveSession = null;
 
@@ -4383,9 +4389,23 @@ export function createCustomVehicle3D(): CustomVehicleRig {
       let navSuppressPop = 0;
       let lastBackGuardToastAt = 0;
 
-      function pushNavLayer(layer) {
+      function pushNavLayer(layer, url) {
         try {
-          history.pushState({ rigNav: layer }, "");
+          if (url !== undefined && location.protocol !== "file:") {
+            history.pushState({ rigNav: layer }, "", url);
+          } else {
+            history.pushState({ rigNav: layer }, "");
+          }
+        } catch (e) {}
+      }
+
+      function syncModelQueryUrl(id) {
+        if (location.protocol === "file:") return;
+        try {
+          const nextUrl = id
+            ? `${location.pathname}?id=${encodeURIComponent(id)}`
+            : location.pathname;
+          history.replaceState(history.state, "", nextUrl);
         } catch (e) {}
       }
 
@@ -4547,7 +4567,9 @@ export function createCustomVehicle3D(): CustomVehicleRig {
               updatedAt: data.updatedAt,
               code: data.code,
             });
+            showSharedPreviewLayout();
             executeUserCode(true, { recordHistory: false });
+            setTurntable(true);
             showToast(`공유 모델 불러옴: ${data.title || sharedId}`);
             return true;
           }
@@ -5283,7 +5305,10 @@ export function createCustomVehicle3D(): CustomVehicleRig {
               localStorage.setItem(STORAGE_KEY, code);
               executeUserCode(true, { recordHistory: false });
               closeHistoryModal({ skipHistoryPop: true });
-              pushNavLayer("modelView");
+              pushNavLayer(
+                "modelView",
+                `${location.pathname}?id=${encodeURIComponent(id)}`,
+              );
               showToast(`☁️ 불러옴: ${meta.title}`);
             }
             return;
@@ -5295,7 +5320,7 @@ export function createCustomVehicle3D(): CustomVehicleRig {
             localStorage.setItem(STORAGE_KEY, item.code);
             executeUserCode(true, { recordHistory: false });
             closeHistoryModal({ skipHistoryPop: true });
-            pushNavLayer("modelView");
+            pushNavLayer("modelView", location.pathname);
             showToast(`불러옴: ${item.title}`);
           }
         });

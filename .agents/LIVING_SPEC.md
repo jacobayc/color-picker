@@ -93,12 +93,24 @@ flowchart TD
 - **하이브리드 모델 이력 (Netlify Blobs 서버 수동 저장 + IndexedDB 자동 백업, 최대 1,000건):**
   - 로컬 자동 누적(`IndexedDB` 1.4초 디바운스·3분 내 동일 제목 병합, API 호출 0회) + `[💾 저장]` 클릭 시에만 `POST /api/histories` 수동 서버 저장 (`rig-code-histories` 스토어에 `_index` / `code/:id` / `thumb/:id` 분리 보관 및 `Netlify-CDN-Cache-Control` 장기 캐시)
   - `codeHash` 대조로 헤더(`+N`) 및 로컬 백업 탭에서 `저장할 내용 N건` 실시간 표시, 20건 청크 일괄 업로드(`POST /api/histories/import`) 및 단건 업로드 지원
-  - 공유 링크(`🔗`, `/3d/?id=<id>`)로 키 없이 열람 가능, `HISTORY_ADMIN_KEY` 설정 시 쓰기/삭제 `x-admin-key` 인증 및 `file:///`·오프라인 환경 IndexedDB 폴백 지원
+  - 공유 링크(`🔗`, `/3d/?id=<id>`)로 키 없이 열람 가능(서버 이력 클릭 시 주소창 `?id=<id>` 자동 분기, 공유 URL 진입 시 에디터 자동 접힘·모바일 3D View 기본 전환·턴테이블 자동 회전), `HISTORY_ADMIN_KEY` 설정 시 쓰기/삭제 `x-admin-key` 인증 및 `file:///`·오프라인 환경 IndexedDB 폴백 지원
 - **시승 테스트 세트장 (`3d/drive.js`):** 코드 주석 스펙(크루즈/부스트 km/h, `ev`/`sport`/`car` 사운드) 파싱 연동, 시작 전 트랙(`아스팔트` / `오프로드` 램프·요철) 및 모바일 가상 패드(`A안` 통합 스틱 / `B안` 레이싱 패드) 사전 선택, PC(`방향키`·`Shift`·`Space`·`B`) 및 멀티터치 주행·바퀴 구름·조향·제동등 실시간 검증
 
 ---
 
 ## 4. Changelog
+
+### [2026-11-23] 3D Rig Showcase 서버 이력 URL 분기(`?id=`) 및 공유 진입 프리뷰 최적화
+
+- **요약:** 서버 저장 이력 클릭 시 주소창을 `?id=<id>`로 자동 분기해 주소창 복사만으로 공유 가능하게 하고, 공유 URL 진입 시 데스크톱 에디터 접힘·모바일 `3D View` 기본 전환·턴테이블 자동 회전을 적용.
+- **주요 변경:**
+  - `3d/index.html`: `pushNavLayer(layer, url)` 및 `syncModelQueryUrl(id)` 추가(서버 이력 클릭 시 `?id=<id>` 반영, 로컬 이력·프리셋 전환 시 `?id=` 제거).
+  - `3d/index.html`: `setTurntable(enabled)`, `showSharedPreviewLayout()` 추가 및 `loadSharedModelFromQuery()` 성공 시 자동 호출.
+
+```diff
++ 3d/index.html: pushNavLayer(layer, url), syncModelQueryUrl(id), setTurntable(enabled), showSharedPreviewLayout()
+~ 3d/index.html: 서버 이력 클릭 시 ?id=<id> URL 분기 및 공유 진입 시 3D 뷰포트 단독 노출 + 턴테이블 자동 회전
+```
 
 ### [2026-11-19] 3D Rig Showcase Netlify Blobs 하이브리드 이력 저장소 및 공유 링크 구축
 
